@@ -87,6 +87,7 @@ public class LoginViewModel : INotifyPropertyChanged
     public ICommand SignUpCommand { get; }
     public ICommand GoogleSignInCommand { get; }
     public ICommand ToggleSignUpCommand { get; }
+    public ICommand DemoModeCommand { get; }
 
     public LoginViewModel()
     {
@@ -97,6 +98,7 @@ public class LoginViewModel : INotifyPropertyChanged
         SignUpCommand = new RelayCommand(SignUpAsync, () => CanExecuteAuth());
         GoogleSignInCommand = new RelayCommand(GoogleSignInAsync, () => !IsLoading);
         ToggleSignUpCommand = new RelayCommand(ToggleSignUp);
+        DemoModeCommand = new RelayCommand(EnterDemoMode);
     }
 
     private bool CanExecuteAuth()
@@ -142,6 +144,19 @@ public class LoginViewModel : INotifyPropertyChanged
         LastName = string.Empty;
         PhoneNumber = string.Empty;
         DateOfBirth = DateTime.Now.AddYears(-25);
+    }
+
+    private async void EnterDemoMode()
+    {
+        try
+        {
+            // Navigate straight to main dashboard; Dashboard will load demo data when no authenticated user
+            await Shell.Current.GoToAsync("//main", animate: true);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Demo mode navigation error: {ex.Message}");
+        }
     }
 
     private async void SignInAsync()

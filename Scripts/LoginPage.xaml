@@ -22,6 +22,20 @@
               <ScrollView Grid.Row="0" BackgroundColor="{StaticResource DarkBg}" HorizontalOptions="Fill" VerticalOptions="Fill">
                      <VerticalStackLayout Padding="20,60,20,20" Spacing="20" VerticalOptions="Center">
 
+                            <!-- Top Right Demo Mode Button -->
+                            <Grid ColumnDefinitions="*,Auto">
+                                   <Label Grid.Column="0" />
+                                   <Button Grid.Column="1"
+                                           Text="See demo mode"
+                                           Command="{Binding DemoModeCommand}"
+                                           BackgroundColor="{StaticResource CardBg}"
+                                           TextColor="{StaticResource AccentOrange}"
+                                           CornerRadius="12"
+                                           Padding="12,8"
+                                           FontAttributes="Bold"
+                                           FontSize="12" />
+                            </Grid>
+
                             <VerticalStackLayout Spacing="8" HorizontalOptions="Center" Margin="0,40,0,20">
                                    <Label Text="Lender"
                                              FontSize="40"

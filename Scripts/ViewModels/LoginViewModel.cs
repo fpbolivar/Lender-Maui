@@ -13,6 +13,9 @@ public class LoginViewModel : INotifyPropertyChanged
     private readonly IAuthenticationService _authService;
     private string _email = string.Empty;
     private string _password = string.Empty;
+    private string _firstName = string.Empty;
+    private string _lastName = string.Empty;
+    private string _phoneNumber = string.Empty;
     private bool _isLoading;
     private string _errorMessage = string.Empty;
     private bool _isSignUp;
@@ -29,6 +32,24 @@ public class LoginViewModel : INotifyPropertyChanged
     {
         get => _password;
         set => SetProperty(ref _password, value);
+    }
+
+    public string FirstName
+    {
+        get => _firstName;
+        set => SetProperty(ref _firstName, value);
+    }
+
+    public string LastName
+    {
+        get => _lastName;
+        set => SetProperty(ref _lastName, value);
+    }
+
+    public string PhoneNumber
+    {
+        get => _phoneNumber;
+        set => SetProperty(ref _phoneNumber, value);
     }
 
     public bool IsLoading
@@ -65,7 +86,19 @@ public class LoginViewModel : INotifyPropertyChanged
         ToggleSignUpCommand = new RelayCommand(ToggleSignUp);
     }
 
-    private bool CanExecuteAuth() => !IsLoading && !string.IsNullOrWhiteSpace(Email) && !string.IsNullOrWhiteSpace(Password) && Password.Length >= 6;
+    private bool CanExecuteAuth()
+    {
+        if (IsLoading || string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password) || Password.Length < 6)
+            return false;
+
+        // For sign up, also require first and last names
+        if (IsSignUp)
+        {
+            return !string.IsNullOrWhiteSpace(FirstName) && !string.IsNullOrWhiteSpace(LastName);
+        }
+
+        return true;
+    }
 
     public async Task<bool> RestoreSessionAsync()
     {
@@ -92,6 +125,9 @@ public class LoginViewModel : INotifyPropertyChanged
         ErrorMessage = string.Empty;
         Email = string.Empty;
         Password = string.Empty;
+        FirstName = string.Empty;
+        LastName = string.Empty;
+        PhoneNumber = string.Empty;
     }
 
     private async void SignInAsync()
@@ -115,7 +151,24 @@ public class LoginViewModel : INotifyPropertyChanged
             return;
         }
 
-        await HandleAuthActionAsync(() => _authService.SignUpAsync(Email, Password), "Sign up");
+        // Validate first name
+        if (string.IsNullOrWhiteSpace(FirstName))
+        {
+            ErrorMessage = "Please enter your first name.";
+            return;
+        }
+
+        // Validate last name
+        if (string.IsNullOrWhiteSpace(LastName))
+        {
+            ErrorMessage = "Please enter your last name.";
+            return;
+        }
+
+        await HandleAuthActionAsync(
+            () => _authService.SignUpAsync(Email, Password, FirstName, LastName, PhoneNumber), 
+            "Sign up"
+        );
     }
 
     private async void GoogleSignInAsync()
@@ -191,7 +244,8 @@ public class LoginViewModel : INotifyPropertyChanged
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
             // Re-evaluate command execution when relevant properties change
-            if (propertyName == nameof(Email) || propertyName == nameof(Password) || propertyName == nameof(IsLoading))
+            if (propertyName == nameof(Email) || propertyName == nameof(Password) || propertyName == nameof(IsLoading) ||
+                propertyName == nameof(FirstName) || propertyName == nameof(LastName) || propertyName == nameof(IsSignUp))
             {
                 (SignInCommand as RelayCommand)?.NotifyCanExecuteChanged();
                 (SignUpCommand as RelayCommand)?.NotifyCanExecuteChanged();

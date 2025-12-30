@@ -42,6 +42,36 @@
                                      IsVisible="{Binding IsSignUp}" />
                      </HorizontalStackLayout>
 
+                     <!-- Sign Up Only Fields -->
+                     <Border StrokeShape="RoundRectangle 8" Stroke="{StaticResource CardBg}" BackgroundColor="{StaticResource CardBg}" Padding="12"
+                             IsVisible="{Binding IsSignUp}">
+                            <Entry Placeholder="First Name"
+                                      PlaceholderColor="{StaticResource TextLight}"
+                                      TextColor="#000000"
+                                      FontSize="14"
+                                      Text="{Binding FirstName}" />
+                     </Border>
+
+                     <Border StrokeShape="RoundRectangle 8" Stroke="{StaticResource CardBg}" BackgroundColor="{StaticResource CardBg}" Padding="12"
+                             IsVisible="{Binding IsSignUp}">
+                            <Entry Placeholder="Last Name"
+                                      PlaceholderColor="{StaticResource TextLight}"
+                                      TextColor="#000000"
+                                      FontSize="14"
+                                      Text="{Binding LastName}" />
+                     </Border>
+
+                     <Border StrokeShape="RoundRectangle 8" Stroke="{StaticResource CardBg}" BackgroundColor="{StaticResource CardBg}" Padding="12"
+                             IsVisible="{Binding IsSignUp}">
+                            <Entry Placeholder="Phone Number (Optional)"
+                                      PlaceholderColor="{StaticResource TextLight}"
+                                      TextColor="#000000"
+                                      Keyboard="Telephone"
+                                      FontSize="14"
+                                      Text="{Binding PhoneNumber}" />
+                     </Border>
+
+                     <!-- Email and Password Fields (Both Sign In and Sign Up) -->
                      <Border StrokeShape="RoundRectangle 8" Stroke="{StaticResource CardBg}" BackgroundColor="{StaticResource CardBg}" Padding="12">
                             <Entry Placeholder="Email"
                                       PlaceholderColor="{StaticResource TextLight}"

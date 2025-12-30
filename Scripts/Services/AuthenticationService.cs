@@ -12,7 +12,7 @@ public interface IAuthenticationService : INotifyPropertyChanged
     bool IsAuthenticated { get; }
     string? CurrentUserId { get; }
     string? CurrentUserEmail { get; }
-    Task<bool> SignUpAsync(string email, string password);
+    Task<bool> SignUpAsync(string email, string password, string firstName, string lastName, string? phoneNumber = null);
     Task<bool> SignInAsync(string email, string password);
     Task<bool> SignInWithGoogleAsync();
     Task SignOutAsync();
@@ -73,7 +73,7 @@ public class AuthenticationService : IAuthenticationService
         }
     }
 
-    public async Task<bool> SignUpAsync(string email, string password)
+    public async Task<bool> SignUpAsync(string email, string password, string firstName, string lastName, string? phoneNumber = null)
     {
         try
         {
@@ -81,7 +81,7 @@ public class AuthenticationService : IAuthenticationService
             var requestUri = $"{FirebaseAuthUrl}/accounts:signUp?key={FirebaseWebApiKey}";
             
             Debug.WriteLine($"SignUp request URI: {requestUri}");
-            Debug.WriteLine($"Email: {email}, Password length: {password.Length}");
+            Debug.WriteLine($"Email: {email}, FirstName: {firstName}, LastName: {lastName}, Password length: {password.Length}");
             
             var payload = new
             {
@@ -123,13 +123,13 @@ public class AuthenticationService : IAuthenticationService
                         userEmail.GetString() ?? ""
                     );
 
-                    // Create user document in Firestore
+                    // Create user document in Firestore with complete profile
                     var newUser = new User
                     {
                         Id = localId.GetString() ?? "",
                         Email = userEmail.GetString() ?? "",
-                        FullName = "",
-                        PhoneNumber = "",
+                        FullName = $"{firstName} {lastName}".Trim(),
+                        PhoneNumber = phoneNumber ?? "",
                         Balance = 0,
                         CreditScore = 0,
                         Status = UserStatus.Active,
@@ -138,7 +138,7 @@ public class AuthenticationService : IAuthenticationService
                     
                     var firebaseService = FirestoreService.Instance;
                     await firebaseService.SaveUserAsync(newUser);
-                    Debug.WriteLine($"User {newUser.Email} created in Firestore");
+                    Debug.WriteLine($"User {newUser.Email} created in Firestore with full profile");
                     
                     return true;
                 }

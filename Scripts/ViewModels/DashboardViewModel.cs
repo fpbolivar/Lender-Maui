@@ -406,6 +406,11 @@ public class DashboardViewModel : INotifyPropertyChanged
         }
     }
 
+    public Task RefreshAsync()
+    {
+        return LoadUserDataAsync();
+    }
+
     private void EnableDemoMode()
     {
         IsDemoMode = true;

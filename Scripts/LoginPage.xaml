@@ -19,24 +19,24 @@
        </ContentPage.Resources>
 
        <Grid RowDefinitions="*" Padding="0" BackgroundColor="{StaticResource DarkBg}" SafeAreaEdges="None">
+              <!-- Top Right Demo Mode Button (Absolute Positioning) -->
+              <Button Text="See demo mode"
+                      Command="{Binding DemoModeCommand}"
+                      BackgroundColor="{StaticResource CardBg}"
+                      TextColor="{StaticResource AccentOrange}"
+                      CornerRadius="12"
+                      Padding="12,8"
+                      FontAttributes="Bold"
+                      FontSize="12"
+                      HorizontalOptions="End"
+                      VerticalOptions="Start"
+                      Margin="0,60,20,0"
+                      ZIndex="100" />
+              
               <ScrollView Grid.Row="0" BackgroundColor="{StaticResource DarkBg}" HorizontalOptions="Fill" VerticalOptions="Fill">
-                     <VerticalStackLayout Padding="20,20,20,20" Spacing="20" VerticalOptions="Center">
+                     <VerticalStackLayout Padding="20,60,20,20" Spacing="12">
 
-                            <!-- Top Right Demo Mode Button -->
-                            <Grid ColumnDefinitions="*,Auto">
-                                   <Label Grid.Column="0" />
-                                   <Button Grid.Column="1"
-                                           Text="See demo mode"
-                                           Command="{Binding DemoModeCommand}"
-                                           BackgroundColor="{StaticResource CardBg}"
-                                           TextColor="{StaticResource AccentOrange}"
-                                           CornerRadius="12"
-                                           Padding="12,8"
-                                           FontAttributes="Bold"
-                                           FontSize="12" />
-                            </Grid>
-
-                            <VerticalStackLayout Spacing="8" HorizontalOptions="Center" Margin="0,40,0,20">
+                            <VerticalStackLayout Spacing="4" HorizontalOptions="Center" Margin="0,0,0,12">
                                    <Label Text="Lender"
                                              FontSize="40"
                                              FontAttributes="Bold"
@@ -48,11 +48,15 @@
                                              HorizontalTextAlignment="Center" />
                             </VerticalStackLayout>
 
-                     <HorizontalStackLayout Spacing="0" HorizontalOptions="Center" Margin="0,0,0,20">
+                     <HorizontalStackLayout Spacing="0" HorizontalOptions="Center" Margin="0,0,0,12">
                               <Label Text="Sign In" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource AccentOrange}" Margin="0,0,20,0"
                                      IsVisible="{Binding IsSignUp, Converter={StaticResource InvertedBoolConverter}}" />
+                              <Label Text="Sign Up" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource AccentOrange}" Margin="0,0,20,0"
+                                     IsVisible="{Binding IsSignUp}" />
                             <Label Text="•" TextColor="{StaticResource TextLight}" />
                               <Label Text="Sign Up" FontSize="14" TextColor="{StaticResource TextLight}" Margin="20,0,0,0"
+                                     IsVisible="{Binding IsSignUp, Converter={StaticResource InvertedBoolConverter}}" />
+                              <Label Text="Sign In" FontSize="14" TextColor="{StaticResource TextLight}" Margin="20,0,0,0"
                                      IsVisible="{Binding IsSignUp}" />
                      </HorizontalStackLayout>
 
@@ -104,7 +108,7 @@
 
                      <!-- Email and Password Fields (Both Sign In and Sign Up) -->
                      <Border StrokeShape="RoundRectangle 8" Stroke="{StaticResource CardBg}" BackgroundColor="{StaticResource CardBg}" Padding="12">
-                            <Entry Placeholder="Email"
+                            <Entry Placeholder="Username"
                                       PlaceholderColor="{StaticResource TextLight}"
                                       TextColor="#000000"
                                       Keyboard="Email"
@@ -165,13 +169,31 @@
                                 Command="{Binding GoogleSignInCommand}"
                                 IsEnabled="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}" />
 
-                         <Button Text="{Binding IsSignUp, StringFormat='Already have an account? Sign In', FallbackValue='Don\'t have an account? Sign Up'}"
-                                BackgroundColor="Transparent"
+                         <Button BackgroundColor="Transparent"
                                 TextColor="{StaticResource AccentOrange}"
                                 FontSize="12"
                                 Padding="10"
-                                Margin="0,20,0,0"
-                                Command="{Binding ToggleSignUpCommand}" />
+                                Margin="0,10,0,0"
+                                Command="{Binding ToggleSignUpCommand}">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsSignUp}" Value="True">
+                                    <Setter Property="Text" Value="Already have an account? Sign In" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsSignUp}" Value="False">
+                                    <Setter Property="Text" Value="Don't have an account? Sign Up" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                         </Button>
+
+                         <!-- Quick Dev Login Button -->
+                         <Button Text="Quick Login (Dev)"
+                                BackgroundColor="{StaticResource CardBg}"
+                                TextColor="{StaticResource TextLight}"
+                                FontSize="10"
+                                Padding="8"
+                                Margin="0,10,0,0"
+                                Command="{Binding QuickLoginCommand}"
+                                IsVisible="{Binding IsSignUp, Converter={StaticResource InvertedBoolConverter}}" />
 
               </VerticalStackLayout>
        </ScrollView>

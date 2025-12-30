@@ -19,10 +19,10 @@
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <Grid RowDefinitions="Auto,*" Padding="0" BackgroundColor="{StaticResource DarkBg}" SafeAreaEdges="None">
+    <Grid RowDefinitions="Auto,*,Auto" Padding="0" BackgroundColor="{StaticResource DarkBg}" SafeAreaEdges="None">
         <VerticalStackLayout Grid.Row="0" Padding="16,50,16,16" Spacing="20" BackgroundColor="{StaticResource DarkBg}">
             
-            <!-- Header with Menu Button and Sign Out -->
+            <!-- Header with Menu Button -->
             <HorizontalStackLayout Spacing="12">
                 <Button Text="☰"
                         Command="{Binding MenuCommand}"
@@ -46,29 +46,12 @@
                           FontSize="12"
                           TextColor="{StaticResource TextLight}" />
                   </VerticalStackLayout>
-                <Button Text="Sign Out"
-                        Command="{Binding SignOutCommand}"
-                        BackgroundColor="{StaticResource AccentOrange}"
-                        TextColor="{StaticResource DarkBg}"
-                        CornerRadius="6"
-                        FontSize="12"
-                        Padding="12,8"
-                        VerticalOptions="Center"
-                        HorizontalOptions="End" />
-            </HorizontalStackLayout>
-
-            <!-- Tab Navigation -->
-            <HorizontalStackLayout Spacing="12" HorizontalOptions="Center">
-                <Label Text="Transactions" FontSize="12" TextColor="{StaticResource TextLight}" />
-                <Label Text="Dashboard" FontSize="12" TextColor="{StaticResource AccentOrange}" FontAttributes="Bold" />
-                <Label Text="Categories" FontSize="12" TextColor="{StaticResource TextLight}" />
-                <Label Text="Requests" FontSize="12" TextColor="{StaticResource TextLight}" />
             </HorizontalStackLayout>
         </VerticalStackLayout>
 
         <!-- Scrollable Content Area -->
-        <ScrollView Grid.Row="1" BackgroundColor="{StaticResource DarkBg}">
-            <VerticalStackLayout Padding="16,0,16,16" Spacing="20" BackgroundColor="{StaticResource DarkBg}">
+        <ScrollView Grid.Row="1" BackgroundColor="{StaticResource DarkBg}" SafeAreaEdges="None">
+            <VerticalStackLayout Padding="16,0,16,16" Spacing="20" BackgroundColor="{StaticResource DarkBg}" SafeAreaEdges="None">
 
             <!-- User Info Card -->
             <Frame CornerRadius="12"
@@ -92,44 +75,43 @@
                             <Label Text="{Binding Status}" FontSize="12" TextColor="{StaticResource AccentGreen}" />
                         </VerticalStackLayout>
                     </HorizontalStackLayout>
-                    <Button Text="Use Demo Data" Command="{Binding ToggleDemoCommand}" BackgroundColor="{StaticResource AccentOrange}" TextColor="{StaticResource DarkBg}" CornerRadius="8" FontAttributes="Bold" FontSize="12" Padding="12,8" />
                 </VerticalStackLayout>
             </Frame>
 
-            <!-- Budget Summary Card -->
+            <!-- Loan Overview -->
             <Frame CornerRadius="12" 
                    BorderColor="{StaticResource CardBg}" 
                    BackgroundColor="{StaticResource CardBg}"
                    HasShadow="True"
                    Padding="16">
                 <VerticalStackLayout Spacing="12">
-                    <VerticalStackLayout Spacing="4">
-                        <Label Text="Budget Overview" 
-                               FontSize="14" 
-                               TextColor="{StaticResource TextLight}" />
-                        <HorizontalStackLayout Spacing="4">
-                            <Label x:Name="BudgetAmountLabel"
-                                   Text="{Binding TotalRemaining, StringFormat='${0:F0} over'}"
-                                   FontSize="28" 
-                                   FontAttributes="Bold"
-                                   TextColor="{StaticResource AccentOrange}" />
-                            <VerticalStackLayout VerticalOptions="Center">
-                                <Label Text="{Binding TotalBudget, StringFormat='${0:F0} budgeted'}"
-                                       FontSize="12" 
-                                       TextColor="{StaticResource TextLight}" />
-                            </VerticalStackLayout>
-                        </HorizontalStackLayout>
-                    </VerticalStackLayout>
+                    <Label Text="Loan Overview" 
+                           FontSize="14" 
+                           TextColor="{StaticResource TextLight}" />
 
-                    <!-- Chart Placeholder -->
-                    <BoxView HeightRequest="100" 
-                             BackgroundColor="{StaticResource DarkBg}"
-                             CornerRadius="8" />
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto">
+                        <VerticalStackLayout Grid.Row="0" Grid.Column="0" Spacing="4">
+                            <Label Text="Total Lent" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding TotalLentAmount, StringFormat='${0:F2}'}" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource AccentOrange}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Row="0" Grid.Column="1" Spacing="4">
+                            <Label Text="Total Borrowed" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding TotalBorrowedAmount, StringFormat='${0:F2}'}" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource TextWhite}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Row="1" Grid.Column="0" Spacing="4">
+                            <Label Text="Expected Return" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding ExpectedReturn, StringFormat='${0:F2}'}" FontSize="18" TextColor="{StaticResource AccentGreen}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="4">
+                            <Label Text="Next Payment" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding NextPaymentDisplay}" FontSize="14" TextColor="{StaticResource TextWhite}" />
+                        </VerticalStackLayout>
+                    </Grid>
                 </VerticalStackLayout>
             </Frame>
 
-            <!-- Recent Loans / To Review -->
-            <VerticalStackLayout Spacing="12">
+            <!-- Active Loans -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsDemoMode}">
                 <HorizontalStackLayout Spacing="12">
                     <Label Text="LOANS TO REVIEW" 
                            FontSize="12" 
@@ -207,63 +189,85 @@
                         Padding="12,8"
                         Margin="0,8,0,8" />
             </VerticalStackLayout>
-
-            <!-- Budget Categories -->
-            <VerticalStackLayout Spacing="12">
-                <HorizontalStackLayout Spacing="12">
-                    <Label Text="BUDGETS" 
-                           FontSize="12" 
-                           FontAttributes="Bold"
-                           TextColor="{StaticResource TextLight}"
-                           HorizontalOptions="StartAndExpand" />
-                    <Label Text="Categories >" 
-                           FontSize="12" 
-                           TextColor="{StaticResource TextLight}" />
-                </HorizontalStackLayout>
-
-                <CollectionView ItemsSource="{Binding Budgets}"
-                               SelectionMode="Single">
-                    <CollectionView.ItemsLayout>
-                        <GridItemsLayout Orientation="Horizontal"
-                                        HorizontalItemSpacing="8"
-                                        VerticalItemSpacing="8" />
-                    </CollectionView.ItemsLayout>
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <VerticalStackLayout Spacing="8" WidthRequest="80">
-                                <!-- Budget Circle -->
-                                <Frame CornerRadius="40"
-                                       WidthRequest="80"
-                                       HeightRequest="80"
-                                       HasShadow="False"
-                                       BorderColor="{Binding ColorHex}"
-                                       BackgroundColor="{StaticResource CardBg}"
-                                       Padding="0">
-                                    <VerticalStackLayout VerticalOptions="Center" 
-                                                        HorizontalOptions="Center" 
-                                                        Spacing="0">
-                                        <Label Text="{Binding IconEmoji}" 
-                                               FontSize="24" 
-                                               HorizontalTextAlignment="Center" />
-                                    </VerticalStackLayout>
-                                </Frame>
-
-                                <!-- Category Info -->
-                                <Label Text="{Binding Category}" 
-                                       FontSize="11" 
-                                       TextColor="{StaticResource TextWhite}"
-                                       HorizontalTextAlignment="Center"
-                                       LineBreakMode="WordWrap" />
-                                <Label Text="{Binding AmountRemaining, StringFormat='${0:F0} left'}" 
-                                       FontSize="10" 
-                                       TextColor="{StaticResource TextLight}"
-                                       HorizontalTextAlignment="Center" />
-                            </VerticalStackLayout>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
+            
+            <!-- No Loans Message (Live Mode) -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsDemoMode, Converter={StaticResource InvertedBoolConverter}}" Padding="20" VerticalOptions="Center">
+                <Label Text="No active loans" 
+                       FontSize="18" 
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource TextLight}"
+                       HorizontalTextAlignment="Center" />
+                <Label Text="Create your first loan to get started" 
+                       FontSize="14" 
+                       TextColor="{StaticResource TextLight}"
+                       HorizontalTextAlignment="Center" />
+                <Button Text="CREATE LOAN" 
+                        BackgroundColor="{StaticResource AccentOrange}"
+                        TextColor="{StaticResource DarkBg}"
+                        CornerRadius="8"
+                        FontAttributes="Bold"
+                        FontSize="14"
+                        Padding="16,12"
+                        Margin="0,20,0,0"
+                        HorizontalOptions="Center" />
             </VerticalStackLayout>
-        </VerticalStackLayout>
+
+            </VerticalStackLayout>
         </ScrollView>
+        
+        <!-- Bottom Navigation Bar -->
+        <Grid Grid.Row="2" ColumnDefinitions="*,*,*,*,*" BackgroundColor="{StaticResource CardBg}" Padding="8,12,8,32" SafeAreaEdges="None">
+            <!-- Transactions -->
+            <VerticalStackLayout Grid.Column="0" Spacing="4" HorizontalOptions="Center">
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding NavigateToTransactionsCommand}" />
+                </VerticalStackLayout.GestureRecognizers>
+                <Label Text="💳" FontSize="22" HorizontalTextAlignment="Center" />
+                <Label Text="Transactions" FontSize="10" TextColor="{StaticResource TextLight}" HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+            
+            <!-- Dashboard -->
+            <VerticalStackLayout Grid.Column="1" Spacing="4" HorizontalOptions="Center">
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding NavigateToDashboardCommand}" />
+                </VerticalStackLayout.GestureRecognizers>
+                <Label Text="📊" FontSize="22" HorizontalTextAlignment="Center" />
+                <Label Text="Dashboard" FontSize="10" TextColor="{StaticResource AccentOrange}" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+            
+            <!-- Request/Send Loan (Main) -->
+            <VerticalStackLayout Grid.Column="2" Spacing="4" HorizontalOptions="Center" Margin="0,-20,0,0">
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding NavigateToRequestLoanCommand}" />
+                </VerticalStackLayout.GestureRecognizers>
+                <Frame CornerRadius="30" 
+                       BackgroundColor="{StaticResource AccentOrange}" 
+                       Padding="16" 
+                       HasShadow="True"
+                       HeightRequest="60"
+                       WidthRequest="60">
+                    <Label Text="+" FontSize="32" TextColor="{StaticResource DarkBg}" FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" Margin="0,-8,0,0" />
+                </Frame>
+                <Label Text="Request/Send" FontSize="9" TextColor="{StaticResource TextLight}" HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+            
+            <!-- Loan Calculator -->
+            <VerticalStackLayout Grid.Column="3" Spacing="4" HorizontalOptions="Center">
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding NavigateToCalculatorCommand}" />
+                </VerticalStackLayout.GestureRecognizers>
+                <Label Text="🧮" FontSize="22" HorizontalTextAlignment="Center" />
+                <Label Text="Calculator" FontSize="10" TextColor="{StaticResource TextLight}" HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+            
+            <!-- Profile -->
+            <VerticalStackLayout Grid.Column="4" Spacing="4" HorizontalOptions="Center">
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding NavigateToProfileCommand}" />
+                </VerticalStackLayout.GestureRecognizers>
+                <Label Text="👤" FontSize="22" HorizontalTextAlignment="Center" />
+                <Label Text="Profile" FontSize="10" TextColor="{StaticResource TextLight}" HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+        </Grid>
     </Grid>
 </ContentPage>

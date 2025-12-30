@@ -88,6 +88,7 @@ public class LoginViewModel : INotifyPropertyChanged
     public ICommand GoogleSignInCommand { get; }
     public ICommand ToggleSignUpCommand { get; }
     public ICommand DemoModeCommand { get; }
+    public ICommand QuickLoginCommand { get; }
 
     public LoginViewModel()
     {
@@ -99,6 +100,7 @@ public class LoginViewModel : INotifyPropertyChanged
         GoogleSignInCommand = new RelayCommand(GoogleSignInAsync, () => !IsLoading);
         ToggleSignUpCommand = new RelayCommand(ToggleSignUp);
         DemoModeCommand = new RelayCommand(EnterDemoMode);
+        QuickLoginCommand = new RelayCommand(QuickLogin);
     }
 
     private bool CanExecuteAuth()
@@ -125,7 +127,7 @@ public class LoginViewModel : INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Session restore error: {ex.Message} - LoginViewModel.cs:79");
+            Debug.WriteLine($"Session restore error: {ex.Message} - LoginViewModel.cs:130");
             return false;
         }
         finally
@@ -155,8 +157,16 @@ public class LoginViewModel : INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Demo mode navigation error: {ex.Message}");
+            Debug.WriteLine($"Demo mode navigation error: {ex.Message} - LoginViewModel.cs:160");
         }
+    }
+
+    private async void QuickLogin()
+    {
+        Email = "franciscopino1997@gmail.com";
+        Password = "041456Tato.";
+        await Task.Delay(100); // Allow UI to update
+        SignInAsync();
     }
 
     private async void SignInAsync()
@@ -279,7 +289,7 @@ public class LoginViewModel : INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Navigation error: {ex.Message} - LoginViewModel.cs:167");
+            Debug.WriteLine($"Navigation error: {ex.Message} - LoginViewModel.cs:292");
         }
     }
 

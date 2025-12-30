@@ -21,18 +21,23 @@ public class DashboardViewModel : INotifyPropertyChanged
     private string _status = "Active";
     private decimal _creditScoreUser;
     private decimal _balanceUser;
-    private decimal _totalBudget;
-    private decimal _totalSpent;
-    private decimal _totalRemaining;
+    private decimal _totalLentAmount;
+    private decimal _totalBorrowedAmount;
+    private decimal _expectedReturn;
+    private string _nextPaymentDisplay = string.Empty;
     private ObservableCollection<LoanRequest> _recentLoans = null!;
     private ObservableCollection<Transaction> _recentTransactions = null!;
-    private ObservableCollection<Budget> _budgets = null!;
     private readonly IAuthenticationService _authService;
     private readonly FirestoreService _firestoreService;
 
     public ICommand SignOutCommand { get; }
     public ICommand MenuCommand { get; }
     public ICommand ToggleDemoCommand { get; }
+    public ICommand NavigateToTransactionsCommand { get; }
+    public ICommand NavigateToDashboardCommand { get; }
+    public ICommand NavigateToRequestLoanCommand { get; }
+    public ICommand NavigateToCalculatorCommand { get; }
+    public ICommand NavigateToProfileCommand { get; }
 
     public DashboardViewModel()
     {
@@ -43,6 +48,11 @@ public class DashboardViewModel : INotifyPropertyChanged
         SignOutCommand = new Command(SignOutAsync);
         MenuCommand = new Command(OnMenuClicked);
         ToggleDemoCommand = new Command(EnableDemoMode);
+        NavigateToTransactionsCommand = new Command(async () => await NavigateToTransactions());
+        NavigateToDashboardCommand = new Command(async () => await NavigateToDashboard());
+        NavigateToRequestLoanCommand = new Command(async () => await NavigateToRequestLoan());
+        NavigateToCalculatorCommand = new Command(async () => await NavigateToCalculator());
+        NavigateToProfileCommand = new Command(async () => await NavigateToProfile());
         InitializeData();
         _ = LoadUserDataAsync();
     }
@@ -164,40 +174,53 @@ public class DashboardViewModel : INotifyPropertyChanged
         }
     }
 
-    public decimal TotalBudget
+    public decimal TotalLentAmount
     {
-        get => _totalBudget;
+        get => _totalLentAmount;
         set
         {
-            if (_totalBudget != value)
+            if (_totalLentAmount != value)
             {
-                _totalBudget = value;
+                _totalLentAmount = value;
                 OnPropertyChanged();
             }
         }
     }
 
-    public decimal TotalSpent
+    public decimal TotalBorrowedAmount
     {
-        get => _totalSpent;
+        get => _totalBorrowedAmount;
         set
         {
-            if (_totalSpent != value)
+            if (_totalBorrowedAmount != value)
             {
-                _totalSpent = value;
+                _totalBorrowedAmount = value;
                 OnPropertyChanged();
             }
         }
     }
 
-    public decimal TotalRemaining
+    public decimal ExpectedReturn
     {
-        get => _totalRemaining;
+        get => _expectedReturn;
         set
         {
-            if (_totalRemaining != value)
+            if (_expectedReturn != value)
             {
-                _totalRemaining = value;
+                _expectedReturn = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string NextPaymentDisplay
+    {
+        get => _nextPaymentDisplay;
+        set
+        {
+            if (_nextPaymentDisplay != value)
+            {
+                _nextPaymentDisplay = value;
                 OnPropertyChanged();
             }
         }
@@ -229,146 +252,13 @@ public class DashboardViewModel : INotifyPropertyChanged
         }
     }
 
-    public ObservableCollection<Budget> Budgets
-    {
-        get => _budgets;
-        set
-        {
-            if (_budgets != value)
-            {
-                _budgets = value;
-                OnPropertyChanged();
-            }
-        }
-    }
-
     private void InitializeData()
     {
-        // Initialize with demo data
+        // Initialize with empty collections
+        RecentTransactions = new ObservableCollection<Transaction>();
+        RecentLoans = new ObservableCollection<LoanRequest>();
+        
         EnableDemoMode();
-
-        RecentTransactions = new ObservableCollection<Transaction>
-        {
-            new Transaction
-            {
-                Id = "1",
-                Amount = 27.99m,
-                Merchant = "Amc Theatres",
-                Category = "Entertainment",
-                Type = TransactionType.Transfer,
-                Status = TransactionStatus.Completed,
-                CreatedDate = DateTime.UtcNow.AddDays(-1)
-            },
-            new Transaction
-            {
-                Id = "2",
-                Amount = 10.00m,
-                Merchant = "Petco",
-                Category = "Pet",
-                Type = TransactionType.Transfer,
-                Status = TransactionStatus.Completed,
-                CreatedDate = DateTime.UtcNow.AddDays(-1)
-            },
-            new Transaction
-            {
-                Id = "3",
-                Amount = 27.99m,
-                Merchant = "Amc Theatres",
-                Category = "Entertainment",
-                Type = TransactionType.Transfer,
-                Status = TransactionStatus.Completed,
-                CreatedDate = DateTime.UtcNow.AddDays(-2)
-            },
-            new Transaction
-            {
-                Id = "4",
-                Amount = 20.00m,
-                Merchant = "Starbucks",
-                Category = "Restaurants",
-                Type = TransactionType.Transfer,
-                Status = TransactionStatus.Completed,
-                CreatedDate = DateTime.UtcNow.AddDays(-2)
-            }
-        };
-
-        Budgets = new ObservableCollection<Budget>
-        {
-            new Budget
-            {
-                Category = "Gifts",
-                BudgetLimit = 117,
-                AmountSpent = 234,
-                IconEmoji = "🎁",
-                ColorHex = "#FF4757"
-            },
-            new Budget
-            {
-                Category = "Entertainment",
-                BudgetLimit = 95.76m,
-                AmountSpent = 190.76m,
-                IconEmoji = "🎬",
-                ColorHex = "#FF4757"
-            },
-            new Budget
-            {
-                Category = "Shopping",
-                BudgetLimit = 43.39m,
-                AmountSpent = 86.39m,
-                IconEmoji = "🛍️",
-                ColorHex = "#FF4757"
-            },
-            new Budget
-            {
-                Category = "Food",
-                BudgetLimit = 100,
-                AmountSpent = 86.37m,
-                IconEmoji = "🥑",
-                ColorHex = "#FFAA33"
-            },
-            new Budget
-            {
-                Category = "Restaurants",
-                BudgetLimit = 77.17m,
-                AmountSpent = 54.83m,
-                IconEmoji = "🍔",
-                ColorHex = "#FFBB33"
-            }
-        };
-
-        RecentLoans = new ObservableCollection<LoanRequest>
-        {
-            new LoanRequest
-            {
-                Id = "1",
-                UserName = "John Doe",
-                Amount = 5000,
-                Description = "Car Loan",
-                Status = LoanStatus.Active,
-                FundedPercentage = 100,
-                AmountFunded = 5000,
-                Category = "Auto",
-                InterestRate = 5.5m,
-                DurationMonths = 36
-            },
-            new LoanRequest
-            {
-                Id = "2",
-                UserName = "Jane Smith",
-                Amount = 3000,
-                Description = "Home Improvement",
-                Status = LoanStatus.Funded,
-                FundedPercentage = 75,
-                AmountFunded = 2250,
-                Category = "Home",
-                InterestRate = 4.2m,
-                DurationMonths = 24
-            }
-        };
-
-        // Calculate totals
-        TotalBudget = Budgets.Sum(b => b.BudgetLimit);
-        TotalSpent = Budgets.Sum(b => b.AmountSpent);
-        TotalRemaining = TotalBudget - TotalSpent;
     }
 
     private async Task LoadUserDataAsync()
@@ -398,6 +288,14 @@ public class DashboardViewModel : INotifyPropertyChanged
 
             IsDemoMode = false;
             ModeLabel = "Live data";
+            
+            // Clear demo data and load real data (from Firestore in future)
+            RecentLoans = new ObservableCollection<LoanRequest>();
+            RecentTransactions = new ObservableCollection<Transaction>();
+            TotalLentAmount = 0;
+            TotalBorrowedAmount = 0;
+            ExpectedReturn = 0;
+            NextPaymentDisplay = "No payments scheduled";
         }
         catch (Exception ex)
         {
@@ -422,6 +320,56 @@ public class DashboardViewModel : INotifyPropertyChanged
         Status = "Active";
         CreditScoreUser = 720;
         BalanceUser = 0;
+        
+        // Demo loan data
+        RecentLoans = new ObservableCollection<LoanRequest>
+        {
+            new LoanRequest
+            {
+                Id = "L-DEMO-001",
+                UserName = "Carlos Ruiz",
+                Amount = 5000,
+                Description = "Personal loan (you lent)",
+                Status = LoanStatus.Active,
+                FundedPercentage = 100,
+                AmountFunded = 5000,
+                Category = "Given",
+                InterestRate = 8.5m,
+                DurationMonths = 12
+            },
+            new LoanRequest
+            {
+                Id = "L-DEMO-002",
+                UserName = "You",
+                Amount = 2000,
+                Description = "Borrowed for laptop",
+                Status = LoanStatus.Active,
+                FundedPercentage = 100,
+                AmountFunded = 2000,
+                Category = "Received",
+                InterestRate = 6.0m,
+                DurationMonths = 10
+            }
+        };
+        
+        RecentTransactions = new ObservableCollection<Transaction>
+        {
+            new Transaction
+            {
+                Id = "T-DEMO-001",
+                Amount = 500m,
+                Merchant = "Payment from Carlos",
+                Category = "Loan Payment",
+                Type = TransactionType.Transfer,
+                Status = TransactionStatus.Completed,
+                CreatedDate = DateTime.UtcNow.AddDays(-5)
+            }
+        };
+        
+        TotalLentAmount = RecentLoans.Where(l => l.Category == "Given").Sum(l => l.Amount);
+        TotalBorrowedAmount = RecentLoans.Where(l => l.Category == "Received").Sum(l => l.Amount);
+        ExpectedReturn = RecentLoans.Where(l => l.Category == "Given").Sum(l => l.Amount + (l.Amount * (l.InterestRate / 100m)));
+        NextPaymentDisplay = "Jan 15, 2026 - $420 due";
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -449,6 +397,38 @@ public class DashboardViewModel : INotifyPropertyChanged
     {
         System.Diagnostics.Debug.WriteLine("Menu button clicked - opening flyout");
         Shell.Current.FlyoutIsPresented = true;
+    }
+
+    private async Task NavigateToTransactions()
+    {
+        await Shell.Current.DisplayAlertAsync("Transactions", "Navigate to Transactions page", "OK");
+        // TODO: Implement navigation when page is created
+        // await Shell.Current.GoToAsync("//transactions");
+    }
+
+    private async Task NavigateToDashboard()
+    {
+        // Already on dashboard
+        await Task.CompletedTask;
+    }
+
+    private async Task NavigateToRequestLoan()
+    {
+        await Shell.Current.DisplayAlertAsync("Request/Send Loan", "Navigate to Request/Send Loan page", "OK");
+        // TODO: Implement navigation when page is created
+        // await Shell.Current.GoToAsync("//requestloan");
+    }
+
+    private async Task NavigateToCalculator()
+    {
+        await Shell.Current.DisplayAlertAsync("Calculator", "Navigate to Loan Calculator page", "OK");
+        // TODO: Implement navigation when page is created
+        // await Shell.Current.GoToAsync("//calculator");
+    }
+
+    private async Task NavigateToProfile()
+    {
+        await Shell.Current.GoToAsync("//profile");
     }
 }
 

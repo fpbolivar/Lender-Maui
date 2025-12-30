@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Lender.ProfilePage"
+             Title="Profile"
+             BackgroundColor="#0A1929"
+             Padding="0"
+             SafeAreaEdges="None">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Color x:Key="DarkBg">#0A1929</Color>
+            <Color x:Key="CardBg">#132F4C</Color>
+            <Color x:Key="AccentOrange">#FF9F43</Color>
+            <Color x:Key="AccentGreen">#1ABC9C</Color>
+            <Color x:Key="TextLight">#B0BEC5</Color>
+            <Color x:Key="TextWhite">#FFFFFF</Color>
+            <Color x:Key="RedAlert">#EF4444</Color>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*,Auto" Padding="0" BackgroundColor="{StaticResource DarkBg}" SafeAreaEdges="None">
+        <!-- Header -->
+        <VerticalStackLayout Grid.Row="0" Padding="16,50,16,16" Spacing="12" BackgroundColor="{StaticResource DarkBg}">
+            <HorizontalStackLayout Spacing="12">
+                <Button Text="←"
+                        Command="{Binding BackCommand}"
+                        FontSize="24"
+                        TextColor="{StaticResource TextWhite}"
+                        BackgroundColor="{StaticResource CardBg}"
+                        WidthRequest="44"
+                        HeightRequest="44"
+                        CornerRadius="8"
+                        Padding="0"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Start" />
+                <Label Text="Profile" 
+                       FontSize="28" 
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource TextWhite}"
+                       VerticalOptions="Center"
+                       HorizontalOptions="StartAndExpand" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+
+        <!-- Content -->
+        <ScrollView Grid.Row="1" BackgroundColor="{StaticResource DarkBg}" SafeAreaEdges="None">
+            <VerticalStackLayout Padding="16,0,16,16" Spacing="20" BackgroundColor="{StaticResource DarkBg}" SafeAreaEdges="None">
+
+                <!-- Profile Header Card -->
+                <Frame CornerRadius="12"
+                       BorderColor="{StaticResource CardBg}"
+                       BackgroundColor="{StaticResource CardBg}"
+                       HasShadow="True"
+                       Padding="20">
+                    <VerticalStackLayout Spacing="16">
+                        <!-- Avatar -->
+                        <Frame CornerRadius="50"
+                               WidthRequest="100"
+                               HeightRequest="100"
+                               HasShadow="False"
+                               BorderColor="{StaticResource AccentOrange}"
+                               BackgroundColor="{StaticResource DarkBg}"
+                               HorizontalOptions="Center"
+                               Padding="0">
+                            <Label Text="{Binding UserInitials}"
+                                   VerticalTextAlignment="Center"
+                                   HorizontalTextAlignment="Center"
+                                   FontSize="36"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource AccentOrange}" />
+                        </Frame>
+
+                        <!-- User Info -->
+                        <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                            <Label Text="{Binding UserName}" 
+                                   FontSize="24" 
+                                   FontAttributes="Bold" 
+                                   TextColor="{StaticResource TextWhite}"
+                                   HorizontalTextAlignment="Center" />
+                            <Label Text="{Binding UserEmail}" 
+                                   FontSize="14" 
+                                   TextColor="{StaticResource TextLight}"
+                                   HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+
+                        <!-- Stats Grid -->
+                        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto" ColumnSpacing="16" Margin="0,16,0,0">
+                            <Frame Grid.Column="0" 
+                                   CornerRadius="8"
+                                   BackgroundColor="{StaticResource DarkBg}"
+                                   Padding="12"
+                                   HasShadow="False">
+                                <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                                    <Label Text="Credit Score" FontSize="12" TextColor="{StaticResource TextLight}" HorizontalTextAlignment="Center" />
+                                    <Label Text="{Binding CreditScore}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource AccentOrange}" HorizontalTextAlignment="Center" />
+                                </VerticalStackLayout>
+                            </Frame>
+                            <Frame Grid.Column="1" 
+                                   CornerRadius="8"
+                                   BackgroundColor="{StaticResource DarkBg}"
+                                   Padding="12"
+                                   HasShadow="False">
+                                <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                                    <Label Text="Balance" FontSize="12" TextColor="{StaticResource TextLight}" HorizontalTextAlignment="Center" />
+                                    <Label Text="{Binding Balance, StringFormat='${0:F2}'}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource AccentGreen}" HorizontalTextAlignment="Center" />
+                                </VerticalStackLayout>
+                            </Frame>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Personal Information -->
+                <Frame CornerRadius="12"
+                       BorderColor="{StaticResource CardBg}"
+                       BackgroundColor="{StaticResource CardBg}"
+                       HasShadow="True"
+                       Padding="16">
+                    <VerticalStackLayout Spacing="16">
+                        <Label Text="Personal Information" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource TextWhite}" />
+                        
+                        <VerticalStackLayout Spacing="12">
+                            <HorizontalStackLayout Spacing="12">
+                                <Label Text="📱" FontSize="20" VerticalOptions="Center" />
+                                <VerticalStackLayout Spacing="2" HorizontalOptions="StartAndExpand">
+                                    <Label Text="Phone Number" FontSize="12" TextColor="{StaticResource TextLight}" />
+                                    <Label Text="{Binding PhoneNumber}" FontSize="14" TextColor="{StaticResource TextWhite}" />
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+
+                            <HorizontalStackLayout Spacing="12">
+                                <Label Text="🎂" FontSize="20" VerticalOptions="Center" />
+                                <VerticalStackLayout Spacing="2" HorizontalOptions="StartAndExpand">
+                                    <Label Text="Date of Birth" FontSize="12" TextColor="{StaticResource TextLight}" />
+                                    <Label Text="{Binding DateOfBirth}" FontSize="14" TextColor="{StaticResource TextWhite}" />
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+
+                            <HorizontalStackLayout Spacing="12">
+                                <Label Text="📅" FontSize="20" VerticalOptions="Center" />
+                                <VerticalStackLayout Spacing="2" HorizontalOptions="StartAndExpand">
+                                    <Label Text="Member Since" FontSize="12" TextColor="{StaticResource TextLight}" />
+                                    <Label Text="{Binding MemberSince}" FontSize="14" TextColor="{StaticResource TextWhite}" />
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+
+                        <Button Text="Edit Profile"
+                                Command="{Binding EditProfileCommand}"
+                                BackgroundColor="Transparent"
+                                BorderColor="{StaticResource AccentOrange}"
+                                BorderWidth="1"
+                                TextColor="{StaticResource AccentOrange}"
+                                CornerRadius="8"
+                                FontSize="14"
+                                Padding="12,10" />
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Statistics -->
+                <Frame CornerRadius="12"
+                       BorderColor="{StaticResource CardBg}"
+                       BackgroundColor="{StaticResource CardBg}"
+                       HasShadow="True"
+                       Padding="16">
+                    <VerticalStackLayout Spacing="16">
+                        <Label Text="Loan Statistics" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource TextWhite}" />
+                        
+                        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
+                            <VerticalStackLayout Grid.Row="0" Grid.Column="0" Spacing="4">
+                                <Label Text="Total Loans" FontSize="12" TextColor="{StaticResource TextLight}" />
+                                <Label Text="{Binding TotalLoans}" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource TextWhite}" />
+                            </VerticalStackLayout>
+
+                            <VerticalStackLayout Grid.Row="0" Grid.Column="1" Spacing="4">
+                                <Label Text="Amount Lent" FontSize="12" TextColor="{StaticResource TextLight}" />
+                                <Label Text="{Binding TotalLent, StringFormat='${0:F2}'}" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource AccentOrange}" />
+                            </VerticalStackLayout>
+
+                            <VerticalStackLayout Grid.Row="1" Grid.Column="0" Spacing="4">
+                                <Label Text="Amount Borrowed" FontSize="12" TextColor="{StaticResource TextLight}" />
+                                <Label Text="{Binding TotalBorrowed, StringFormat='${0:F2}'}" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource TextWhite}" />
+                            </VerticalStackLayout>
+
+                            <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="4">
+                                <Label Text="On-Time Rate" FontSize="12" TextColor="{StaticResource TextLight}" />
+                                <Label Text="{Binding OnTimeRate, StringFormat='{0}%'}" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource AccentGreen}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Account Settings -->
+                <Frame CornerRadius="12"
+                       BorderColor="{StaticResource CardBg}"
+                       BackgroundColor="{StaticResource CardBg}"
+                       HasShadow="True"
+                       Padding="16">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Account Settings" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource TextWhite}" Margin="0,0,0,8" />
+                        
+                        <Button Text="🔒 Change Password"
+                                Command="{Binding ChangePasswordCommand}"
+                                BackgroundColor="Transparent"
+                                TextColor="{StaticResource TextWhite}"
+                                FontSize="14"
+                                Padding="12,10"
+                                HorizontalOptions="Fill"
+                                HorizontalTextAlignment="Start" />
+
+                        <Button Text="🔔 Notifications"
+                                Command="{Binding NotificationsCommand}"
+                                BackgroundColor="Transparent"
+                                TextColor="{StaticResource TextWhite}"
+                                FontSize="14"
+                                Padding="12,10"
+                                HorizontalOptions="Fill"
+                                HorizontalTextAlignment="Start" />
+
+                        <Button Text="ℹ️ About &amp; Support"
+                                Command="{Binding AboutCommand}"
+                                BackgroundColor="Transparent"
+                                TextColor="{StaticResource TextWhite}"
+                                FontSize="14"
+                                Padding="12,10"
+                                HorizontalOptions="Fill"
+                                HorizontalTextAlignment="Start" />
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Danger Zone -->
+                <Frame CornerRadius="12"
+                       BorderColor="{StaticResource RedAlert}"
+                       BackgroundColor="{StaticResource CardBg}"
+                       HasShadow="True"
+                       Padding="16">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Danger Zone" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource RedAlert}" />
+                        
+                        <Button Text="Sign Out"
+                                Command="{Binding SignOutCommand}"
+                                BackgroundColor="{StaticResource RedAlert}"
+                                TextColor="{StaticResource TextWhite}"
+                                CornerRadius="8"
+                                FontAttributes="Bold"
+                                FontSize="14"
+                                Padding="12,10" />
+
+                        <Button Text="Delete Account"
+                                Command="{Binding DeleteAccountCommand}"
+                                BackgroundColor="Transparent"
+                                BorderColor="{StaticResource RedAlert}"
+                                BorderWidth="1"
+                                TextColor="{StaticResource RedAlert}"
+                                CornerRadius="8"
+                                FontSize="12"
+                                Padding="12,10" />
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- App Version -->
+                <Label Text="Lender v1.0.0" 
+                       FontSize="12" 
+                       TextColor="{StaticResource TextLight}" 
+                       HorizontalTextAlignment="Center"
+                       Margin="0,8,0,20" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Bottom Navigation Bar -->
+        <Grid Grid.Row="2" ColumnDefinitions="*,*,*,*,*" BackgroundColor="{StaticResource CardBg}" Padding="8,12,8,32" SafeAreaEdges="None">
+            <!-- Transactions -->
+            <VerticalStackLayout Grid.Column="0" Spacing="4" HorizontalOptions="Center">
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding NavigateToTransactionsCommand}" />
+                </VerticalStackLayout.GestureRecognizers>
+                <Label Text="💳" FontSize="22" HorizontalTextAlignment="Center" />
+                <Label Text="Transactions" FontSize="10" TextColor="{StaticResource TextLight}" HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+            
+            <!-- Dashboard -->
+            <VerticalStackLayout Grid.Column="1" Spacing="4" HorizontalOptions="Center">
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding NavigateToDashboardCommand}" />
+                </VerticalStackLayout.GestureRecognizers>
+                <Label Text="📊" FontSize="22" HorizontalTextAlignment="Center" />
+                <Label Text="Dashboard" FontSize="10" TextColor="{StaticResource TextLight}" HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+            
+            <!-- Request/Send Loan (Main) -->
+            <VerticalStackLayout Grid.Column="2" Spacing="4" HorizontalOptions="Center" Margin="0,-20,0,0">
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding NavigateToRequestLoanCommand}" />
+                </VerticalStackLayout.GestureRecognizers>
+                <Frame CornerRadius="30" 
+                       BackgroundColor="{StaticResource AccentOrange}" 
+                       Padding="16" 
+                       HasShadow="True"
+                       HeightRequest="60"
+                       WidthRequest="60">
+                    <Label Text="+" FontSize="32" TextColor="{StaticResource DarkBg}" FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" Margin="0,-8,0,0" />
+                </Frame>
+                <Label Text="Request/Send" FontSize="9" TextColor="{StaticResource TextLight}" HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+            
+            <!-- Loan Calculator -->
+            <VerticalStackLayout Grid.Column="3" Spacing="4" HorizontalOptions="Center">
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding NavigateToCalculatorCommand}" />
+                </VerticalStackLayout.GestureRecognizers>
+                <Label Text="🧮" FontSize="22" HorizontalTextAlignment="Center" />
+                <Label Text="Calculator" FontSize="10" TextColor="{StaticResource TextLight}" HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+            
+            <!-- Profile -->
+            <VerticalStackLayout Grid.Column="4" Spacing="4" HorizontalOptions="Center">
+                <Label Text="👤" FontSize="22" HorizontalTextAlignment="Center" />
+                <Label Text="Profile" FontSize="10" TextColor="{StaticResource AccentOrange}" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+        </Grid>
+    </Grid>
+</ContentPage>

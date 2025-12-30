@@ -9,9 +9,7 @@ public class AppDelegate : MauiUIApplicationDelegate
 	public override bool FinishedLaunching(UIApplication application, NSDictionary? launchOptions)
 	{
 		System.Console.WriteLine("AppDelegate.FinishedLaunching called - AppDelegate.cs:11");
-		
-		// Force the app to extend under the status bar
-		UIApplication.SharedApplication.StatusBarStyle = UIStatusBarStyle.LightContent;
+		// Keep default status bar handling (avoids obsolete API usage)
 		
 		return base.FinishedLaunching(application, launchOptions);
 	}

@@ -7,20 +7,10 @@ namespace Lender;
 
 public partial class AppShell : Shell
 {
-	private bool _authCheckPerformed = false;
-
 	public AppShell()
 	{
 		InitializeComponent();
 
-	}
-
-	protected override async void OnAppearing()
-	{
-		base.OnAppearing();
-
-		// Temporarily disabled for testing - let MainPage load as default
-		_authCheckPerformed = true;
 	}
 
 	private async Task CheckAuthenticationAsync()

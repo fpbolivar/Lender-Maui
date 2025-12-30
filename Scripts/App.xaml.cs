@@ -15,7 +15,9 @@ public partial class App : Application
 		var shell = new AppShell();
 		
 		// Force all pages to ignore safe area
+		#pragma warning disable CS0618
 		Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific.Page.SetUseSafeArea(shell, false);
+		#pragma warning restore CS0618
 		
 		return new Window(shell);
 	}

@@ -50,6 +50,11 @@ public class User
     public string ProfileImageUrl { get; set; } = string.Empty;
 
     /// <summary>
+    /// User's date of birth
+    /// </summary>
+    public DateTime DateOfBirth { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
     /// Verification status for lending
     /// </summary>
     public bool IsVerified { get; set; } = false;

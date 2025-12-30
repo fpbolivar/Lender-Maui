@@ -71,6 +71,23 @@
                                       Text="{Binding PhoneNumber}" />
                      </Border>
 
+                     <!-- Date of Birth Picker -->
+                     <VerticalStackLayout IsVisible="{Binding IsSignUp}" Spacing="8">
+                            <Label Text="Date of Birth" FontSize="12" TextColor="{StaticResource TextLight}" Margin="4,0,0,0" />
+                            <Border StrokeShape="RoundRectangle 8" Stroke="{StaticResource CardBg}" BackgroundColor="{StaticResource CardBg}" Padding="0">
+                                   <Grid ColumnDefinitions="*,40" Padding="12,0">
+                                          <DatePicker Grid.Column="0" 
+                                                      Date="{Binding DateOfBirth}"
+                                                      FontSize="14"
+                                                      TextColor="#000000"
+                                                      Format="MMM dd, yyyy"
+                                                      MaximumDate="{Binding MaxDateOfBirth}"
+                                                      MinimumDate="{Binding MinDateOfBirth}" />
+                                          <Label Grid.Column="1" Text="📅" FontSize="18" VerticalOptions="Center" HorizontalOptions="Center" />
+                                   </Grid>
+                            </Border>
+                     </VerticalStackLayout>
+
                      <!-- Email and Password Fields (Both Sign In and Sign Up) -->
                      <Border StrokeShape="RoundRectangle 8" Stroke="{StaticResource CardBg}" BackgroundColor="{StaticResource CardBg}" Padding="12">
                             <Entry Placeholder="Email"

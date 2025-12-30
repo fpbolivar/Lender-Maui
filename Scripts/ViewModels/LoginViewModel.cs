@@ -16,6 +16,7 @@ public class LoginViewModel : INotifyPropertyChanged
     private string _firstName = string.Empty;
     private string _lastName = string.Empty;
     private string _phoneNumber = string.Empty;
+    private DateTime _dateOfBirth = DateTime.Now.AddYears(-25); // Default to 25 years ago
     private bool _isLoading;
     private string _errorMessage = string.Empty;
     private bool _isSignUp;
@@ -51,6 +52,18 @@ public class LoginViewModel : INotifyPropertyChanged
         get => _phoneNumber;
         set => SetProperty(ref _phoneNumber, value);
     }
+
+    public DateTime DateOfBirth
+    {
+        get => _dateOfBirth;
+        set => SetProperty(ref _dateOfBirth, value);
+    }
+
+    // Maximum date: today (cannot be future date)
+    public DateTime MaxDateOfBirth => DateTime.Now;
+
+    // Minimum date: 120 years ago (reasonable age limit)
+    public DateTime MinDateOfBirth => DateTime.Now.AddYears(-120);
 
     public bool IsLoading
     {
@@ -128,6 +141,7 @@ public class LoginViewModel : INotifyPropertyChanged
         FirstName = string.Empty;
         LastName = string.Empty;
         PhoneNumber = string.Empty;
+        DateOfBirth = DateTime.Now.AddYears(-25);
     }
 
     private async void SignInAsync()
@@ -165,8 +179,26 @@ public class LoginViewModel : INotifyPropertyChanged
             return;
         }
 
+        // Validate date of birth
+        var today = DateTime.Now;
+        var age = today.Year - DateOfBirth.Year;
+        if (DateOfBirth.Date > today.AddYears(-age))
+            age--;
+
+        if (age < 13)
+        {
+            ErrorMessage = "You must be at least 13 years old to create an account.";
+            return;
+        }
+
+        if (age > 120)
+        {
+            ErrorMessage = "Please enter a valid date of birth.";
+            return;
+        }
+
         await HandleAuthActionAsync(
-            () => _authService.SignUpAsync(Email, Password, FirstName, LastName, PhoneNumber), 
+            () => _authService.SignUpAsync(Email, Password, FirstName, LastName, PhoneNumber, DateOfBirth), 
             "Sign up"
         );
     }
@@ -245,7 +277,8 @@ public class LoginViewModel : INotifyPropertyChanged
 
             // Re-evaluate command execution when relevant properties change
             if (propertyName == nameof(Email) || propertyName == nameof(Password) || propertyName == nameof(IsLoading) ||
-                propertyName == nameof(FirstName) || propertyName == nameof(LastName) || propertyName == nameof(IsSignUp))
+                propertyName == nameof(FirstName) || propertyName == nameof(LastName) || propertyName == nameof(IsSignUp) ||
+                propertyName == nameof(DateOfBirth))
             {
                 (SignInCommand as RelayCommand)?.NotifyCanExecuteChanged();
                 (SignUpCommand as RelayCommand)?.NotifyCanExecuteChanged();

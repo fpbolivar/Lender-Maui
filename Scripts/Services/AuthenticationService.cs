@@ -17,6 +17,9 @@ public interface IAuthenticationService : INotifyPropertyChanged
     Task<bool> SignInWithGoogleAsync();
     Task SignOutAsync();
     Task<bool> RestoreSessionAsync();
+    Task<bool> ChangePasswordAsync(string currentPassword, string newPassword);
+    Task<bool> ChangeEmailAsync(string newEmail);
+    Task<bool> DeleteAccountAsync(string password);
 }
 
 public class AuthenticationService : IAuthenticationService
@@ -449,6 +452,206 @@ public class AuthenticationService : IAuthenticationService
         {
             field = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+    public async Task<bool> ChangePasswordAsync(string currentPassword, string newPassword)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(CurrentUserEmail))
+                return false;
+
+            using var client = new HttpClient();
+            
+            // First, re-authenticate with current password
+            var signInUri = $"{FirebaseAuthUrl}/accounts:signInWithPassword?key={FirebaseWebApiKey}";
+            var signInPayload = new
+            {
+                email = CurrentUserEmail,
+                password = currentPassword,
+                returnSecureToken = true
+            };
+
+            var signInContent = new StringContent(
+                JsonSerializer.Serialize(signInPayload),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            var signInResponse = await client.PostAsync(signInUri, signInContent);
+            
+            if (!signInResponse.IsSuccessStatusCode)
+            {
+                Debug.WriteLine("Re-authentication failed - invalid current password");
+                return false;
+            }
+
+            var signInResult = JsonSerializer.Deserialize<JsonElement>(
+                await signInResponse.Content.ReadAsStringAsync());
+            
+            if (!signInResult.TryGetProperty("idToken", out var idToken))
+                return false;
+
+            // Now update password
+            var updateUri = $"{FirebaseAuthUrl}/accounts:update?key={FirebaseWebApiKey}";
+            var updatePayload = new
+            {
+                idToken = idToken.GetString(),
+                password = newPassword,
+                returnSecureToken = true
+            };
+
+            var updateContent = new StringContent(
+                JsonSerializer.Serialize(updatePayload),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            var updateResponse = await client.PostAsync(updateUri, updateContent);
+            
+            if (updateResponse.IsSuccessStatusCode)
+            {
+                var updateResult = JsonSerializer.Deserialize<JsonElement>(
+                    await updateResponse.Content.ReadAsStringAsync());
+                
+                if (updateResult.TryGetProperty("idToken", out var newToken))
+                {
+                    // Save new token
+                    await SecureStorage.SetAsync(FirebaseTokenKey, newToken.GetString() ?? "");
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Change password failed: {ex.Message}");
+            return false;
+        }
+    }
+
+    public async Task<bool> ChangeEmailAsync(string newEmail)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(CurrentUserEmail))
+                return false;
+
+            using var client = new HttpClient();
+            var token = await SecureStorage.GetAsync(FirebaseTokenKey);
+            
+            if (string.IsNullOrEmpty(token))
+                return false;
+
+            var updateUri = $"{FirebaseAuthUrl}/accounts:update?key={FirebaseWebApiKey}";
+            var updatePayload = new
+            {
+                idToken = token,
+                email = newEmail,
+                returnSecureToken = true
+            };
+
+            var updateContent = new StringContent(
+                JsonSerializer.Serialize(updatePayload),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            var updateResponse = await client.PostAsync(updateUri, updateContent);
+            
+            if (updateResponse.IsSuccessStatusCode)
+            {
+                var updateResult = JsonSerializer.Deserialize<JsonElement>(
+                    await updateResponse.Content.ReadAsStringAsync());
+                
+                if (updateResult.TryGetProperty("idToken", out var newToken) &&
+                    updateResult.TryGetProperty("email", out var email))
+                {
+                    // Update stored auth data
+                    await SecureStorage.SetAsync(FirebaseTokenKey, newToken.GetString() ?? "");
+                    await SecureStorage.SetAsync(FirebaseUserEmailKey, email.GetString() ?? "");
+                    CurrentUserEmail = email.GetString();
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Change email failed: {ex.Message}");
+            return false;
+        }
+    }
+
+    public async Task<bool> DeleteAccountAsync(string password)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(CurrentUserEmail))
+                return false;
+
+            using var client = new HttpClient();
+            
+            // First, re-authenticate with password
+            var signInUri = $"{FirebaseAuthUrl}/accounts:signInWithPassword?key={FirebaseWebApiKey}";
+            var signInPayload = new
+            {
+                email = CurrentUserEmail,
+                password,
+                returnSecureToken = true
+            };
+
+            var signInContent = new StringContent(
+                JsonSerializer.Serialize(signInPayload),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            var signInResponse = await client.PostAsync(signInUri, signInContent);
+            
+            if (!signInResponse.IsSuccessStatusCode)
+            {
+                Debug.WriteLine("Re-authentication failed - invalid password");
+                return false;
+            }
+
+            var signInResult = JsonSerializer.Deserialize<JsonElement>(
+                await signInResponse.Content.ReadAsStringAsync());
+            
+            if (!signInResult.TryGetProperty("idToken", out var idToken))
+                return false;
+
+            // Now delete account
+            var deleteUri = $"{FirebaseAuthUrl}/accounts:delete?key={FirebaseWebApiKey}";
+            var deletePayload = new
+            {
+                idToken = idToken.GetString()
+            };
+
+            var deleteContent = new StringContent(
+                JsonSerializer.Serialize(deletePayload),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            var deleteResponse = await client.PostAsync(deleteUri, deleteContent);
+            
+            if (deleteResponse.IsSuccessStatusCode)
+            {
+                // Clear auth data
+                await SignOutAsync();
+                return true;
+            }
+
+            return false;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Delete account failed: {ex.Message}");
+            return false;
         }
     }
 }

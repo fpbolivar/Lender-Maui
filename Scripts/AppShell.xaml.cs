@@ -10,7 +10,38 @@ public partial class AppShell : Shell
 	public AppShell()
 	{
 		InitializeComponent();
+		
+		// Register routes for navigation
+		Routing.RegisterRoute("profile", typeof(ProfilePage));
 
+		// Prevent navigation to protected routes when unauthenticated (demo mode)
+		Navigating += OnShellNavigating;
+	}
+
+	private void OnShellNavigating(object? sender, ShellNavigatingEventArgs e)
+	{
+		try
+		{
+			var target = e.Target?.Location?.OriginalString ?? string.Empty;
+			var authService = ServiceHelper.GetService<IAuthenticationService>();
+
+			// If not authenticated (demo mode) block navigation to profile/settings
+			if (authService != null && !authService.IsAuthenticated)
+			{
+				if (target.Contains("profile", StringComparison.OrdinalIgnoreCase))
+				{
+					e.Cancel();
+					MainThread.BeginInvokeOnMainThread(async () =>
+					{
+						await Application.Current.MainPage.DisplayAlert("Demo mode", "Navigation is disabled in demo mode. Sign in to access this section.", "OK");
+					});
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			System.Diagnostics.Debug.WriteLine($"Shell navigation guard error: {ex.Message}");
+		}
 	}
 
 	private async Task CheckAuthenticationAsync()

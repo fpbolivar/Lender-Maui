@@ -521,4 +521,205 @@ public class FirestoreService
             return DateTime.UtcNow;
         }
     }
+
+    // ==================== UPDATE OPERATIONS ====================
+
+    /// <summary>
+    /// Update an existing user document
+    /// </summary>
+    public async Task<bool> UpdateUserAsync(User user)
+    {
+        try
+        {
+            Debug.WriteLine($"[FirestoreService] Updating user: {user.Email}");
+            return await SaveUserAsync(user); // PATCH operation handles create or update
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[FirestoreService] Error updating user: {ex.Message}");
+            return false;
+        }
+    }
+
+    // ==================== DELETE OPERATIONS ====================
+
+    /// <summary>
+    /// Delete a user document
+    /// </summary>
+    public async Task<bool> DeleteUserAsync(string email)
+    {
+        try
+        {
+            Debug.WriteLine($"[FirestoreService] Deleting user: {email}");
+            
+            var documentId = Uri.EscapeDataString(email);
+            var url = $"{_baseUrl}/{UsersCollection}/{documentId}?key={_apiKey}";
+            var response = await _httpClient.DeleteAsync(url);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                Debug.WriteLine($"[FirestoreService] ✅ User {email} deleted successfully");
+                return true;
+            }
+            
+            Debug.WriteLine($"[FirestoreService] ❌ Error deleting user - Status: {response.StatusCode}");
+            return false;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[FirestoreService] ❌ Exception deleting user: {ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Delete a loan document
+    /// </summary>
+    public async Task<bool> DeleteLoanAsync(string loanId)
+    {
+        try
+        {
+            Debug.WriteLine($"[FirestoreService] Deleting loan: {loanId}");
+            
+            var url = $"{_baseUrl}/{LoansCollection}/{loanId}?key={_apiKey}";
+            var response = await _httpClient.DeleteAsync(url);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                Debug.WriteLine($"[FirestoreService] ✅ Loan {loanId} deleted successfully");
+                return true;
+            }
+            
+            Debug.WriteLine($"[FirestoreService] ❌ Error deleting loan - Status: {response.StatusCode}");
+            return false;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[FirestoreService] ❌ Exception deleting loan: {ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Delete a transaction document
+    /// </summary>
+    public async Task<bool> DeleteTransactionAsync(string transactionId)
+    {
+        try
+        {
+            Debug.WriteLine($"[FirestoreService] Deleting transaction: {transactionId}");
+            
+            var url = $"{_baseUrl}/{TransactionsCollection}/{transactionId}?key={_apiKey}";
+            var response = await _httpClient.DeleteAsync(url);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                Debug.WriteLine($"[FirestoreService] ✅ Transaction {transactionId} deleted successfully");
+                return true;
+            }
+            
+            Debug.WriteLine($"[FirestoreService] ❌ Error deleting transaction - Status: {response.StatusCode}");
+            return false;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[FirestoreService] ❌ Exception deleting transaction: {ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Get all loans for a user (as lender or borrower)
+    /// </summary>
+    public async Task<List<LoanRequest>> GetUserLoansAsync(string email)
+    {
+        try
+        {
+            Debug.WriteLine($"[FirestoreService] Getting loans for user: {email}");
+            var loans = new List<LoanRequest>();
+            
+            // For now, return empty list - will be implemented when loan collection is created
+            // TODO: Query loans where LenderEmail == email OR BorrowerEmail == email
+            
+            Debug.WriteLine($"[FirestoreService] Found {loans.Count} loans for user");
+            return loans;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[FirestoreService] Error getting user loans: {ex.Message}");
+            return new List<LoanRequest>();
+        }
+    }
+
+    /// <summary>
+    /// Get all transactions for a user
+    /// </summary>
+    public async Task<List<Transaction>> GetUserTransactionsAsync(string email)
+    {
+        try
+        {
+            Debug.WriteLine($"[FirestoreService] Getting transactions for user: {email}");
+            
+            // Get all transactions and filter by user email
+            var url = $"{_baseUrl}/{TransactionsCollection}?key={_apiKey}";
+            var response = await _httpClient.GetAsync(url);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                return ParseTransactionsFromJson(json, email);
+            }
+            
+            return new List<Transaction>();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[FirestoreService] Error getting user transactions: {ex.Message}");
+            return new List<Transaction>();
+        }
+    }
+
+    private List<Transaction> ParseTransactionsFromJson(string json, string userEmail)
+    {
+        var transactions = new List<Transaction>();
+        
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            if (doc.RootElement.TryGetProperty("documents", out var documents))
+            {
+                foreach (var document in documents.EnumerateArray())
+                {
+                    if (document.TryGetProperty("fields", out var fields))
+                    {
+                        var fromUserId = GetStringValue(fields, "FromUserId");
+                        var toUserId = GetStringValue(fields, "ToUserId");
+                        
+                        // Only include transactions involving this user
+                        if (fromUserId == userEmail || toUserId == userEmail)
+                        {
+                            transactions.Add(new Transaction
+                            {
+                                Id = ExtractDocumentId(document.GetRawText()),
+                                LoanRequestId = GetStringValue(fields, "LoanRequestId"),
+                                FromUserId = fromUserId,
+                                ToUserId = toUserId,
+                                Amount = (decimal)GetDoubleValue(fields, "Amount"),
+                                Type = (TransactionType)GetIntValue(fields, "Type"),
+                                Status = (TransactionStatus)GetIntValue(fields, "Status"),
+                                CreatedDate = GetDateTimeValue(fields, "CreatedDate"),
+                                Description = GetStringValue(fields, "Description")
+                            });
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[FirestoreService] Error parsing transactions: {ex.Message}");
+        }
+        
+        return transactions;
+    }
 }

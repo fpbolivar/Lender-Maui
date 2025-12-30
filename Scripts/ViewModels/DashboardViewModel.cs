@@ -384,6 +384,7 @@ public class DashboardViewModel : INotifyPropertyChanged
         try
         {
             await _authService.SignOutAsync();
+            EnableDemoMode();
             // Navigate back to login
             await Shell.Current.GoToAsync("//login", animate: true);
         }
@@ -401,6 +402,11 @@ public class DashboardViewModel : INotifyPropertyChanged
 
     private async Task NavigateToTransactions()
     {
+        if (IsDemoMode)
+        {
+            await Shell.Current.DisplayAlertAsync("Demo mode", "Navigation is disabled in demo mode. Sign in to access this section.", "OK");
+            return;
+        }
         await Shell.Current.DisplayAlertAsync("Transactions", "Navigate to Transactions page", "OK");
         // TODO: Implement navigation when page is created
         // await Shell.Current.GoToAsync("//transactions");
@@ -408,12 +414,22 @@ public class DashboardViewModel : INotifyPropertyChanged
 
     private async Task NavigateToDashboard()
     {
+        if (IsDemoMode)
+        {
+            await Shell.Current.DisplayAlertAsync("Demo mode", "Navigation is disabled in demo mode. Sign in to access this section.", "OK");
+            return;
+        }
         // Already on dashboard
         await Task.CompletedTask;
     }
 
     private async Task NavigateToRequestLoan()
     {
+        if (IsDemoMode)
+        {
+            await Shell.Current.DisplayAlertAsync("Demo mode", "Navigation is disabled in demo mode. Sign in to access this section.", "OK");
+            return;
+        }
         await Shell.Current.DisplayAlertAsync("Request/Send Loan", "Navigate to Request/Send Loan page", "OK");
         // TODO: Implement navigation when page is created
         // await Shell.Current.GoToAsync("//requestloan");
@@ -421,6 +437,11 @@ public class DashboardViewModel : INotifyPropertyChanged
 
     private async Task NavigateToCalculator()
     {
+        if (IsDemoMode)
+        {
+            await Shell.Current.DisplayAlertAsync("Demo mode", "Navigation is disabled in demo mode. Sign in to access this section.", "OK");
+            return;
+        }
         await Shell.Current.DisplayAlertAsync("Calculator", "Navigate to Loan Calculator page", "OK");
         // TODO: Implement navigation when page is created
         // await Shell.Current.GoToAsync("//calculator");
@@ -428,6 +449,11 @@ public class DashboardViewModel : INotifyPropertyChanged
 
     private async Task NavigateToProfile()
     {
+        if (IsDemoMode)
+        {
+            await Shell.Current.DisplayAlertAsync("Demo mode", "Navigation is disabled in demo mode. Sign in to access this section.", "OK");
+            return;
+        }
         await Shell.Current.GoToAsync("//profile");
     }
 }

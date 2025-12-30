@@ -123,20 +123,21 @@
                            TextColor="{StaticResource TextLight}" />
                 </HorizontalStackLayout>
 
-                <Label Text="Pending Requests" 
-                       FontSize="14" 
-                       TextColor="{StaticResource TextLight}"
-                       Margin="0,8,0,8" />
+                  <Label Text="Pending Requests" 
+                      FontSize="14" 
+                      TextColor="{StaticResource TextLight}"
+                      Margin="0,8,0,8" />
 
-                <CollectionView ItemsSource="{Binding RecentLoans}"
-                               SelectionMode="Single">
-                    <CollectionView.ItemTemplate>
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecentLoans}"
+                                      Spacing="8"
+                                      Margin="0,0,0,8">
+                    <BindableLayout.ItemTemplate>
                         <DataTemplate>
                             <Frame CornerRadius="12" 
                                    BorderColor="{StaticResource CardBg}"
                                    BackgroundColor="{StaticResource CardBg}"
                                    Padding="12"
-                                   Margin="0,4,0,4">
+                                   Margin="0,2,0,2">
                                 <HorizontalStackLayout Spacing="12" Padding="4">
                                     <!-- Avatar Placeholder -->
                                     <Frame CornerRadius="20"
@@ -146,10 +147,11 @@
                                            BorderColor="{StaticResource CardBg}"
                                            BackgroundColor="{StaticResource DarkBg}"
                                            VerticalOptions="Center">
-                                        <Label Text="{Binding UserName, StringFormat='{0:F1}'}"
+                                        <Label Text="{Binding UserName}"
                                                VerticalTextAlignment="Center"
                                                HorizontalTextAlignment="Center"
-                                               FontSize="10"
+                                               FontSize="12"
+                                               LineBreakMode="TailTruncation"
                                                TextColor="{StaticResource AccentOrange}" />
                                     </Frame>
 
@@ -177,8 +179,8 @@
                                 </HorizontalStackLayout>
                             </Frame>
                         </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
 
                 <Button Text="REVIEW REQUESTS" 
                         BackgroundColor="{StaticResource AccentOrange}"

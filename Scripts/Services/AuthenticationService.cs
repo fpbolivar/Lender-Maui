@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using Lender.Models;
 
 namespace Lender.Services;
 
@@ -121,6 +122,23 @@ public class AuthenticationService : IAuthenticationService
                         localId.GetString() ?? "",
                         userEmail.GetString() ?? ""
                     );
+
+                    // Create user document in Firestore
+                    var newUser = new User
+                    {
+                        Id = localId.GetString() ?? "",
+                        Email = userEmail.GetString() ?? "",
+                        FullName = "",
+                        PhoneNumber = "",
+                        Balance = 0,
+                        CreditScore = 0,
+                        Status = UserStatus.Active,
+                        JoinDate = DateTime.UtcNow
+                    };
+                    
+                    var firebaseService = FirestoreService.Instance;
+                    await firebaseService.SaveUserAsync(newUser);
+                    Debug.WriteLine($"User {newUser.Email} created in Firestore");
                     
                     return true;
                 }

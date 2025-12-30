@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="Lender.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:Lender"
+    Title="Lender"
+    BackgroundColor="#0A1929"
+    Padding="0"
+    Shell.NavBarIsVisible="False"
+    Shell.TabBarIsVisible="False"
+    FlyoutBehavior="Flyout">
+    
+    <Shell.FlyoutBackgroundColor>#0A1929</Shell.FlyoutBackgroundColor>
+    <Shell.TabBarBackgroundColor>#0A1929</Shell.TabBarBackgroundColor>
+    <Shell.TabBarForegroundColor>#FFFFFF</Shell.TabBarForegroundColor>
+    <Shell.TabBarUnselectedColor>#666666</Shell.TabBarUnselectedColor>
+
+    <Shell.Resources>
+        <ResourceDictionary>
+            <Color x:Key="DarkBg">#0A1929</Color>
+            <Color x:Key="AccentOrange">#FF9F43</Color>
+        </ResourceDictionary>
+    </Shell.Resources>
+
+    <Shell.FlyoutHeader>
+        <VerticalStackLayout Padding="20" BackgroundColor="#132F4C" Spacing="8">
+            <Label Text="Lender" FontSize="24" FontAttributes="Bold" TextColor="#FF9F43" />
+            <Label Text="Peer-to-Peer Lending" FontSize="14" TextColor="#B0BEC5" />
+        </VerticalStackLayout>
+    </Shell.FlyoutHeader>
+
+    <Shell.FlyoutFooter>
+        <VerticalStackLayout Padding="20" BackgroundColor="#0A1929">
+            <Button Text="Sign Out"
+                    BackgroundColor="#FF9F43"
+                    TextColor="#0A1929"
+                    CornerRadius="8"
+                    FontSize="16"
+                    Padding="16,12"
+                    Clicked="OnSignOutClicked" />
+        </VerticalStackLayout>
+    </Shell.FlyoutFooter>
+
+    <!-- Dashboard Page (default for testing) -->
+    <FlyoutItem Title="Dashboard">
+        <ShellContent
+            ContentTemplate="{DataTemplate local:MainPage}"
+            Route="mainpage" />
+    </FlyoutItem>
+
+    <!-- Login Page -->
+    <ShellContent
+        Title="Login"
+        ContentTemplate="{DataTemplate local:LoginPage}"
+        Route="login"
+        FlyoutItemIsVisible="False" />
+
+</Shell>

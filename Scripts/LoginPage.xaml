@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                      x:Class="Lender.LoginPage"
+                      Title="Lender"
+                      BackgroundColor="#0A1929"
+                      Padding="0"
+                      SafeAreaEdges="None">
+
+       <ContentPage.Resources>
+              <ResourceDictionary>
+                     <Color x:Key="DarkBg">#0A1929</Color>
+                     <Color x:Key="CardBg">#132F4C</Color>
+                     <Color x:Key="AccentOrange">#FF9F43</Color>
+                     <Color x:Key="TextLight">#B0BEC5</Color>
+                     <Color x:Key="TextWhite">#FFFFFF</Color>
+                     <Color x:Key="ErrorRed">#EF4444</Color>
+              </ResourceDictionary>
+       </ContentPage.Resources>
+
+       <Grid RowDefinitions="*" Padding="0" BackgroundColor="{StaticResource DarkBg}" SafeAreaEdges="None">
+              <ScrollView Grid.Row="0" BackgroundColor="{StaticResource DarkBg}" HorizontalOptions="Fill" VerticalOptions="Fill">
+                     <VerticalStackLayout Padding="20,60,20,20" Spacing="20" VerticalOptions="Center">
+
+                            <VerticalStackLayout Spacing="8" HorizontalOptions="Center" Margin="0,40,0,20">
+                                   <Label Text="Lender"
+                                             FontSize="40"
+                                             FontAttributes="Bold"
+                                             TextColor="{StaticResource AccentOrange}"
+                                             HorizontalTextAlignment="Center" />
+                                   <Label Text="Peer-to-Peer Lending"
+                                             FontSize="14"
+                                             TextColor="{StaticResource TextLight}"
+                                             HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+
+                     <HorizontalStackLayout Spacing="0" HorizontalOptions="Center" Margin="0,0,0,20">
+                              <Label Text="Sign In" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource AccentOrange}" Margin="0,0,20,0"
+                                     IsVisible="{Binding IsSignUp, Converter={StaticResource InvertedBoolConverter}}" />
+                            <Label Text="•" TextColor="{StaticResource TextLight}" />
+                              <Label Text="Sign Up" FontSize="14" TextColor="{StaticResource TextLight}" Margin="20,0,0,0"
+                                     IsVisible="{Binding IsSignUp}" />
+                     </HorizontalStackLayout>
+
+                     <Border StrokeShape="RoundRectangle 8" Stroke="{StaticResource CardBg}" BackgroundColor="{StaticResource CardBg}" Padding="12">
+                            <Entry Placeholder="Email"
+                                      PlaceholderColor="{StaticResource TextLight}"
+                                      TextColor="#000000"
+                                      Keyboard="Email"
+                                      FontSize="14"
+                                      Text="{Binding Email}" />
+                     </Border>
+
+                     <Border StrokeShape="RoundRectangle 8" Stroke="{StaticResource CardBg}" BackgroundColor="{StaticResource CardBg}" Padding="12">
+                            <Entry Placeholder="Password"
+                                      PlaceholderColor="{StaticResource TextLight}"
+                                     TextColor="#000000"
+                                     IsPassword="True"
+                                     FontSize="14"
+                                     Text="{Binding Password}" />
+                     </Border>
+
+                          <Label Text="{Binding ErrorMessage}"
+                                 TextColor="{StaticResource ErrorRed}"
+                                 FontSize="12"
+                                 IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNullOrEmptyConverter}, ConverterParameter=True}"
+                                 Margin="0,0,0,10" />
+
+                     <Button Text="Sign In"
+                                   BackgroundColor="{StaticResource AccentOrange}"
+                                   TextColor="{StaticResource DarkBg}"
+                                   CornerRadius="8"
+                                   FontAttributes="Bold"
+                                FontSize="14"
+                                Padding="12,10"
+                                Command="{Binding SignInCommand}"
+                                IsEnabled="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}"
+                                IsVisible="{Binding IsSignUp, Converter={StaticResource InvertedBoolConverter}}" />
+
+                     <Button Text="Create Account"
+                                   BackgroundColor="{StaticResource AccentOrange}"
+                                   TextColor="{StaticResource DarkBg}"
+                                   CornerRadius="8"
+                                   FontAttributes="Bold"
+                                FontSize="14"
+                                Padding="12,10"
+                                Command="{Binding SignUpCommand}"
+                                IsEnabled="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}"
+                                IsVisible="{Binding IsSignUp}" />
+
+                          <ActivityIndicator IsRunning="{Binding IsLoading}"
+                                             IsVisible="{Binding IsLoading}"
+                                             Color="{StaticResource AccentOrange}"
+                                             Margin="0,10,0,10" />
+
+                     <Button Text="Sign In with Google"
+                                   BackgroundColor="#FFFFFF"
+                                   TextColor="{StaticResource DarkBg}"
+                                   CornerRadius="8"
+                                   FontAttributes="Bold"
+                                FontSize="14"
+                                Padding="12,10"
+                                Margin="0,10,0,0"
+                                Command="{Binding GoogleSignInCommand}"
+                                IsEnabled="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}" />
+
+                         <Button Text="{Binding IsSignUp, StringFormat='Already have an account? Sign In', FallbackValue='Don\'t have an account? Sign Up'}"
+                                BackgroundColor="Transparent"
+                                TextColor="{StaticResource AccentOrange}"
+                                FontSize="12"
+                                Padding="10"
+                                Margin="0,20,0,0"
+                                Command="{Binding ToggleSignUpCommand}" />
+
+              </VerticalStackLayout>
+       </ScrollView>
+       </Grid>
+
+</ContentPage>

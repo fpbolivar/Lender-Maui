@@ -1,0 +1,243 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Lender.MainPage"
+             Title="Lender"
+             BackgroundColor="#0A1929"
+             Padding="0"
+             SafeAreaEdges="None">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Color x:Key="DarkBg">#0A1929</Color>
+            <Color x:Key="CardBg">#132F4C</Color>
+            <Color x:Key="AccentOrange">#FF9F43</Color>
+            <Color x:Key="AccentGreen">#1ABC9C</Color>
+            <Color x:Key="TextLight">#B0BEC5</Color>
+            <Color x:Key="TextWhite">#FFFFFF</Color>
+            <Color x:Key="RedAlert">#EF4444</Color>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*" Padding="0" BackgroundColor="{StaticResource DarkBg}" SafeAreaEdges="None">
+        <VerticalStackLayout Grid.Row="0" Padding="16,50,16,16" Spacing="20" BackgroundColor="{StaticResource DarkBg}">
+            
+            <!-- Header with Menu Button and Sign Out -->
+            <HorizontalStackLayout Spacing="12">
+                <Button Text="☰"
+                        Command="{Binding MenuCommand}"
+                        FontSize="24"
+                        TextColor="{StaticResource TextWhite}"
+                        BackgroundColor="{StaticResource CardBg}"
+                        WidthRequest="44"
+                        HeightRequest="44"
+                        CornerRadius="8"
+                        Padding="0"
+                        InputTransparent="False"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Start" />
+                        
+                <VerticalStackLayout HorizontalOptions="FillAndExpand" VerticalOptions="Center" Spacing="0">
+                    <Label Text="Lender" 
+                           FontSize="32" 
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextWhite}" />
+                    <Label Text="You're in demo mode" 
+                           FontSize="12"
+                           TextColor="{StaticResource TextLight}" />
+                </VerticalStackLayout>
+                <Button Text="Sign Out"
+                        Command="{Binding SignOutCommand}"
+                        BackgroundColor="{StaticResource AccentOrange}"
+                        TextColor="{StaticResource DarkBg}"
+                        CornerRadius="6"
+                        FontSize="12"
+                        Padding="12,8"
+                        VerticalOptions="Center"
+                        HorizontalOptions="End" />
+            </HorizontalStackLayout>
+
+            <!-- Tab Navigation -->
+            <HorizontalStackLayout Spacing="12" HorizontalOptions="Center">
+                <Label Text="Transactions" FontSize="12" TextColor="{StaticResource TextLight}" />
+                <Label Text="Dashboard" FontSize="12" TextColor="{StaticResource AccentOrange}" FontAttributes="Bold" />
+                <Label Text="Categories" FontSize="12" TextColor="{StaticResource TextLight}" />
+                <Label Text="Requests" FontSize="12" TextColor="{StaticResource TextLight}" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+
+        <!-- Scrollable Content Area -->
+        <ScrollView Grid.Row="1" BackgroundColor="{StaticResource DarkBg}">
+            <VerticalStackLayout Padding="16,0,16,16" Spacing="20" BackgroundColor="{StaticResource DarkBg}">
+
+            <!-- Budget Summary Card -->
+            <Frame CornerRadius="12" 
+                   BorderColor="{StaticResource CardBg}" 
+                   BackgroundColor="{StaticResource CardBg}"
+                   HasShadow="True"
+                   Padding="16">
+                <VerticalStackLayout Spacing="12">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Budget Overview" 
+                               FontSize="14" 
+                               TextColor="{StaticResource TextLight}" />
+                        <HorizontalStackLayout Spacing="4">
+                            <Label x:Name="BudgetAmountLabel"
+                                   Text="{Binding TotalRemaining, StringFormat='${0:F0} over'}"
+                                   FontSize="28" 
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource AccentOrange}" />
+                            <VerticalStackLayout VerticalOptions="Center">
+                                <Label Text="{Binding TotalBudget, StringFormat='${0:F0} budgeted'}"
+                                       FontSize="12" 
+                                       TextColor="{StaticResource TextLight}" />
+                            </VerticalStackLayout>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+
+                    <!-- Chart Placeholder -->
+                    <BoxView HeightRequest="100" 
+                             BackgroundColor="{StaticResource DarkBg}"
+                             CornerRadius="8" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Recent Loans / To Review -->
+            <VerticalStackLayout Spacing="12">
+                <HorizontalStackLayout Spacing="12">
+                    <Label Text="LOANS TO REVIEW" 
+                           FontSize="12" 
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextLight}"
+                           HorizontalOptions="StartAndExpand" />
+                    <Label Text="View all >" 
+                           FontSize="12" 
+                           TextColor="{StaticResource TextLight}" />
+                </HorizontalStackLayout>
+
+                <Label Text="Pending Requests" 
+                       FontSize="14" 
+                       TextColor="{StaticResource TextLight}"
+                       Margin="0,8,0,8" />
+
+                <CollectionView ItemsSource="{Binding RecentLoans}"
+                               SelectionMode="Single">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame CornerRadius="12" 
+                                   BorderColor="{StaticResource CardBg}"
+                                   BackgroundColor="{StaticResource CardBg}"
+                                   Padding="12"
+                                   Margin="0,4,0,4">
+                                <HorizontalStackLayout Spacing="12" Padding="4">
+                                    <!-- Avatar Placeholder -->
+                                    <Frame CornerRadius="20"
+                                           WidthRequest="40"
+                                           HeightRequest="40"
+                                           HasShadow="False"
+                                           BorderColor="{StaticResource CardBg}"
+                                           BackgroundColor="{StaticResource DarkBg}"
+                                           VerticalOptions="Center">
+                                        <Label Text="{Binding UserName, StringFormat='{0:F1}'}"
+                                               VerticalTextAlignment="Center"
+                                               HorizontalTextAlignment="Center"
+                                               FontSize="10"
+                                               TextColor="{StaticResource AccentOrange}" />
+                                    </Frame>
+
+                                    <!-- Loan Info -->
+                                    <VerticalStackLayout Spacing="4" HorizontalOptions="StartAndExpand">
+                                        <Label Text="{Binding UserName}" 
+                                               FontSize="14" 
+                                               FontAttributes="Bold"
+                                               TextColor="{StaticResource TextWhite}" />
+                                        <Label Text="{Binding Description}" 
+                                               FontSize="12" 
+                                               TextColor="{StaticResource TextLight}" />
+                                    </VerticalStackLayout>
+
+                                    <!-- Amount -->
+                                    <VerticalStackLayout Spacing="4" VerticalOptions="Center">
+                                        <Label Text="{Binding Amount, StringFormat='${0:F2}'}" 
+                                               FontSize="14" 
+                                               FontAttributes="Bold"
+                                               TextColor="{StaticResource TextWhite}" />
+                                        <Label Text="{Binding Status}" 
+                                               FontSize="10" 
+                                               TextColor="{StaticResource AccentOrange}" />
+                                    </VerticalStackLayout>
+                                </HorizontalStackLayout>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <Button Text="REVIEW REQUESTS" 
+                        BackgroundColor="{StaticResource AccentOrange}"
+                        TextColor="{StaticResource DarkBg}"
+                        CornerRadius="8"
+                        FontAttributes="Bold"
+                        FontSize="12"
+                        Padding="12,8"
+                        Margin="0,8,0,8" />
+            </VerticalStackLayout>
+
+            <!-- Budget Categories -->
+            <VerticalStackLayout Spacing="12">
+                <HorizontalStackLayout Spacing="12">
+                    <Label Text="BUDGETS" 
+                           FontSize="12" 
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextLight}"
+                           HorizontalOptions="StartAndExpand" />
+                    <Label Text="Categories >" 
+                           FontSize="12" 
+                           TextColor="{StaticResource TextLight}" />
+                </HorizontalStackLayout>
+
+                <CollectionView ItemsSource="{Binding Budgets}"
+                               SelectionMode="Single">
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Orientation="Horizontal"
+                                        HorizontalItemSpacing="8"
+                                        VerticalItemSpacing="8" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <VerticalStackLayout Spacing="8" WidthRequest="80">
+                                <!-- Budget Circle -->
+                                <Frame CornerRadius="40"
+                                       WidthRequest="80"
+                                       HeightRequest="80"
+                                       HasShadow="False"
+                                       BorderColor="{Binding ColorHex}"
+                                       BackgroundColor="{StaticResource CardBg}"
+                                       Padding="0">
+                                    <VerticalStackLayout VerticalOptions="Center" 
+                                                        HorizontalOptions="Center" 
+                                                        Spacing="0">
+                                        <Label Text="{Binding IconEmoji}" 
+                                               FontSize="24" 
+                                               HorizontalTextAlignment="Center" />
+                                    </VerticalStackLayout>
+                                </Frame>
+
+                                <!-- Category Info -->
+                                <Label Text="{Binding Category}" 
+                                       FontSize="11" 
+                                       TextColor="{StaticResource TextWhite}"
+                                       HorizontalTextAlignment="Center"
+                                       LineBreakMode="WordWrap" />
+                                <Label Text="{Binding AmountRemaining, StringFormat='${0:F0} left'}" 
+                                       FontSize="10" 
+                                       TextColor="{StaticResource TextLight}"
+                                       HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

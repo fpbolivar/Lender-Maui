@@ -12,11 +12,18 @@ public partial class LoginPage : ContentPage
 
 		// Use DI for the view model so bindings are populated
 		BindingContext = ServiceHelper.GetService<LoginViewModel>() ?? new LoginViewModel();
+
+        // Disable flyout/menu gestures on the login screen
+        Shell.SetFlyoutBehavior(this, FlyoutBehavior.Disabled);
     }
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
+
+        // Ensure flyout is closed/disabled when showing login
+        Shell.Current.FlyoutIsPresented = false;
+        Shell.Current.FlyoutBehavior = FlyoutBehavior.Disabled;
 
         // Attempt session restore; navigate to main page if successful
         if (BindingContext is LoginViewModel viewModel)
@@ -30,5 +37,13 @@ public partial class LoginPage : ContentPage
                 }
             });
         }
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+
+        // Restore flyout to automatic for other pages
+        Shell.Current.FlyoutBehavior = FlyoutBehavior.Flyout;
     }
 }

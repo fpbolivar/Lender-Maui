@@ -2,6 +2,8 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using System.Linq;
+using System.Threading.Tasks;
 using Lender.Helpers;
 using Lender.Models;
 using Lender.Services;
@@ -10,6 +12,15 @@ namespace Lender.ViewModels;
 
 public class DashboardViewModel : INotifyPropertyChanged
 {
+    private bool _isDemoMode = true;
+    private string _modeLabel = "Demo mode";
+    private string _userName = "Demo User";
+    private string _userEmail = "demo@example.com";
+    private string _phoneNumber = "";
+    private string _dateOfBirthDisplay = "";
+    private string _status = "Active";
+    private decimal _creditScoreUser;
+    private decimal _balanceUser;
     private decimal _totalBudget;
     private decimal _totalSpent;
     private decimal _totalRemaining;
@@ -17,18 +28,140 @@ public class DashboardViewModel : INotifyPropertyChanged
     private ObservableCollection<Transaction> _recentTransactions = null!;
     private ObservableCollection<Budget> _budgets = null!;
     private readonly IAuthenticationService _authService;
+    private readonly FirestoreService _firestoreService;
 
     public ICommand SignOutCommand { get; }
     public ICommand MenuCommand { get; }
+    public ICommand ToggleDemoCommand { get; }
 
     public DashboardViewModel()
     {
         _authService = ServiceHelper.GetService<IAuthenticationService>() ?? 
             throw new InvalidOperationException("AuthenticationService not registered");
+        _firestoreService = FirestoreService.Instance;
         
         SignOutCommand = new Command(SignOutAsync);
         MenuCommand = new Command(OnMenuClicked);
+        ToggleDemoCommand = new Command(EnableDemoMode);
         InitializeData();
+        _ = LoadUserDataAsync();
+    }
+
+    public bool IsDemoMode
+    {
+        get => _isDemoMode;
+        set
+        {
+            if (_isDemoMode != value)
+            {
+                _isDemoMode = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string ModeLabel
+    {
+        get => _modeLabel;
+        set
+        {
+            if (_modeLabel != value)
+            {
+                _modeLabel = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string UserName
+    {
+        get => _userName;
+        set
+        {
+            if (_userName != value)
+            {
+                _userName = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string UserEmail
+    {
+        get => _userEmail;
+        set
+        {
+            if (_userEmail != value)
+            {
+                _userEmail = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string PhoneNumber
+    {
+        get => _phoneNumber;
+        set
+        {
+            if (_phoneNumber != value)
+            {
+                _phoneNumber = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string DateOfBirthDisplay
+    {
+        get => _dateOfBirthDisplay;
+        set
+        {
+            if (_dateOfBirthDisplay != value)
+            {
+                _dateOfBirthDisplay = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string Status
+    {
+        get => _status;
+        set
+        {
+            if (_status != value)
+            {
+                _status = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public decimal CreditScoreUser
+    {
+        get => _creditScoreUser;
+        set
+        {
+            if (_creditScoreUser != value)
+            {
+                _creditScoreUser = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public decimal BalanceUser
+    {
+        get => _balanceUser;
+        set
+        {
+            if (_balanceUser != value)
+            {
+                _balanceUser = value;
+                OnPropertyChanged();
+            }
+        }
     }
 
     public decimal TotalBudget
@@ -112,6 +245,8 @@ public class DashboardViewModel : INotifyPropertyChanged
     private void InitializeData()
     {
         // Initialize with demo data
+        EnableDemoMode();
+
         RecentTransactions = new ObservableCollection<Transaction>
         {
             new Transaction
@@ -234,6 +369,54 @@ public class DashboardViewModel : INotifyPropertyChanged
         TotalBudget = Budgets.Sum(b => b.BudgetLimit);
         TotalSpent = Budgets.Sum(b => b.AmountSpent);
         TotalRemaining = TotalBudget - TotalSpent;
+    }
+
+    private async Task LoadUserDataAsync()
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(_authService.CurrentUserEmail))
+            {
+                EnableDemoMode();
+                return;
+            }
+
+            var user = await _firestoreService.GetUserAsync(_authService.CurrentUserEmail);
+            if (user == null)
+            {
+                EnableDemoMode();
+                return;
+            }
+
+            UserName = string.IsNullOrWhiteSpace(user.FullName) ? user.Email : user.FullName;
+            UserEmail = user.Email;
+            PhoneNumber = user.PhoneNumber;
+            DateOfBirthDisplay = user.DateOfBirth == DateTime.MinValue ? "" : user.DateOfBirth.ToString("yyyy-MM-dd");
+            Status = user.Status.ToString();
+            CreditScoreUser = user.CreditScore;
+            BalanceUser = user.Balance;
+
+            IsDemoMode = false;
+            ModeLabel = "Live data";
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] LoadUserDataAsync error: {ex.Message}");
+            EnableDemoMode();
+        }
+    }
+
+    private void EnableDemoMode()
+    {
+        IsDemoMode = true;
+        ModeLabel = "Demo mode";
+        UserName = "Demo User";
+        UserEmail = "demo@example.com";
+        PhoneNumber = "";
+        DateOfBirthDisplay = "";
+        Status = "Active";
+        CreditScoreUser = 720;
+        BalanceUser = 0;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

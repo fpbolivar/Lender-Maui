@@ -37,15 +37,15 @@
                         VerticalOptions="Center"
                         HorizontalOptions="Start" />
                         
-                <VerticalStackLayout HorizontalOptions="FillAndExpand" VerticalOptions="Center" Spacing="0">
-                    <Label Text="Lender" 
-                           FontSize="32" 
-                           FontAttributes="Bold"
-                           TextColor="{StaticResource TextWhite}" />
-                    <Label Text="You're in demo mode" 
-                           FontSize="12"
-                           TextColor="{StaticResource TextLight}" />
-                </VerticalStackLayout>
+                  <VerticalStackLayout HorizontalOptions="FillAndExpand" VerticalOptions="Center" Spacing="0">
+                      <Label Text="{Binding UserName}" 
+                          FontSize="28" 
+                          FontAttributes="Bold"
+                          TextColor="{StaticResource TextWhite}" />
+                      <Label Text="{Binding ModeLabel}" 
+                          FontSize="12"
+                          TextColor="{StaticResource TextLight}" />
+                  </VerticalStackLayout>
                 <Button Text="Sign Out"
                         Command="{Binding SignOutCommand}"
                         BackgroundColor="{StaticResource AccentOrange}"
@@ -69,6 +69,32 @@
         <!-- Scrollable Content Area -->
         <ScrollView Grid.Row="1" BackgroundColor="{StaticResource DarkBg}">
             <VerticalStackLayout Padding="16,0,16,16" Spacing="20" BackgroundColor="{StaticResource DarkBg}">
+
+            <!-- User Info Card -->
+            <Frame CornerRadius="12"
+                   BorderColor="{StaticResource CardBg}"
+                   BackgroundColor="{StaticResource CardBg}"
+                   HasShadow="True"
+                   Padding="16">
+                <VerticalStackLayout Spacing="12">
+                    <HorizontalStackLayout Spacing="12" VerticalOptions="Center" HorizontalOptions="FillAndExpand">
+                        <VerticalStackLayout Spacing="4" HorizontalOptions="StartAndExpand">
+                            <Label Text="{Binding UserName}" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource TextWhite}" />
+                            <Label Text="{Binding UserEmail}" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding PhoneNumber}" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding DateOfBirthDisplay, StringFormat='DOB: {0}'}" FontSize="12" TextColor="{StaticResource TextLight}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4" HorizontalOptions="End" WidthRequest="120">
+                            <Label Text="Balance" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding BalanceUser, StringFormat='${0:F2}'}" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource AccentOrange}" />
+                            <Label Text="Credit Score" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding CreditScoreUser}" FontSize="16" TextColor="{StaticResource TextWhite}" />
+                            <Label Text="{Binding Status}" FontSize="12" TextColor="{StaticResource AccentGreen}" />
+                        </VerticalStackLayout>
+                    </HorizontalStackLayout>
+                    <Button Text="Use Demo Data" Command="{Binding ToggleDemoCommand}" BackgroundColor="{StaticResource AccentOrange}" TextColor="{StaticResource DarkBg}" CornerRadius="8" FontAttributes="Bold" FontSize="12" Padding="12,8" />
+                </VerticalStackLayout>
+            </Frame>
 
             <!-- Budget Summary Card -->
             <Frame CornerRadius="12" 

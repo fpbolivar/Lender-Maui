@@ -137,11 +137,21 @@ public class AuthenticationService : IAuthenticationService
                         JoinDate = DateTime.UtcNow
                     };
                     
+                    Debug.WriteLine($"[AuthenticationService] Creating user in Firestore: {newUser.Email}");
                     var firebaseService = FirestoreService.Instance;
-                    await firebaseService.SaveUserAsync(newUser);
-                    Debug.WriteLine($"User {newUser.Email} created in Firestore with full profile including DateOfBirth");
+                    var saveSuccess = await firebaseService.SaveUserAsync(newUser);
                     
-                    return true;
+                    if (saveSuccess)
+                    {
+                        Debug.WriteLine($"[AuthenticationService] ✅ User {newUser.Email} successfully created in Firestore with full profile");
+                        return true;
+                    }
+                    else
+                    {
+                        Debug.WriteLine($"[AuthenticationService] ⚠️ User created in Firebase Auth but FAILED to save to Firestore!");
+                        // Still return true because Firebase Auth worked, but log the issue
+                        return true;
+                    }
                 }
             }
             else

@@ -41,23 +41,36 @@ public class FirestoreService
     {
         try
         {
+            Debug.WriteLine($"[FirestoreService] Starting SaveUserAsync for user: {user.Email} (ID: {user.Id})");
+            
             var url = $"{_baseUrl}/{UsersCollection}/{user.Id}?key={_apiKey}";
+            Debug.WriteLine($"[FirestoreService] URL: {url}");
+            
             var payload = UserToJson(user);
+            Debug.WriteLine($"[FirestoreService] Payload: {payload}");
+            
             var content = new StringContent(payload, Encoding.UTF8, "application/json");
             
             var response = await _httpClient.PatchAsync(url, content);
+            Debug.WriteLine($"[FirestoreService] Response Status: {response.StatusCode}");
+            
             if (response.IsSuccessStatusCode)
             {
-                Debug.WriteLine($"User {user.Email} saved to Firestore");
+                var responseContent = await response.Content.ReadAsStringAsync();
+                Debug.WriteLine($"[FirestoreService] Success! Response: {responseContent}");
+                Debug.WriteLine($"[FirestoreService] User {user.Email} saved to Firestore successfully");
                 return true;
             }
             
-            Debug.WriteLine($"Error saving user: {response.StatusCode}");
+            var errorContent = await response.Content.ReadAsStringAsync();
+            Debug.WriteLine($"[FirestoreService] Error saving user - Status: {response.StatusCode}");
+            Debug.WriteLine($"[FirestoreService] Error response: {errorContent}");
             return false;
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Exception saving user: {ex.Message}");
+            Debug.WriteLine($"[FirestoreService] Exception saving user: {ex.Message}");
+            Debug.WriteLine($"[FirestoreService] Stack trace: {ex.StackTrace}");
             return false;
         }
     }
@@ -69,17 +82,27 @@ public class FirestoreService
     {
         try
         {
+            Debug.WriteLine($"[FirestoreService] Getting user: {userId}");
+            
             var url = $"{_baseUrl}/{UsersCollection}/{userId}?key={_apiKey}";
             var response = await _httpClient.GetAsync(url);
             
-            if (!response.IsSuccessStatusCode) return null;
+            Debug.WriteLine($"[FirestoreService] Get user response status: {response.StatusCode}");
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Debug.WriteLine($"[FirestoreService] Error getting user: {errorContent}");
+                return null;
+            }
 
             var content = await response.Content.ReadAsStringAsync();
+            Debug.WriteLine($"[FirestoreService] User data received, parsing...");
             return JsonToUser(userId, content);
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Error getting user: {ex.Message}");
+            Debug.WriteLine($"[FirestoreService] Exception getting user: {ex.Message}");
             return null;
         }
     }
@@ -102,7 +125,7 @@ public class FirestoreService
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
                 var docId = ExtractDocumentId(responseContent);
-                Debug.WriteLine($"Loan created with ID: {docId}");
+                Debug.WriteLine($"Loan created with ID: {docId} - FirestoreService.cs:105");
                 return docId;
             }
 
@@ -110,7 +133,7 @@ public class FirestoreService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Error creating loan: {ex.Message}");
+            Debug.WriteLine($"Error creating loan: {ex.Message} - FirestoreService.cs:113");
             return null;
         }
     }
@@ -132,7 +155,7 @@ public class FirestoreService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Error getting loan: {ex.Message}");
+            Debug.WriteLine($"Error getting loan: {ex.Message} - FirestoreService.cs:135");
             return null;
         }
     }
@@ -153,7 +176,7 @@ public class FirestoreService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Error updating loan: {ex.Message}");
+            Debug.WriteLine($"Error updating loan: {ex.Message} - FirestoreService.cs:156");
             return false;
         }
     }
@@ -176,7 +199,7 @@ public class FirestoreService
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
                 var docId = ExtractDocumentId(responseContent);
-                Debug.WriteLine($"Transaction created with ID: {docId}");
+                Debug.WriteLine($"Transaction created with ID: {docId} - FirestoreService.cs:179");
                 return docId;
             }
 
@@ -184,7 +207,7 @@ public class FirestoreService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Error creating transaction: {ex.Message}");
+            Debug.WriteLine($"Error creating transaction: {ex.Message} - FirestoreService.cs:187");
             return null;
         }
     }
@@ -207,7 +230,7 @@ public class FirestoreService
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
                 var docId = ExtractDocumentId(responseContent);
-                Debug.WriteLine($"Investment created with ID: {docId}");
+                Debug.WriteLine($"Investment created with ID: {docId} - FirestoreService.cs:210");
                 return docId;
             }
 
@@ -215,7 +238,7 @@ public class FirestoreService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Error creating investment: {ex.Message}");
+            Debug.WriteLine($"Error creating investment: {ex.Message} - FirestoreService.cs:218");
             return null;
         }
     }
@@ -238,7 +261,7 @@ public class FirestoreService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Error saving budget: {ex.Message}");
+            Debug.WriteLine($"Error saving budget: {ex.Message} - FirestoreService.cs:241");
             return false;
         }
     }
@@ -261,10 +284,18 @@ public class FirestoreService
             { "status", new { stringValue = user.Status.ToString() } },
             { "isVerified", new { booleanValue = user.IsVerified } },
             { "totalLent", new { doubleValue = (double)user.TotalLent } },
-            { "totalBorrowed", new { doubleValue = (double)user.TotalBorrowed } }
+            { "totalBorrowed", new { doubleValue = (double)user.TotalBorrowed } },
+            { "lastUpdated", new { timestampValue = DateTime.UtcNow.ToString("O") } }
         };
 
-        return JsonSerializer.Serialize(new { fields });
+        var document = new
+        {
+            fields = fields
+        };
+
+        var json = JsonSerializer.Serialize(document);
+        Debug.WriteLine($"[FirestoreService] Generated User JSON: {json}");
+        return json;
     }
 
     private User? JsonToUser(string userId, string json)
@@ -295,7 +326,7 @@ public class FirestoreService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Error parsing user JSON: {ex.Message}");
+            Debug.WriteLine($"Error parsing user JSON: {ex.Message} - FirestoreService.cs:298");
             return null;
         }
     }
@@ -348,7 +379,7 @@ public class FirestoreService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Error parsing loan JSON: {ex.Message}");
+            Debug.WriteLine($"Error parsing loan JSON: {ex.Message} - FirestoreService.cs:351");
             return null;
         }
     }

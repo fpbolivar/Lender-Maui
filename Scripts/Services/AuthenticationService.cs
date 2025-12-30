@@ -138,19 +138,28 @@ public class AuthenticationService : IAuthenticationService
                     };
                     
                     Debug.WriteLine($"[AuthenticationService] Creating user in Firestore: {newUser.Email}");
-                    var firebaseService = FirestoreService.Instance;
-                    var saveSuccess = await firebaseService.SaveUserAsync(newUser);
-                    
-                    if (saveSuccess)
+                    try
                     {
-                        Debug.WriteLine($"[AuthenticationService] ✅ User {newUser.Email} successfully created in Firestore with full profile");
-                        return true;
+                        var firebaseService = FirestoreService.Instance;
+                        var saveSuccess = await firebaseService.SaveUserAsync(newUser);
+                        
+                        if (saveSuccess)
+                        {
+                            Debug.WriteLine($"[AuthenticationService] ✅ User {newUser.Email} successfully created in Firestore with full profile");
+                            return true;
+                        }
+                        else
+                        {
+                            Debug.WriteLine($"[AuthenticationService] ⚠️ User created in Firebase Auth but FAILED to save to Firestore!");
+                            // Still return true because Firebase Auth worked
+                            return true;
+                        }
                     }
-                    else
+                    catch (Exception firestoreEx)
                     {
-                        Debug.WriteLine($"[AuthenticationService] ⚠️ User created in Firebase Auth but FAILED to save to Firestore!");
-                        // Still return true because Firebase Auth worked, but log the issue
-                        return true;
+                        Debug.WriteLine($"[AuthenticationService] EXCEPTION saving to Firestore: {firestoreEx.Message}");
+                        Debug.WriteLine($"[AuthenticationService] Stack: {firestoreEx.StackTrace}");
+                        return true; // Auth still succeeded
                     }
                 }
             }

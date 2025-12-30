@@ -41,50 +41,62 @@ public class FirestoreService
     {
         try
         {
+            Debug.WriteLine($"[FirestoreService] ===== START SAVE USER =====");
             Debug.WriteLine($"[FirestoreService] Starting SaveUserAsync for user: {user.Email} (ID: {user.Id})");
             
-            var url = $"{_baseUrl}/{UsersCollection}/{user.Id}?key={_apiKey}";
+            // Use email as document ID for easier access
+            var documentId = Uri.EscapeDataString(user.Email);
+            var url = $"{_baseUrl}/{UsersCollection}/{documentId}?key={_apiKey}";
             Debug.WriteLine($"[FirestoreService] URL: {url}");
             
             var payload = UserToJson(user);
+            Debug.WriteLine($"[FirestoreService] Payload length: {payload.Length} chars");
             Debug.WriteLine($"[FirestoreService] Payload: {payload}");
             
             var content = new StringContent(payload, Encoding.UTF8, "application/json");
             
+            Debug.WriteLine($"[FirestoreService] Sending PATCH request...");
             var response = await _httpClient.PatchAsync(url, content);
-            Debug.WriteLine($"[FirestoreService] Response Status: {response.StatusCode}");
+            Debug.WriteLine($"[FirestoreService] Response Status: {response.StatusCode} ({(int)response.StatusCode})");
             
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
-                Debug.WriteLine($"[FirestoreService] Success! Response: {responseContent}");
-                Debug.WriteLine($"[FirestoreService] User {user.Email} saved to Firestore successfully");
+                Debug.WriteLine($"[FirestoreService] Success! Response length: {responseContent.Length}");
+                Debug.WriteLine($"[FirestoreService] Response: {responseContent}");
+                Debug.WriteLine($"[FirestoreService] ✅ User {user.Email} saved to Firestore successfully");
+                Debug.WriteLine($"[FirestoreService] ===== END SAVE USER SUCCESS =====");
                 return true;
             }
             
             var errorContent = await response.Content.ReadAsStringAsync();
-            Debug.WriteLine($"[FirestoreService] Error saving user - Status: {response.StatusCode}");
+            Debug.WriteLine($"[FirestoreService] ❌ Error saving user - Status: {response.StatusCode}");
+            Debug.WriteLine($"[FirestoreService] Error response length: {errorContent.Length}");
             Debug.WriteLine($"[FirestoreService] Error response: {errorContent}");
+            Debug.WriteLine($"[FirestoreService] ===== END SAVE USER FAIL =====");
             return false;
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[FirestoreService] Exception saving user: {ex.Message}");
+            Debug.WriteLine($"[FirestoreService] ❌ EXCEPTION saving user: {ex.GetType().Name}");
+            Debug.WriteLine($"[FirestoreService] Exception message: {ex.Message}");
             Debug.WriteLine($"[FirestoreService] Stack trace: {ex.StackTrace}");
+            Debug.WriteLine($"[FirestoreService] ===== END SAVE USER EXCEPTION =====");
             return false;
         }
     }
 
     /// <summary>
-    /// Get a user by ID
+    /// Get a user by email
     /// </summary>
-    public async Task<User?> GetUserAsync(string userId)
+    public async Task<User?> GetUserAsync(string email)
     {
         try
         {
-            Debug.WriteLine($"[FirestoreService] Getting user: {userId}");
+            Debug.WriteLine($"[FirestoreService] Getting user: {email}");
             
-            var url = $"{_baseUrl}/{UsersCollection}/{userId}?key={_apiKey}";
+            var documentId = Uri.EscapeDataString(email);
+            var url = $"{_baseUrl}/{UsersCollection}/{documentId}?key={_apiKey}";
             var response = await _httpClient.GetAsync(url);
             
             Debug.WriteLine($"[FirestoreService] Get user response status: {response.StatusCode}");
@@ -98,7 +110,7 @@ public class FirestoreService
 
             var content = await response.Content.ReadAsStringAsync();
             Debug.WriteLine($"[FirestoreService] User data received, parsing...");
-            return JsonToUser(userId, content);
+            return JsonToUser(email, content);
         }
         catch (Exception ex)
         {
@@ -272,20 +284,21 @@ public class FirestoreService
     {
         var fields = new Dictionary<string, object>
         {
+            { "id", new { stringValue = user.Id } },
             { "fullName", new { stringValue = user.FullName } },
             { "email", new { stringValue = user.Email } },
             { "phoneNumber", new { stringValue = user.PhoneNumber } },
-            { "dateOfBirth", new { timestampValue = user.DateOfBirth.ToString("O") } },
+            { "dateOfBirth", new { timestampValue = user.DateOfBirth.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss'Z'") } },
             { "balance", new { doubleValue = (double)user.Balance } },
             { "creditScore", new { doubleValue = (double)user.CreditScore } },
             { "loansGiven", new { integerValue = user.LoansGiven } },
             { "loansReceived", new { integerValue = user.LoansReceived } },
-            { "joinDate", new { timestampValue = user.JoinDate.ToString("O") } },
+            { "joinDate", new { timestampValue = user.JoinDate.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss'Z'") } },
             { "status", new { stringValue = user.Status.ToString() } },
             { "isVerified", new { booleanValue = user.IsVerified } },
             { "totalLent", new { doubleValue = (double)user.TotalLent } },
             { "totalBorrowed", new { doubleValue = (double)user.TotalBorrowed } },
-            { "lastUpdated", new { timestampValue = DateTime.UtcNow.ToString("O") } }
+            { "lastUpdated", new { timestampValue = DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'") } }
         };
 
         var document = new
@@ -298,7 +311,7 @@ public class FirestoreService
         return json;
     }
 
-    private User? JsonToUser(string userId, string json)
+    private User? JsonToUser(string email, string json)
     {
         try
         {
@@ -308,7 +321,7 @@ public class FirestoreService
 
             return new User
             {
-                Id = userId,
+                Id = GetStringValue(fields, "id") ?? email, // Use stored ID or email
                 FullName = GetStringValue(fields, "fullName"),
                 Email = GetStringValue(fields, "email"),
                 PhoneNumber = GetStringValue(fields, "phoneNumber"),

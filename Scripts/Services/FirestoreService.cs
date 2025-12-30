@@ -284,20 +284,25 @@ public class FirestoreService
     {
         var fields = new Dictionary<string, object>
         {
+            // User Information
             { "id", new { stringValue = user.Id } },
-            { "fullName", new { stringValue = user.FullName } },
             { "email", new { stringValue = user.Email } },
+            { "fullName", new { stringValue = user.FullName } },
             { "phoneNumber", new { stringValue = user.PhoneNumber } },
-            { "dateOfBirth", new { timestampValue = user.DateOfBirth.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss'Z'") } },
+            { "dateOfBirth", new { stringValue = user.DateOfBirth.ToString("yyyy-MM-dd") } },
+            
+            // Loan Information
             { "balance", new { doubleValue = (double)user.Balance } },
             { "creditScore", new { doubleValue = (double)user.CreditScore } },
             { "loansGiven", new { integerValue = user.LoansGiven } },
             { "loansReceived", new { integerValue = user.LoansReceived } },
-            { "joinDate", new { timestampValue = user.JoinDate.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss'Z'") } },
-            { "status", new { stringValue = user.Status.ToString() } },
-            { "isVerified", new { booleanValue = user.IsVerified } },
             { "totalLent", new { doubleValue = (double)user.TotalLent } },
             { "totalBorrowed", new { doubleValue = (double)user.TotalBorrowed } },
+            
+            // Metadata
+            { "status", new { stringValue = user.Status.ToString() } },
+            { "isVerified", new { booleanValue = user.IsVerified } },
+            { "joinDate", new { timestampValue = user.JoinDate.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss'Z'") } },
             { "lastUpdated", new { timestampValue = DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'") } }
         };
 
@@ -325,7 +330,7 @@ public class FirestoreService
                 FullName = GetStringValue(fields, "fullName"),
                 Email = GetStringValue(fields, "email"),
                 PhoneNumber = GetStringValue(fields, "phoneNumber"),
-                DateOfBirth = GetDateTimeValue(fields, "dateOfBirth"),
+                DateOfBirth = DateTime.TryParse(GetStringValue(fields, "dateOfBirth"), out var dob) ? dob : DateTime.MinValue,
                 Balance = (decimal)GetDoubleValue(fields, "balance"),
                 CreditScore = (decimal)GetDoubleValue(fields, "creditScore"),
                 LoansGiven = GetIntValue(fields, "loansGiven"),

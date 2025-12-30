@@ -151,7 +151,7 @@ public class LoginViewModel : INotifyPropertyChanged
         try
         {
             // Navigate straight to main dashboard; Dashboard will load demo data when no authenticated user
-            await Shell.Current.GoToAsync("//main", animate: true);
+            await Shell.Current.GoToAsync("//mainpage", animate: true);
         }
         catch (Exception ex)
         {

@@ -20,7 +20,7 @@
 
        <Grid RowDefinitions="*" Padding="0" BackgroundColor="{StaticResource DarkBg}" SafeAreaEdges="None">
               <ScrollView Grid.Row="0" BackgroundColor="{StaticResource DarkBg}" HorizontalOptions="Fill" VerticalOptions="Fill">
-                     <VerticalStackLayout Padding="20,60,20,20" Spacing="20" VerticalOptions="Center">
+                     <VerticalStackLayout Padding="20,20,20,20" Spacing="20" VerticalOptions="Center">
 
                             <!-- Top Right Demo Mode Button -->
                             <Grid ColumnDefinitions="*,Auto">

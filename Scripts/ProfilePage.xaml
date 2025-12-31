@@ -1,29 +1,45 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Lender.ProfilePage"
-             Title="Settings"
-             BackgroundColor="#0A1929">
+                      xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                      xmlns:views="clr-namespace:Lender.Views"
+                      x:Class="Lender.ProfilePage"
+                      Title="Settings"
+                      BackgroundColor="#0A1929">
 
-    <Grid>
-        <!-- Back Button - Fixed top left -->
-        <Button Text="←"
-                Command="{Binding BackCommand}"
-                BackgroundColor="Transparent"
-                TextColor="#FF9F43"
-                FontSize="32"
-                WidthRequest="50"
-                HeightRequest="50"
-                CornerRadius="25"
-                Padding="0"
-                HorizontalOptions="Start"
-                VerticalOptions="Start"
-                Margin="10,50,0,0"
-                ZIndex="100" />
+       <ContentPage.Resources>
+              <ResourceDictionary>
+                     <Color x:Key="DarkBg">#0A1929</Color>
+                     <Color x:Key="CardBg">#132F4C</Color>
+                     <Color x:Key="AccentOrange">#FF9F43</Color>
+                     <Color x:Key="AccentGreen">#1ABC9C</Color>
+                     <Color x:Key="TextLight">#B0BEC5</Color>
+                     <Color x:Key="TextWhite">#FFFFFF</Color>
+              </ResourceDictionary>
+       </ContentPage.Resources>
 
-        <!-- Main Content -->
-        <ScrollView Margin="0,50,0,0">
-            <VerticalStackLayout Padding="20,10,20,40" Spacing="15">
+       <Grid RowDefinitions="Auto,*,Auto" BackgroundColor="{StaticResource DarkBg}" Padding="0" SafeAreaEdges="None">
+              <Grid.GestureRecognizers>
+                     <SwipeGestureRecognizer Direction="Right" Command="{Binding NavigateToCalculatorCommand}" />
+              </Grid.GestureRecognizers>
+              <!-- Back Button - Fixed top left -->
+              <Button Grid.Row="0"
+                            Text="←"
+                            Command="{Binding BackCommand}"
+                            BackgroundColor="Transparent"
+                            TextColor="{StaticResource AccentOrange}"
+                            FontSize="32"
+                            WidthRequest="50"
+                            HeightRequest="50"
+                            CornerRadius="25"
+                            Padding="0"
+                            HorizontalOptions="Start"
+                            VerticalOptions="Start"
+                            Margin="10,50,0,0"
+                            ZIndex="100" />
+
+              <!-- Main Content -->
+              <ScrollView Grid.Row="1" Margin="0,10,0,0">
+                     <VerticalStackLayout Padding="20,10,20,140" Spacing="15">
                 <Label Text="Profile &amp; Settings" 
                        FontSize="28" 
                        FontAttributes="Bold"
@@ -184,5 +200,7 @@
                     Margin="0,0,0,20" />
             </VerticalStackLayout>
         </ScrollView>
+
+              <views:BottomNavView Grid.Row="2" SelectedTab="Profile" />
     </Grid>
 </ContentPage>

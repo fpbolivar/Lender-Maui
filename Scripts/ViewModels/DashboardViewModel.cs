@@ -12,10 +12,10 @@ namespace Lender.ViewModels;
 
 public class DashboardViewModel : INotifyPropertyChanged
 {
-    private bool _isDemoMode = true;
-    private string _modeLabel = "Demo mode";
-    private string _userName = "Demo User";
-    private string _userEmail = "demo@example.com";
+    private bool _isDemoMode = false;
+    private string _modeLabel = "Live data";
+    private string _userName = "User";
+    private string _userEmail = string.Empty;
     private string _phoneNumber = "";
     private string _dateOfBirthDisplay = "";
     private string _status = "Active";
@@ -31,7 +31,7 @@ public class DashboardViewModel : INotifyPropertyChanged
     private readonly FirestoreService _firestoreService;
 
     public ICommand SignOutCommand { get; }
-    public ICommand MenuCommand { get; }
+    public ICommand SignInCommand { get; }
     public ICommand ToggleDemoCommand { get; }
     public ICommand NavigateToTransactionsCommand { get; }
     public ICommand NavigateToDashboardCommand { get; }
@@ -46,7 +46,7 @@ public class DashboardViewModel : INotifyPropertyChanged
         _firestoreService = FirestoreService.Instance;
         
         SignOutCommand = new Command(SignOutAsync);
-        MenuCommand = new Command(OnMenuClicked);
+        SignInCommand = new Command(async () => await Shell.Current.GoToAsync("//login", animate: false));
         ToggleDemoCommand = new Command(EnableDemoMode);
         NavigateToTransactionsCommand = new Command(async () => await NavigateToTransactions());
         NavigateToDashboardCommand = new Command(async () => await NavigateToDashboard());
@@ -299,7 +299,7 @@ public class DashboardViewModel : INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] LoadUserDataAsync error: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] LoadUserDataAsync error: {ex.Message} - DashboardViewModel.cs:302");
             EnableDemoMode();
         }
     }
@@ -390,14 +390,8 @@ public class DashboardViewModel : INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Sign out error: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Sign out error: {ex.Message} - DashboardViewModel.cs:393");
         }
-    }
-
-    private void OnMenuClicked()
-    {
-        System.Diagnostics.Debug.WriteLine("Menu button clicked - opening flyout");
-        Shell.Current.FlyoutIsPresented = true;
     }
 
     private async Task NavigateToTransactions()
@@ -414,13 +408,7 @@ public class DashboardViewModel : INotifyPropertyChanged
 
     private async Task NavigateToDashboard()
     {
-        if (IsDemoMode)
-        {
-            await Shell.Current.DisplayAlertAsync("Demo mode", "Navigation is disabled in demo mode. Sign in to access this section.", "OK");
-            return;
-        }
-        // Already on dashboard
-        await Task.CompletedTask;
+        await NavBarNavigation.GoToDashboardAsync(IsDemoMode);
     }
 
     private async Task NavigateToRequestLoan()
@@ -437,24 +425,12 @@ public class DashboardViewModel : INotifyPropertyChanged
 
     private async Task NavigateToCalculator()
     {
-        if (IsDemoMode)
-        {
-            await Shell.Current.DisplayAlertAsync("Demo mode", "Navigation is disabled in demo mode. Sign in to access this section.", "OK");
-            return;
-        }
-        await Shell.Current.DisplayAlertAsync("Calculator", "Navigate to Loan Calculator page", "OK");
-        // TODO: Implement navigation when page is created
-        // await Shell.Current.GoToAsync("//calculator");
+        await NavBarNavigation.GoToCalculatorAsync(IsDemoMode);
     }
 
     private async Task NavigateToProfile()
     {
-        if (IsDemoMode)
-        {
-            await Shell.Current.DisplayAlertAsync("Demo mode", "Navigation is disabled in demo mode. Sign in to access this section.", "OK");
-            return;
-        }
-        await Shell.Current.GoToAsync("//profile");
+        await NavBarNavigation.GoToProfileAsync(IsDemoMode);
     }
 }
 

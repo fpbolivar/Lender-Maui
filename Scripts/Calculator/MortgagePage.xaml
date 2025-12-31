@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:Lender.Views"
+             x:Class="Lender.MortgagePage"
+             Title="Mortgage"
+             BackgroundColor="#0A1929"
+             Shell.PresentationMode="ModalAnimated"
+             SafeAreaEdges="None">
+    <Grid RowDefinitions="*,Auto" BackgroundColor="#0A1929">
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="20,10,20,40" Spacing="14">
+                <HorizontalStackLayout Spacing="10">
+                    <Button Text="&lt;"
+                            Command="{Binding BackCommand}"
+                            BackgroundColor="Transparent"
+                            TextColor="#FF9F43"
+                            FontSize="28"
+                            WidthRequest="44"
+                            HeightRequest="44"
+                            CornerRadius="22"
+                            Padding="0" />
+                    <Label Text="Mortgage"
+                           FontSize="24"
+                           FontAttributes="Bold"
+                           TextColor="White"
+                           VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+
+                <Label Text="Payment Frequency"
+                       FontSize="14"
+                       TextColor="#B0BEC5" />
+                <Picker ItemsSource="{Binding PaymentFrequencyOptions}"
+                        ItemDisplayBinding="{Binding Label}"
+                        SelectedItem="{Binding SelectedFrequency}"
+                        Title="Select frequency"
+                        TextColor="White"
+                        BackgroundColor="#102A44" />
+
+                <Label Text="Home Price"
+                       FontSize="14"
+                       TextColor="#B0BEC5" />
+                <Entry Placeholder="e.g., 400000"
+                       Keyboard="Numeric"
+                       Text="{Binding HomePrice, Mode=TwoWay}" />
+
+                <Label Text="Down Payment"
+                       FontSize="14"
+                       TextColor="#B0BEC5" />
+                <Entry Placeholder="e.g., 80000"
+                       Keyboard="Numeric"
+                       Text="{Binding DownPayment, Mode=TwoWay}" />
+
+                <Label Text="Annual Rate (%)"
+                       FontSize="14"
+                       TextColor="#B0BEC5" />
+                <Entry Placeholder="e.g., 6.5"
+                       Keyboard="Numeric"
+                       Text="{Binding Rate, Mode=TwoWay}" />
+
+                <Label Text="Term (years)"
+                       FontSize="14"
+                       TextColor="#B0BEC5" />
+                <Entry Placeholder="e.g., 30"
+                       Keyboard="Numeric"
+                       Text="{Binding TermYears, Mode=TwoWay}" />
+
+                <Label Text="Annual Property Tax"
+                       FontSize="14"
+                       TextColor="#B0BEC5" />
+                <Entry Placeholder="e.g., 4500"
+                       Keyboard="Numeric"
+                       Text="{Binding PropertyTax, Mode=TwoWay}" />
+
+                <Label Text="Annual Insurance"
+                       FontSize="14"
+                       TextColor="#B0BEC5" />
+                <Entry Placeholder="e.g., 1200"
+                       Keyboard="Numeric"
+                       Text="{Binding Insurance, Mode=TwoWay}" />
+
+                <Label Text="Monthly PMI"
+                       FontSize="14"
+                       TextColor="#B0BEC5" />
+                <Entry Placeholder="e.g., 150"
+                       Keyboard="Numeric"
+                       Text="{Binding PMI, Mode=TwoWay}" />
+
+                <Label Text="Monthly HOA"
+                       FontSize="14"
+                       TextColor="#B0BEC5" />
+                <Entry Placeholder="e.g., 200"
+                       Keyboard="Numeric"
+                       Text="{Binding HOA, Mode=TwoWay}" />
+
+                <Button Text="Calculate"
+                        Command="{Binding CalculateCommand}"
+                        BackgroundColor="#FF9F43"
+                        TextColor="#0A1929"
+                        CornerRadius="8" />
+
+                <Label Text="{Binding Result}"
+                       FontSize="14"
+                       TextColor="#FFFFFF" />
+
+                <Label Text="{Binding ErrorMessage}"
+                       FontSize="12"
+                       TextColor="#EF4444" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <views:BottomNavView x:Name="BottomNav" Grid.Row="1" SelectedTab="Calculator" />
+    </Grid>
+</ContentPage>

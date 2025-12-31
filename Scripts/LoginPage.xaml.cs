@@ -23,7 +23,7 @@ public partial class LoginPage : ContentPage
 
         // Ensure flyout is closed/disabled when showing login
         Shell.Current.FlyoutIsPresented = false;
-        Shell.Current.FlyoutBehavior = FlyoutBehavior.Disabled;
+        Shell.Current.FlyoutBehavior = FlyoutBehavior.Locked;
 
         // Attempt session restore; navigate to main page if successful
         if (BindingContext is LoginViewModel viewModel)
@@ -43,7 +43,7 @@ public partial class LoginPage : ContentPage
     {
         base.OnDisappearing();
 
-        // Restore flyout to automatic for other pages
-        Shell.Current.FlyoutBehavior = FlyoutBehavior.Flyout;
+        // Keep flyout locked for all pages
+        Shell.Current.FlyoutBehavior = FlyoutBehavior.Locked;
     }
 }

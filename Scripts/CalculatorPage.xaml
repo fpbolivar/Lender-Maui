@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                         xmlns:views="clr-namespace:Lender.Views"
+                         x:Class="Lender.CalculatorPage"
+                         Title="Calculators"
+                         BackgroundColor="#0A1929">
+
+        <ContentPage.Resources>
+                <ResourceDictionary>
+                        <Color x:Key="DarkBg">#0A1929</Color>
+                        <Color x:Key="CardBg">#132F4C</Color>
+                        <Color x:Key="AccentOrange">#FF9F43</Color>
+                        <Color x:Key="TextLight">#B0BEC5</Color>
+                </ResourceDictionary>
+        </ContentPage.Resources>
+
+        <Grid RowDefinitions="Auto,*,Auto" BackgroundColor="{StaticResource DarkBg}" SafeAreaEdges="None">
+                <Grid.GestureRecognizers>
+                        <SwipeGestureRecognizer Direction="Left" Command="{Binding NavigateToProfileCommand}" />
+                        <SwipeGestureRecognizer Direction="Right" Command="{Binding NavigateToDashboardCommand}" />
+                </Grid.GestureRecognizers>
+                <ScrollView Grid.Row="1">
+                        <VerticalStackLayout Padding="20,10,20,140" Spacing="14">
+                                <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                                        <Button Text="←"
+                                                        Command="{Binding BackCommand}"
+                                                        BackgroundColor="Transparent"
+                                                        TextColor="{StaticResource AccentOrange}"
+                                                        FontSize="32"
+                                                        WidthRequest="50"
+                                                        HeightRequest="50"
+                                                        CornerRadius="25"
+                                                        Padding="0" />
+                                        <Label Text="Financial Calculators" 
+                                                   FontSize="26" 
+                                                   FontAttributes="Bold"
+                                                   TextColor="White"
+                                                   VerticalTextAlignment="Center" />
+                                </HorizontalStackLayout>
+
+                                <Label Text="Choose a calculator" 
+                                           FontSize="14"
+                                           TextColor="{StaticResource TextLight}" />
+
+                                <VerticalStackLayout Spacing="10">
+                                        <Button Text="Loan - Simple Interest" 
+                                                        Command="{Binding OpenSimpleInterestCommand}"
+                                                        BackgroundColor="{StaticResource CardBg}" TextColor="White" CornerRadius="10" />
+                                        <Button Text="Loan - Compound Interest" 
+                                                        Command="{Binding OpenCompoundInterestCommand}"
+                                                        BackgroundColor="{StaticResource CardBg}" TextColor="White" CornerRadius="10" />
+                                        <Button Text="Loan - Amortized Payment" 
+                                                        Command="{Binding OpenAmortizedCommand}"
+                                                        BackgroundColor="{StaticResource CardBg}" TextColor="White" CornerRadius="10" />
+                                        <Button Text="Mortgage Calculator" 
+                                                        Command="{Binding OpenMortgageCommand}"
+                                                        BackgroundColor="{StaticResource CardBg}" TextColor="White" CornerRadius="10" />
+                                        <Button Text="Auto Loan Calculator" 
+                                                        Command="{Binding OpenAutoLoanCommand}"
+                                                        BackgroundColor="{StaticResource CardBg}" TextColor="White" CornerRadius="10" />
+                                        <Button Text="Savings Growth" 
+                                                        Command="{Binding OpenSavingsCommand}"
+                                                        BackgroundColor="{StaticResource CardBg}" TextColor="White" CornerRadius="10" />
+                                        <Button Text="Investment Growth" 
+                                                        Command="{Binding OpenInvestmentCommand}"
+                                                        BackgroundColor="{StaticResource CardBg}" TextColor="White" CornerRadius="10" />
+                                </VerticalStackLayout>
+                        </VerticalStackLayout>
+                </ScrollView>
+
+                <views:BottomNavView Grid.Row="2" SelectedTab="Calculator" />
+        </Grid>
+</ContentPage>

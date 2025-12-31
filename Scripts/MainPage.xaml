@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:Lender.Views"
              x:Class="Lender.MainPage"
              Title="Lender"
              BackgroundColor="#0A1929"
@@ -20,33 +21,32 @@
     </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto,*,Auto" Padding="0" BackgroundColor="{StaticResource DarkBg}" SafeAreaEdges="None">
-        <VerticalStackLayout Grid.Row="0" Padding="16,50,16,16" Spacing="20" BackgroundColor="{StaticResource DarkBg}">
-            
-            <!-- Header with Menu Button -->
-            <HorizontalStackLayout Spacing="12">
-                <Button Text="☰"
-                        Command="{Binding MenuCommand}"
-                        FontSize="24"
-                        TextColor="{StaticResource TextWhite}"
-                        BackgroundColor="{StaticResource CardBg}"
-                        WidthRequest="44"
-                        HeightRequest="44"
+        <Grid.GestureRecognizers>
+            <SwipeGestureRecognizer Direction="Left" Command="{Binding NavigateToCalculatorCommand}" />
+        </Grid.GestureRecognizers>
+        <VerticalStackLayout Grid.Row="0" Padding="16,50,16,16" Spacing="8" BackgroundColor="{StaticResource DarkBg}">
+            <!-- Header with Sign In button -->
+            <Grid HorizontalOptions="FillAndExpand">
+                <VerticalStackLayout HorizontalOptions="Start" Spacing="0">
+                    <Label Text="{Binding UserName}"
+                           FontSize="28"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextWhite}" />
+                    <Label Text="{Binding ModeLabel}"
+                           FontSize="12"
+                           TextColor="{StaticResource TextLight}" />
+                </VerticalStackLayout>
+                <Button Text="Sign In"
+                        Command="{Binding SignInCommand}"
+                        HorizontalOptions="End"
+                        VerticalOptions="Start"
+                        BackgroundColor="{StaticResource AccentOrange}"
+                        TextColor="White"
+                        FontSize="14"
+                        Padding="16,8"
                         CornerRadius="8"
-                        Padding="0"
-                        InputTransparent="False"
-                        VerticalOptions="Center"
-                        HorizontalOptions="Start" />
-                        
-                  <VerticalStackLayout HorizontalOptions="FillAndExpand" VerticalOptions="Center" Spacing="0">
-                      <Label Text="{Binding UserName}" 
-                          FontSize="28" 
-                          FontAttributes="Bold"
-                          TextColor="{StaticResource TextWhite}" />
-                      <Label Text="{Binding ModeLabel}" 
-                          FontSize="12"
-                          TextColor="{StaticResource TextLight}" />
-                  </VerticalStackLayout>
-            </HorizontalStackLayout>
+                        IsVisible="{Binding IsDemoMode}" />
+            </Grid>
         </VerticalStackLayout>
 
         <!-- Scrollable Content Area -->
@@ -217,59 +217,6 @@
             </VerticalStackLayout>
         </ScrollView>
         
-        <!-- Bottom Navigation Bar -->
-        <Grid Grid.Row="2" ColumnDefinitions="*,*,*,*,*" BackgroundColor="{StaticResource CardBg}" Padding="8,12,8,32" SafeAreaEdges="None">
-            <!-- Transactions -->
-            <VerticalStackLayout Grid.Column="0" Spacing="4" HorizontalOptions="Center">
-                <VerticalStackLayout.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding NavigateToTransactionsCommand}" />
-                </VerticalStackLayout.GestureRecognizers>
-                <Label Text="💳" FontSize="22" HorizontalTextAlignment="Center" />
-                <Label Text="Transactions" FontSize="10" TextColor="{StaticResource TextLight}" HorizontalTextAlignment="Center" />
-            </VerticalStackLayout>
-            
-            <!-- Dashboard -->
-            <VerticalStackLayout Grid.Column="1" Spacing="4" HorizontalOptions="Center">
-                <VerticalStackLayout.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding NavigateToDashboardCommand}" />
-                </VerticalStackLayout.GestureRecognizers>
-                <Label Text="📊" FontSize="22" HorizontalTextAlignment="Center" />
-                <Label Text="Dashboard" FontSize="10" TextColor="{StaticResource AccentOrange}" FontAttributes="Bold" HorizontalTextAlignment="Center" />
-            </VerticalStackLayout>
-            
-            <!-- Request/Send Loan (Main) -->
-            <VerticalStackLayout Grid.Column="2" Spacing="4" HorizontalOptions="Center" Margin="0,-20,0,0">
-                <VerticalStackLayout.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding NavigateToRequestLoanCommand}" />
-                </VerticalStackLayout.GestureRecognizers>
-                <Frame CornerRadius="30" 
-                       BackgroundColor="{StaticResource AccentOrange}" 
-                       Padding="16" 
-                       HasShadow="True"
-                       HeightRequest="60"
-                       WidthRequest="60">
-                    <Label Text="+" FontSize="32" TextColor="{StaticResource DarkBg}" FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" Margin="0,-8,0,0" />
-                </Frame>
-                <Label Text="Request/Send" FontSize="9" TextColor="{StaticResource TextLight}" HorizontalTextAlignment="Center" />
-            </VerticalStackLayout>
-            
-            <!-- Loan Calculator -->
-            <VerticalStackLayout Grid.Column="3" Spacing="4" HorizontalOptions="Center">
-                <VerticalStackLayout.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding NavigateToCalculatorCommand}" />
-                </VerticalStackLayout.GestureRecognizers>
-                <Label Text="🧮" FontSize="22" HorizontalTextAlignment="Center" />
-                <Label Text="Calculator" FontSize="10" TextColor="{StaticResource TextLight}" HorizontalTextAlignment="Center" />
-            </VerticalStackLayout>
-            
-            <!-- Profile -->
-            <VerticalStackLayout Grid.Column="4" Spacing="4" HorizontalOptions="Center">
-                <VerticalStackLayout.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding NavigateToProfileCommand}" />
-                </VerticalStackLayout.GestureRecognizers>
-                <Label Text="👤" FontSize="22" HorizontalTextAlignment="Center" />
-                <Label Text="Profile" FontSize="10" TextColor="{StaticResource TextLight}" HorizontalTextAlignment="Center" />
-            </VerticalStackLayout>
-        </Grid>
+        <views:BottomNavView Grid.Row="2" SelectedTab="Dashboard" />
     </Grid>
 </ContentPage>

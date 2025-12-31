@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:Lender.Views"
+             x:Class="Lender.Views.BottomNavView">
+    <ContentView.Resources>
+        <ResourceDictionary>
+            <Color x:Key="DarkBg">#0A1929</Color>
+            <Color x:Key="CardBg">#132F4C</Color>
+            <Color x:Key="AccentOrange">#FF9F43</Color>
+            <Color x:Key="TextLight">#B0BEC5</Color>
+        </ResourceDictionary>
+    </ContentView.Resources>
+
+    <Grid ColumnDefinitions="*,*,*,*,*"
+          BackgroundColor="{StaticResource CardBg}"
+          Padding="8,12,8,0"
+          Margin="0,0,0,-12">
+        <!-- Transactions -->
+        <VerticalStackLayout Grid.Column="0" Spacing="4" HorizontalOptions="Center">
+            <VerticalStackLayout.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding NavigateToTransactionsCommand}" />
+            </VerticalStackLayout.GestureRecognizers>
+            <Label Text="💳" FontSize="22" HorizontalTextAlignment="Center" />
+            <Label Text="Transactions" FontSize="10" TextColor="{StaticResource TextLight}" HorizontalTextAlignment="Center">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label"
+                                 Binding="{Binding SelectedTab, Source={RelativeSource AncestorType={x:Type views:BottomNavView}}}"
+                                 Value="Transactions">
+                        <Setter Property="TextColor" Value="{StaticResource AccentOrange}" />
+                        <Setter Property="FontAttributes" Value="Bold" />
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+        </VerticalStackLayout>
+
+        <!-- Dashboard -->
+        <VerticalStackLayout Grid.Column="1" Spacing="4" HorizontalOptions="Center">
+            <VerticalStackLayout.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding NavigateToDashboardCommand}" />
+            </VerticalStackLayout.GestureRecognizers>
+            <Label Text="📊" FontSize="22" HorizontalTextAlignment="Center" />
+            <Label Text="Dashboard" FontSize="10" TextColor="{StaticResource TextLight}" HorizontalTextAlignment="Center">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label"
+                                 Binding="{Binding SelectedTab, Source={RelativeSource AncestorType={x:Type views:BottomNavView}}}"
+                                 Value="Dashboard">
+                        <Setter Property="TextColor" Value="{StaticResource AccentOrange}" />
+                        <Setter Property="FontAttributes" Value="Bold" />
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+        </VerticalStackLayout>
+
+        <!-- Request/Send Loan (Main) -->
+        <VerticalStackLayout Grid.Column="2" Spacing="4" HorizontalOptions="Center" Margin="0,-20,0,0">
+            <VerticalStackLayout.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding NavigateToRequestLoanCommand}" />
+            </VerticalStackLayout.GestureRecognizers>
+            <Frame CornerRadius="30"
+                   BackgroundColor="{StaticResource AccentOrange}"
+                   Padding="16"
+                   HasShadow="True"
+                   HeightRequest="60"
+                   WidthRequest="60">
+                <Label Text="+" FontSize="32" TextColor="{StaticResource DarkBg}" FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" Margin="0,-8,0,0" />
+            </Frame>
+            <Label Text="Request/Send" FontSize="9" TextColor="{StaticResource TextLight}" HorizontalTextAlignment="Center">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label"
+                                 Binding="{Binding SelectedTab, Source={RelativeSource AncestorType={x:Type views:BottomNavView}}}"
+                                 Value="RequestLoan">
+                        <Setter Property="TextColor" Value="{StaticResource AccentOrange}" />
+                        <Setter Property="FontAttributes" Value="Bold" />
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+        </VerticalStackLayout>
+
+        <!-- Loan Calculator -->
+        <VerticalStackLayout Grid.Column="3" Spacing="4" HorizontalOptions="Center">
+            <VerticalStackLayout.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding NavigateToCalculatorCommand}" />
+            </VerticalStackLayout.GestureRecognizers>
+            <Label Text="🧮" FontSize="22" HorizontalTextAlignment="Center" />
+            <Label Text="Calculator" FontSize="10" TextColor="{StaticResource TextLight}" HorizontalTextAlignment="Center">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label"
+                                 Binding="{Binding SelectedTab, Source={RelativeSource AncestorType={x:Type views:BottomNavView}}}"
+                                 Value="Calculator">
+                        <Setter Property="TextColor" Value="{StaticResource AccentOrange}" />
+                        <Setter Property="FontAttributes" Value="Bold" />
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+        </VerticalStackLayout>
+
+        <!-- Profile -->
+        <VerticalStackLayout Grid.Column="4" Spacing="4" HorizontalOptions="Center">
+            <VerticalStackLayout.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding NavigateToProfileCommand}" />
+            </VerticalStackLayout.GestureRecognizers>
+            <Label Text="👤" FontSize="22" HorizontalTextAlignment="Center" />
+            <Label Text="Profile" FontSize="10" TextColor="{StaticResource TextLight}" HorizontalTextAlignment="Center">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label"
+                                 Binding="{Binding SelectedTab, Source={RelativeSource AncestorType={x:Type views:BottomNavView}}}"
+                                 Value="Profile">
+                        <Setter Property="TextColor" Value="{StaticResource AccentOrange}" />
+                        <Setter Property="FontAttributes" Value="Bold" />
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+        </VerticalStackLayout>
+    </Grid>
+</ContentView>

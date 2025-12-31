@@ -311,7 +311,10 @@ public class ProfileViewModel : INotifyPropertyChanged
     {
         try
         {
-            string newName = await Application.Current.MainPage.DisplayPromptAsync(
+            var page = Application.Current?.Windows[0]?.Page;
+            if (page == null) return;
+            
+            string newName = await page.DisplayPromptAsync(
                 "Edit Profile",
                 "Enter your new name:",
                 initialValue: UserName,
@@ -319,20 +322,25 @@ public class ProfileViewModel : INotifyPropertyChanged
 
             if (!string.IsNullOrWhiteSpace(newName) && newName != UserName && newName != "Loading...")
             {
-                var user = await _firestoreService.GetUserAsync(_authService.CurrentUserEmail);
+                var email = _authService.CurrentUserEmail;
+                if (string.IsNullOrEmpty(email)) return;
+                
+                var user = await _firestoreService.GetUserAsync(email);
                 if (user != null)
                 {
                     user.FullName = newName;
                     await _firestoreService.UpdateUserAsync(user);
                     
                     UserName = newName;
-                    await Application.Current.MainPage.DisplayAlert("Success", "Profile updated successfully!", "OK");
+                    await page.DisplayAlertAsync("Success", "Profile updated successfully!", "OK");
                 }
             }
         }
         catch (Exception ex)
         {
-            await Application.Current.MainPage.DisplayAlert("Error", $"Failed to update profile: {ex.Message}", "OK");
+            var page = Application.Current?.Windows[0]?.Page;
+            if (page != null)
+                await page.DisplayAlertAsync("Error", $"Failed to update profile: {ex.Message}", "OK");
         }
     }
 
@@ -340,7 +348,10 @@ public class ProfileViewModel : INotifyPropertyChanged
     {
         try
         {
-            string currentPassword = await Application.Current.MainPage.DisplayPromptAsync(
+            var page = Application.Current?.Windows[0]?.Page;
+            if (page == null) return;
+            
+            string currentPassword = await page.DisplayPromptAsync(
                 "Change Password",
                 "Enter your current password:",
                 placeholder: "Current password",
@@ -349,7 +360,7 @@ public class ProfileViewModel : INotifyPropertyChanged
             if (string.IsNullOrWhiteSpace(currentPassword))
                 return;
 
-            string newPassword = await Application.Current.MainPage.DisplayPromptAsync(
+            string newPassword = await page.DisplayPromptAsync(
                 "Change Password",
                 "Enter your new password (min 6 characters):",
                 placeholder: "New password",
@@ -357,11 +368,11 @@ public class ProfileViewModel : INotifyPropertyChanged
 
             if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 6)
             {
-                await Application.Current.MainPage.DisplayAlert("Error", "Password must be at least 6 characters", "OK");
+                await page.DisplayAlertAsync("Error", "Password must be at least 6 characters", "OK");
                 return;
             }
 
-            string confirmPassword = await Application.Current.MainPage.DisplayPromptAsync(
+            string confirmPassword = await page.DisplayPromptAsync(
                 "Change Password",
                 "Confirm your new password:",
                 placeholder: "Confirm password",
@@ -369,7 +380,7 @@ public class ProfileViewModel : INotifyPropertyChanged
 
             if (newPassword != confirmPassword)
             {
-                await Application.Current.MainPage.DisplayAlert("Error", "Passwords do not match", "OK");
+                await page.DisplayAlertAsync("Error", "Passwords do not match", "OK");
                 return;
             }
 
@@ -378,16 +389,18 @@ public class ProfileViewModel : INotifyPropertyChanged
             
             if (success)
             {
-                await Application.Current.MainPage.DisplayAlert("Success", "Password changed successfully!", "OK");
+                await page.DisplayAlertAsync("Success", "Password changed successfully!", "OK");
             }
             else
             {
-                await Application.Current.MainPage.DisplayAlert("Error", "Failed to change password. Check your current password.", "OK");
+                await page.DisplayAlertAsync("Error", "Failed to change password. Check your current password.", "OK");
             }
         }
         catch (Exception ex)
         {
-            await Application.Current.MainPage.DisplayAlert("Error", $"Failed to change password: {ex.Message}", "OK");
+            var page = Application.Current?.Windows[0]?.Page;
+            if (page != null)
+                await page.DisplayAlertAsync("Error", $"Failed to change password: {ex.Message}", "OK");
         }
     }
 
@@ -395,7 +408,10 @@ public class ProfileViewModel : INotifyPropertyChanged
     {
         try
         {
-            string newEmail = await Application.Current.MainPage.DisplayPromptAsync(
+            var page = Application.Current?.Windows[0]?.Page;
+            if (page == null) return;
+            
+            string newEmail = await page.DisplayPromptAsync(
                 "Change Email",
                 "Enter your new email address:",
                 initialValue: UserEmail,
@@ -404,7 +420,7 @@ public class ProfileViewModel : INotifyPropertyChanged
 
             if (!string.IsNullOrWhiteSpace(newEmail) && newEmail != UserEmail && newEmail != "Loading...")
             {
-                bool confirm = await Application.Current.MainPage.DisplayAlert(
+                bool confirm = await page.DisplayAlertAsync(
                     "Confirm Email Change",
                     $"Change email to {newEmail}?\n\nYou may need to verify the new email and sign in again.",
                     "Change",
@@ -417,14 +433,18 @@ public class ProfileViewModel : INotifyPropertyChanged
                     
                     if (success)
                     {
-                        var user = await _firestoreService.GetUserAsync(_authService.CurrentUserEmail);
-                        if (user != null)
+                        var email = _authService.CurrentUserEmail;
+                        if (!string.IsNullOrEmpty(email))
                         {
-                            user.Email = newEmail;
-                            await _firestoreService.UpdateUserAsync(user);
+                            var user = await _firestoreService.GetUserAsync(email);
+                            if (user != null)
+                            {
+                                user.Email = newEmail;
+                                await _firestoreService.UpdateUserAsync(user);
+                            }
                         }
                         
-                        await Application.Current.MainPage.DisplayAlert(
+                        await page.DisplayAlertAsync(
                             "Email Changed",
                             "Email updated successfully!",
                             "OK");
@@ -433,14 +453,16 @@ public class ProfileViewModel : INotifyPropertyChanged
                     }
                     else
                     {
-                        await Application.Current.MainPage.DisplayAlert("Error", "Failed to change email", "OK");
+                        await page.DisplayAlertAsync("Error", "Failed to change email", "OK");
                     }
                 }
             }
         }
         catch (Exception ex)
         {
-            await Application.Current.MainPage.DisplayAlert("Error", $"Failed to change email: {ex.Message}", "OK");
+            var page = Application.Current?.Windows[0]?.Page;
+            if (page != null)
+                await page.DisplayAlertAsync("Error", $"Failed to change email: {ex.Message}", "OK");
         }
     }
 
@@ -448,8 +470,11 @@ public class ProfileViewModel : INotifyPropertyChanged
     {
         try
         {
+            var page = Application.Current?.Windows[0]?.Page;
+            if (page == null) return;
+            
             string currentPhone = PhoneNumber == "Not provided" ? "" : PhoneNumber;
-            string newPhone = await Application.Current.MainPage.DisplayPromptAsync(
+            string newPhone = await page.DisplayPromptAsync(
                 "Change Phone Number",
                 PhoneNumber == "Not provided" ? "Add your phone number:" : "Update your phone number:",
                 initialValue: currentPhone,
@@ -458,26 +483,34 @@ public class ProfileViewModel : INotifyPropertyChanged
 
             if (!string.IsNullOrWhiteSpace(newPhone) && newPhone != currentPhone)
             {
-                var user = await _firestoreService.GetUserAsync(_authService.CurrentUserEmail);
+                var email = _authService.CurrentUserEmail;
+                if (string.IsNullOrEmpty(email)) return;
+                
+                var user = await _firestoreService.GetUserAsync(email);
                 if (user != null)
                 {
                     user.PhoneNumber = newPhone;
                     await _firestoreService.UpdateUserAsync(user);
                     
                     PhoneNumber = newPhone;
-                    await Application.Current.MainPage.DisplayAlert("Success", "Phone number updated successfully!", "OK");
+                    await page.DisplayAlertAsync("Success", "Phone number updated successfully!", "OK");
                 }
             }
         }
         catch (Exception ex)
         {
-            await Application.Current.MainPage.DisplayAlert("Error", $"Failed to update phone: {ex.Message}", "OK");
+            var page = Application.Current?.Windows[0]?.Page;
+            if (page != null)
+                await page.DisplayAlertAsync("Error", $"Failed to update phone: {ex.Message}", "OK");
         }
     }
 
     private async Task OpenNotifications()
     {
-        await Application.Current.MainPage.DisplayAlert(
+        var page = Application.Current?.Windows[0]?.Page;
+        if (page == null) return;
+        
+        await page.DisplayAlertAsync(
             "Notifications",
             "Configure notification preferences:\n\n" +
             "• Loan payment reminders\n" +
@@ -490,7 +523,10 @@ public class ProfileViewModel : INotifyPropertyChanged
 
     private async Task OpenLanguage()
     {
-        string language = await Application.Current.MainPage.DisplayActionSheet(
+        var page = Application.Current?.Windows[0]?.Page;
+        if (page == null) return;
+        
+        string language = await page.DisplayActionSheetAsync(
             "Language & Region",
             "Cancel",
             null,
@@ -502,7 +538,7 @@ public class ProfileViewModel : INotifyPropertyChanged
 
         if (!string.IsNullOrEmpty(language) && language != "Cancel")
         {
-            await Application.Current.MainPage.DisplayAlert(
+            await page.DisplayAlertAsync(
                 "Language",
                 $"{language} selected. Language switching will be implemented in a future update.",
                 "OK");
@@ -511,7 +547,10 @@ public class ProfileViewModel : INotifyPropertyChanged
 
     private async Task OpenPrivacy()
     {
-        await Application.Current.MainPage.DisplayAlert(
+        var page = Application.Current?.Windows[0]?.Page;
+        if (page == null) return;
+        
+        await page.DisplayAlertAsync(
             "Privacy & Security",
             "Privacy Settings:\n\n" +
             "• Two-factor authentication\n" +
@@ -525,7 +564,10 @@ public class ProfileViewModel : INotifyPropertyChanged
 
     private async Task OpenAbout()
     {
-        await Application.Current.MainPage.DisplayAlert(
+        var page = Application.Current?.Windows[0]?.Page;
+        if (page == null) return;
+        
+        await page.DisplayAlertAsync(
             "About Lender",
             "Lender - Loan Tracking App\n\n" +
             "Version: 1.0.0\n" +
@@ -558,7 +600,10 @@ public class ProfileViewModel : INotifyPropertyChanged
     {
         try
         {
-            bool firstConfirm = await Application.Current.MainPage.DisplayAlert(
+            var page = Application.Current?.Windows[0]?.Page;
+            if (page == null) return;
+            
+            bool firstConfirm = await page.DisplayAlertAsync(
                 "⚠️ Delete Account",
                 "This action is PERMANENT and cannot be undone.\n\n" +
                 "All your data will be deleted:\n" +
@@ -573,7 +618,7 @@ public class ProfileViewModel : INotifyPropertyChanged
             if (!firstConfirm)
                 return;
 
-            string password = await Application.Current.MainPage.DisplayPromptAsync(
+            string password = await page.DisplayPromptAsync(
                 "Confirm Deletion",
                 "Enter your password to confirm account deletion:",
                 placeholder: "Password",
@@ -582,7 +627,7 @@ public class ProfileViewModel : INotifyPropertyChanged
             if (string.IsNullOrWhiteSpace(password))
                 return;
 
-            bool finalConfirm = await Application.Current.MainPage.DisplayAlert(
+            bool finalConfirm = await page.DisplayAlertAsync(
                 "⚠️ FINAL WARNING",
                 "This is your last chance to cancel.\n\n" +
                 "Type 'DELETE' in the next prompt to permanently delete your account.",
@@ -592,7 +637,7 @@ public class ProfileViewModel : INotifyPropertyChanged
             if (!finalConfirm)
                 return;
 
-            string confirmText = await Application.Current.MainPage.DisplayPromptAsync(
+            string confirmText = await page.DisplayPromptAsync(
                 "Type DELETE",
                 "Type DELETE (in capitals) to confirm:",
                 placeholder: "DELETE",
@@ -600,12 +645,13 @@ public class ProfileViewModel : INotifyPropertyChanged
 
             if (confirmText != "DELETE")
             {
-                await Application.Current.MainPage.DisplayAlert("Cancelled", "Account deletion cancelled", "OK");
+                await page.DisplayAlertAsync("Cancelled", "Account deletion cancelled", "OK");
                 return;
             }
 
             // Delete all user data
             var currentEmail = _authService.CurrentUserEmail;
+            if (string.IsNullOrEmpty(currentEmail)) return;
             
             // Delete user's loans
             var loans = await _firestoreService.GetUserLoansAsync(currentEmail);
@@ -629,22 +675,25 @@ public class ProfileViewModel : INotifyPropertyChanged
             
             if (authDeleted)
             {
-                await Application.Current.MainPage.DisplayAlert(
+                await page.DisplayAlertAsync(
                     "Account Deleted",
                     "Your account has been permanently deleted.",
                     "OK");
                 
                 // Navigate to login
-                Application.Current.MainPage = new NavigationPage(new LoginPage());
+                if (Application.Current?.Windows[0] != null)
+                    Application.Current.Windows[0].Page = new NavigationPage(new LoginPage());
             }
             else
             {
-                await Application.Current.MainPage.DisplayAlert("Error", "Failed to delete account. Check your password.", "OK");
+                await page.DisplayAlertAsync("Error", "Failed to delete account. Check your password.", "OK");
             }
         }
         catch (Exception ex)
         {
-            await Application.Current.MainPage.DisplayAlert("Error", $"Failed to delete account: {ex.Message}", "OK");
+            var page = Application.Current?.Windows[0]?.Page;
+            if (page != null)
+                await page.DisplayAlertAsync("Error", $"Failed to delete account: {ex.Message}", "OK");
         }
     }
 
@@ -656,7 +705,7 @@ public class ProfileViewModel : INotifyPropertyChanged
 
     private async Task NavigateToDashboard()
     {
-        await Shell.Current.GoToAsync("//mainpage");
+        await NavBarNavigation.GoToDashboardAsync();
     }
 
     private async Task NavigateToRequestLoan()
@@ -667,8 +716,7 @@ public class ProfileViewModel : INotifyPropertyChanged
 
     private async Task NavigateToCalculator()
     {
-        await Shell.Current.DisplayAlertAsync("Calculator", "Navigate to Loan Calculator page", "OK");
-        // TODO: await Shell.Current.GoToAsync("//calculator");
+        await NavBarNavigation.GoToCalculatorAsync();
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

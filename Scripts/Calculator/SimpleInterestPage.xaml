@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:Lender.Views"
+             x:Class="Lender.SimpleInterestPage"
+             Title="Simple Interest"
+             BackgroundColor="#0A1929"
+             Shell.PresentationMode="ModalAnimated"
+             SafeAreaEdges="None">
+    <Grid RowDefinitions="*,Auto" BackgroundColor="#0A1929">
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="20,10,20,40" Spacing="14">
+                <HorizontalStackLayout Spacing="10">
+                    <Button Text="&lt;"
+                            Command="{Binding BackCommand}"
+                            BackgroundColor="Transparent"
+                            TextColor="#FF9F43"
+                            FontSize="28"
+                            WidthRequest="44"
+                            HeightRequest="44"
+                            CornerRadius="22"
+                            Padding="0" />
+                    <Label Text="Simple Interest"
+                           FontSize="24"
+                           FontAttributes="Bold"
+                           TextColor="White"
+                           VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+
+                <Label Text="Payment Frequency"
+                       FontSize="14"
+                       TextColor="#B0BEC5" />
+                <Picker ItemsSource="{Binding PaymentFrequencyOptions}"
+                        ItemDisplayBinding="{Binding Label}"
+                        SelectedItem="{Binding SelectedFrequency}"
+                        Title="Select frequency"
+                        TextColor="White"
+                        BackgroundColor="#102A44" />
+
+                <Label Text="Principal"
+                       FontSize="14"
+                       TextColor="#B0BEC5" />
+                <Entry Placeholder="e.g., 10000"
+                       Keyboard="Numeric"
+                       Text="{Binding Principal, Mode=TwoWay}" />
+
+                <Label Text="Annual Rate (%)"
+                       FontSize="14"
+                       TextColor="#B0BEC5" />
+                <Entry Placeholder="e.g., 6"
+                       Keyboard="Numeric"
+                       Text="{Binding Rate, Mode=TwoWay}" />
+
+                <Label Text="Years"
+                       FontSize="14"
+                       TextColor="#B0BEC5" />
+                <Entry Placeholder="e.g., 2"
+                       Keyboard="Numeric"
+                       Text="{Binding Years, Mode=TwoWay}" />
+
+                <Button Text="Calculate"
+                        Command="{Binding CalculateCommand}"
+                        BackgroundColor="#FF9F43"
+                        TextColor="#0A1929"
+                        CornerRadius="8" />
+
+                <Label Text="{Binding Result}"
+                       FontSize="14"
+                       TextColor="#FFFFFF" />
+
+                <Label Text="{Binding ErrorMessage}"
+                       FontSize="12"
+                       TextColor="#EF4444" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <views:BottomNavView x:Name="BottomNav" Grid.Row="1" SelectedTab="Calculator" />
+    </Grid>
+</ContentPage>

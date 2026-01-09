@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using Lender.Models;
+using Lender.Services.Constants;
 
 namespace Lender.Services;
 
@@ -12,23 +13,17 @@ namespace Lender.Services;
 public class FirestoreService
 {
     private static FirestoreService? _instance;
-    private readonly string _projectId = "lender-d0412";
-    private readonly string _apiKey = "AIzaSyBiRfWl6FILfLl2-jMv0ENpQFVNH2YYwLI";
     private readonly string _baseUrl;
     private HttpClient _httpClient;
 
-    // Collection names
-    private const string UsersCollection = "users";
-    private const string LoansCollection = "loans";
-    private const string TransactionsCollection = "transactions";
-    private const string InvestmentsCollection = "investments";
-    private const string BudgetsCollection = "budgets";
+    // Collections and constants centralized in FirestoreCollections and FirestoreConstants
+
 
     public static FirestoreService Instance => _instance ??= new FirestoreService();
 
     public FirestoreService()
     {
-        _baseUrl = $"https://firestore.googleapis.com/v1/projects/{_projectId}/databases/(default)/documents";
+        _baseUrl = $"https://firestore.googleapis.com/v1/projects/{FirestoreConstants.ProjectId}/databases/(default)/documents";
         _httpClient = new HttpClient();
     }
 
@@ -46,7 +41,7 @@ public class FirestoreService
             
             // Use email as document ID for easier access
             var documentId = Uri.EscapeDataString(user.Email);
-            var url = $"{_baseUrl}/{UsersCollection}/{documentId}?key={_apiKey}";
+            var url = $"{_baseUrl}/{FirestoreCollections.Users}/{documentId}?key={FirestoreConstants.ApiKey}";
             Debug.WriteLine($"[FirestoreService] URL: {url}");
             
             var payload = UserToJson(user);
@@ -96,7 +91,7 @@ public class FirestoreService
             Debug.WriteLine($"[FirestoreService] Getting user: {email}");
             
             var documentId = Uri.EscapeDataString(email);
-            var url = $"{_baseUrl}/{UsersCollection}/{documentId}?key={_apiKey}";
+            var url = $"{_baseUrl}/{FirestoreCollections.Users}/{documentId}?key={FirestoreConstants.ApiKey}";
             var response = await _httpClient.GetAsync(url);
             
             Debug.WriteLine($"[FirestoreService] Get user response status: {response.StatusCode}");
@@ -128,7 +123,7 @@ public class FirestoreService
     {
         try
         {
-            var url = $"{_baseUrl}/{LoansCollection}?key={_apiKey}";
+            var url = $"{_baseUrl}/{FirestoreCollections.Loans}?key={FirestoreConstants.ApiKey}";
             var payload = LoanToJson(loan);
             var content = new StringContent(payload, Encoding.UTF8, "application/json");
             
@@ -157,7 +152,7 @@ public class FirestoreService
     {
         try
         {
-            var url = $"{_baseUrl}/{LoansCollection}/{loanId}?key={_apiKey}";
+            var url = $"{_baseUrl}/{FirestoreCollections.Loans}/{loanId}?key={FirestoreConstants.ApiKey}";
             var response = await _httpClient.GetAsync(url);
             
             if (!response.IsSuccessStatusCode) return null;
@@ -179,7 +174,7 @@ public class FirestoreService
     {
         try
         {
-            var url = $"{_baseUrl}/{LoansCollection}/{loan.Id}?key={_apiKey}";
+            var url = $"{_baseUrl}/{FirestoreCollections.Loans}/{loan.Id}?key={FirestoreConstants.ApiKey}";
             var payload = LoanToJson(loan);
             var content = new StringContent(payload, Encoding.UTF8, "application/json");
             
@@ -202,7 +197,7 @@ public class FirestoreService
     {
         try
         {
-            var url = $"{_baseUrl}/{TransactionsCollection}?key={_apiKey}";
+            var url = $"{_baseUrl}/{FirestoreCollections.Transactions}?key={FirestoreConstants.ApiKey}";
             var payload = TransactionToJson(transaction);
             var content = new StringContent(payload, Encoding.UTF8, "application/json");
             
@@ -233,7 +228,7 @@ public class FirestoreService
     {
         try
         {
-            var url = $"{_baseUrl}/{InvestmentsCollection}?key={_apiKey}";
+            var url = $"{_baseUrl}/{FirestoreCollections.Investments}?key={FirestoreConstants.ApiKey}";
             var payload = InvestmentToJson(investment);
             var content = new StringContent(payload, Encoding.UTF8, "application/json");
             
@@ -264,7 +259,7 @@ public class FirestoreService
     {
         try
         {
-            var url = $"{_baseUrl}/{BudgetsCollection}/{budget.Id}?key={_apiKey}";
+            var url = $"{_baseUrl}/{FirestoreCollections.Budgets}/{budget.Id}?key={FirestoreConstants.ApiKey}";
             var payload = BudgetToJson(budget);
             var content = new StringContent(payload, Encoding.UTF8, "application/json");
             
@@ -553,7 +548,7 @@ public class FirestoreService
             Debug.WriteLine($"[FirestoreService] Deleting user: {email}");
             
             var documentId = Uri.EscapeDataString(email);
-            var url = $"{_baseUrl}/{UsersCollection}/{documentId}?key={_apiKey}";
+            var url = $"{_baseUrl}/{FirestoreCollections.Users}/{documentId}?key={FirestoreConstants.ApiKey}";
             var response = await _httpClient.DeleteAsync(url);
             
             if (response.IsSuccessStatusCode)
@@ -581,7 +576,7 @@ public class FirestoreService
         {
             Debug.WriteLine($"[FirestoreService] Deleting loan: {loanId}");
             
-            var url = $"{_baseUrl}/{LoansCollection}/{loanId}?key={_apiKey}";
+            var url = $"{_baseUrl}/{FirestoreCollections.Loans}/{loanId}?key={FirestoreConstants.ApiKey}";
             var response = await _httpClient.DeleteAsync(url);
             
             if (response.IsSuccessStatusCode)
@@ -609,7 +604,7 @@ public class FirestoreService
         {
             Debug.WriteLine($"[FirestoreService] Deleting transaction: {transactionId}");
             
-            var url = $"{_baseUrl}/{TransactionsCollection}/{transactionId}?key={_apiKey}";
+            var url = $"{_baseUrl}/{FirestoreCollections.Transactions}/{transactionId}?key={FirestoreConstants.ApiKey}";
             var response = await _httpClient.DeleteAsync(url);
             
             if (response.IsSuccessStatusCode)
@@ -661,7 +656,7 @@ public class FirestoreService
             Debug.WriteLine($"[FirestoreService] Getting transactions for user: {email}");
             
             // Get all transactions and filter by user email
-            var url = $"{_baseUrl}/{TransactionsCollection}?key={_apiKey}";
+            var url = $"{_baseUrl}/{FirestoreCollections.Transactions}?key={FirestoreConstants.ApiKey}";
             var response = await _httpClient.GetAsync(url);
             
             if (response.IsSuccessStatusCode)

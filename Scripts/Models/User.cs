@@ -74,12 +74,3 @@ public class User
     /// </summary>
     public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
 }
-
-public enum UserStatus
-{
-    Active,
-    Inactive,
-    Suspended,
-    Verified,
-    Unverified
-}

@@ -23,15 +23,6 @@
                 <ScrollView Grid.Row="1">
                         <VerticalStackLayout Padding="20,10,20,140" Spacing="14">
                                 <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
-                                        <Button Text="←"
-                                                        Command="{Binding BackCommand}"
-                                                        BackgroundColor="Transparent"
-                                                        TextColor="{StaticResource AccentOrange}"
-                                                        FontSize="32"
-                                                        WidthRequest="50"
-                                                        HeightRequest="50"
-                                                        CornerRadius="25"
-                                                        Padding="0" />
                                         <Label Text="Financial Calculators" 
                                                    FontSize="26" 
                                                    FontAttributes="Bold"

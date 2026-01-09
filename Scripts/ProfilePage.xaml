@@ -21,22 +21,6 @@
               <Grid.GestureRecognizers>
                      <SwipeGestureRecognizer Direction="Right" Command="{Binding NavigateToCalculatorCommand}" />
               </Grid.GestureRecognizers>
-              <!-- Back Button - Fixed top left -->
-              <Button Grid.Row="0"
-                            Text="←"
-                            Command="{Binding BackCommand}"
-                            BackgroundColor="Transparent"
-                            TextColor="{StaticResource AccentOrange}"
-                            FontSize="32"
-                            WidthRequest="50"
-                            HeightRequest="50"
-                            CornerRadius="25"
-                            Padding="0"
-                            HorizontalOptions="Start"
-                            VerticalOptions="Start"
-                            Margin="10,50,0,0"
-                            ZIndex="100" />
-
               <!-- Main Content -->
               <ScrollView Grid.Row="1" Margin="0,10,0,0">
                      <VerticalStackLayout Padding="20,10,20,140" Spacing="15">

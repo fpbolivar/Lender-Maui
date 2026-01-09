@@ -85,23 +85,3 @@ public class Transaction
     /// </summary>
     public string ReferenceNumber { get; set; } = string.Empty;
 }
-
-public enum TransactionType
-{
-    Funding,      // User funding a loan
-    Repayment,    // Borrower repaying the loan
-    Interest,     // Interest payment
-    Transfer,     // User to user transfer
-    Withdrawal,   // Withdrawal from wallet
-    Deposit       // Deposit to wallet
-}
-
-public enum TransactionStatus
-{
-    Pending,      // Waiting to be processed
-    Processing,   // Currently processing
-    Completed,    // Successfully completed
-    Failed,       // Transaction failed
-    Cancelled,    // Cancelled by user
-    Refunded      // Refunded back to user
-}

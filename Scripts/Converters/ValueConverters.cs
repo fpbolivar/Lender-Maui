@@ -53,3 +53,26 @@ public class StringNullOrEmptyConverter : IValueConverter
         throw new NotImplementedException();
     }
 }
+
+/// <summary>
+/// Converts a boolean value to a color (true = AccentOrange, false = CardBg).
+/// </summary>
+public class BoolToColorConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is bool boolValue)
+        {
+            // When true, return AccentOrange color; when false, return CardBg color
+            return boolValue 
+                ? Color.FromArgb("#FF9F43")  // AccentOrange
+                : Color.FromArgb("#132F4C"); // CardBg
+        }
+        return Color.FromArgb("#132F4C");
+    }
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}

@@ -9,6 +9,7 @@
             <!-- Value Converters -->
             <converters:InvertedBoolConverter x:Key="InvertedBoolConverter" />
             <converters:StringNullOrEmptyConverter x:Key="StringNullOrEmptyConverter" />
+            <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
             
             <!-- Global Styles for Edge-to-Edge Layout -->
             <Style TargetType="ContentPage">

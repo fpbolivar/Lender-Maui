@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:Lender.Views"
+             x:Class="Lender.TransactionPage"
+             Title="Transactions"
+             BackgroundColor="#0A1929"
+             Padding="0"
+             SafeAreaEdges="None">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Color x:Key="DarkBg">#0A1929</Color>
+            <Color x:Key="CardBg">#132F4C</Color>
+            <Color x:Key="AccentOrange">#FF9F43</Color>
+            <Color x:Key="AccentGreen">#1ABC9C</Color>
+            <Color x:Key="TextLight">#B0BEC5</Color>
+            <Color x:Key="TextWhite">#FFFFFF</Color>
+            <Color x:Key="RedAlert">#EF4444</Color>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*,Auto" Padding="0" BackgroundColor="{StaticResource DarkBg}" SafeAreaEdges="None">
+        <!-- Header -->
+        <VerticalStackLayout Grid.Row="0" Padding="16,50,16,16" Spacing="8" BackgroundColor="{StaticResource DarkBg}">
+            <Label Text="Transactions"
+                   FontSize="28"
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource TextWhite}" />
+        </VerticalStackLayout>
+
+        <!-- Scrollable Content Area -->
+        <ScrollView Grid.Row="1" BackgroundColor="{StaticResource DarkBg}" SafeAreaEdges="None">
+            <VerticalStackLayout Padding="16,0,16,16" Spacing="16" BackgroundColor="{StaticResource DarkBg}" SafeAreaEdges="None">
+
+                <!-- Filter Buttons -->
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                    <Button Grid.Column="0"
+                            Text="All"
+                            Command="{Binding FilterByAllCommand}"
+                            CornerRadius="8"
+                            FontSize="12"
+                            FontAttributes="Bold"
+                            Padding="12,8"
+                            TextColor="{StaticResource TextWhite}"
+                            BackgroundColor="{Binding IsAllSelected, Converter={StaticResource BoolToColorConverter}}" />
+                    
+                    <Button Grid.Column="1"
+                            Text="Lends"
+                            Command="{Binding FilterByLendsCommand}"
+                            CornerRadius="8"
+                            FontSize="12"
+                            FontAttributes="Bold"
+                            Padding="12,8"
+                            TextColor="{StaticResource TextWhite}"
+                            BackgroundColor="{Binding IsLendsSelected, Converter={StaticResource BoolToColorConverter}}" />
+                    
+                    <Button Grid.Column="2"
+                            Text="Borrows"
+                            Command="{Binding FilterByBorrowsCommand}"
+                            CornerRadius="8"
+                            FontSize="12"
+                            FontAttributes="Bold"
+                            Padding="12,8"
+                            TextColor="{StaticResource TextWhite}"
+                            BackgroundColor="{Binding IsBorrowsSelected, Converter={StaticResource BoolToColorConverter}}" />
+                </Grid>
+
+                <!-- Transactions List -->
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding FilteredTransactions}" Spacing="8">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <Frame CornerRadius="12"
+                                   BorderColor="{StaticResource CardBg}"
+                                   BackgroundColor="{StaticResource CardBg}"
+                                   Padding="16"
+                                   Margin="0,2,0,2">
+                                <VerticalStackLayout Spacing="12">
+                                    <!-- Header: Type and Amount -->
+                                    <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                                        <VerticalStackLayout Spacing="4" HorizontalOptions="StartAndExpand">
+                                            <Label Text="{Binding TransactionTypeDisplay}"
+                                                   FontSize="14"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{StaticResource TextWhite}" />
+                                            <Label Text="{Binding OtherPartyName}"
+                                                   FontSize="12"
+                                                   TextColor="{StaticResource TextLight}" />
+                                        </VerticalStackLayout>
+
+                                        <VerticalStackLayout Spacing="4" VerticalOptions="Center" HorizontalOptions="End">
+                                            <Label Text="{Binding Amount, StringFormat='${0:F2}'}"
+                                                   FontSize="16"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{Binding AmountTextColor}" />
+                                            <Label Text="{Binding Status}"
+                                                   FontSize="10"
+                                                   TextColor="{StaticResource AccentOrange}" />
+                                        </VerticalStackLayout>
+                                    </HorizontalStackLayout>
+
+                                    <!-- Interest -->
+                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="16" RowSpacing="8">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                            <Label Text="Interest Rate"
+                                                   FontSize="11"
+                                                   TextColor="{StaticResource TextLight}" />
+                                            <Label Text="{Binding InterestRateDisplay}"
+                                                   FontSize="13"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{StaticResource TextWhite}" />
+                                        </VerticalStackLayout>
+
+                                        <!-- Collateral (if exists) -->
+                                        <VerticalStackLayout Grid.Column="1" Spacing="4" IsVisible="{Binding HasCollateral}">
+                                            <Label Text="Collateral"
+                                                   FontSize="11"
+                                                   TextColor="{StaticResource TextLight}" />
+                                            <Label Text="{Binding CollateralName}"
+                                                   FontSize="13"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{StaticResource AccentGreen}" />
+                                        </VerticalStackLayout>
+                                    </Grid>
+
+                                    <!-- Next Payment Details -->
+                                    <Frame CornerRadius="8"
+                                           BorderColor="#1A3A52"
+                                           BackgroundColor="#0D1F2D"
+                                           Padding="12"
+                                           HasShadow="False"
+                                           IsVisible="{Binding HasNextPayment}">
+                                        <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+                                            <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                                <Label Text="Next Payment Date"
+                                                       FontSize="11"
+                                                       TextColor="{StaticResource TextLight}" />
+                                                <Label Text="{Binding NextPaymentDateDisplay}"
+                                                       FontSize="12"
+                                                       FontAttributes="Bold"
+                                                       TextColor="{StaticResource TextWhite}" />
+                                            </VerticalStackLayout>
+
+                                            <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                                <Label Text="Amount Due"
+                                                       FontSize="11"
+                                                       TextColor="{StaticResource TextLight}" />
+                                                <Label Text="{Binding NextPaymentAmountDisplay, StringFormat='${0:F2}'}"
+                                                       FontSize="12"
+                                                       FontAttributes="Bold"
+                                                       TextColor="{StaticResource AccentOrange}" />
+                                            </VerticalStackLayout>
+                                        </Grid>
+                                    </Frame>
+                                </VerticalStackLayout>
+                            </Frame>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <!-- No Transactions Message -->
+                <VerticalStackLayout Spacing="12" Padding="20" VerticalOptions="Center" IsVisible="{Binding HasNoTransactions}">
+                    <Label Text="No transactions"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextLight}"
+                           HorizontalTextAlignment="Center" />
+                    <Label Text="Your transactions will appear here"
+                           FontSize="14"
+                           TextColor="{StaticResource TextLight}"
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Bottom Navigation -->
+        <views:BottomNavView Grid.Row="2" SelectedTab="Transactions" />
+    </Grid>
+</ContentPage>

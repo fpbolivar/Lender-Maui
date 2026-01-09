@@ -39,6 +39,12 @@
         FlyoutItemIsVisible="False" />
 
     <ShellContent
+        Title="Transactions"
+        ContentTemplate="{DataTemplate local:TransactionPage}"
+        Route="transactions"
+        FlyoutItemIsVisible="False" />
+
+    <ShellContent
         Title="Login"
         ContentTemplate="{DataTemplate local:LoginPage}"
         Route="login"

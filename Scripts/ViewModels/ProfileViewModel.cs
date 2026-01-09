@@ -699,8 +699,7 @@ public class ProfileViewModel : INotifyPropertyChanged
 
     private async Task NavigateToTransactions()
     {
-        await Shell.Current.DisplayAlertAsync("Transactions", "Navigate to Transactions page", "OK");
-        // TODO: await Shell.Current.GoToAsync("//transactions");
+        await Shell.Current.GoToAsync("//transactions");
     }
 
     private async Task NavigateToDashboard()

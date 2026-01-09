@@ -4,35 +4,13 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using Lender.Models;
+using Lender.Services.Constants;
 
 namespace Lender.Services;
 
-public interface IAuthenticationService : INotifyPropertyChanged
-{
-    bool IsAuthenticated { get; }
-    string? CurrentUserId { get; }
-    string? CurrentUserEmail { get; }
-    Task<bool> SignUpAsync(string email, string password, string firstName, string lastName, string? phoneNumber = null, DateTime? dateOfBirth = null);
-    Task<bool> SignInAsync(string email, string password);
-    Task<bool> SignInWithGoogleAsync();
-    Task SignOutAsync();
-    Task<bool> RestoreSessionAsync();
-    Task<bool> ChangePasswordAsync(string currentPassword, string newPassword);
-    Task<bool> ChangeEmailAsync(string newEmail);
-    Task<bool> DeleteAccountAsync(string password);
-}
-
 public class AuthenticationService : IAuthenticationService
 {
-    private const string FirebaseWebApiKey = "AIzaSyBiRfWl6FILfLl2-jMv0ENpQFVNH2YYwLI"; // Firebase Web API Key from GoogleService-Info.plist
-    private const string GoogleClientId = "225480243312-e8p7119p1holglcu3a2n6gtrbvr8jbvb.apps.googleusercontent.com"; // iOS Client ID
-    private const string ReversedClientId = "com.googleusercontent.apps.225480243312-e8p7119p1holglcu3a2n6gtrbvr8jbvb";
-    private const string FirebaseAuthUrl = "https://identitytoolkit.googleapis.com/v1";
-    private const string FirebaseProjectId = "lender-d0412";
-    private const string FirebaseTokenKey = "firebase_auth_token";
-    private const string FirebaseUserIdKey = "firebase_user_id";
-    private const string FirebaseUserEmailKey = "firebase_user_email";
-
+    // Authentication constants are centralized in AuthenticationConstants
     private bool _isAuthenticated;
     private string? _currentUserId;
     private string? _currentUserEmail;
@@ -81,7 +59,7 @@ public class AuthenticationService : IAuthenticationService
         try
         {
             using var client = new HttpClient();
-            var requestUri = $"{FirebaseAuthUrl}/accounts:signUp?key={FirebaseWebApiKey}";
+            var requestUri = $"{AuthenticationConstants.FirebaseAuthUrl}/accounts:signUp?key={AuthenticationConstants.FirebaseWebApiKey}";
             
             Debug.WriteLine($"SignUp request URI: {requestUri}");
             Debug.WriteLine($"Email: {email}, FirstName: {firstName}, LastName: {lastName}, DateOfBirth: {dateOfBirth:yyyy-MM-dd}, Password length: {password.Length}");
@@ -199,7 +177,7 @@ public class AuthenticationService : IAuthenticationService
         try
         {
             using var client = new HttpClient();
-            var requestUri = $"{FirebaseAuthUrl}/accounts:signInWithPassword?key={FirebaseWebApiKey}";
+            var requestUri = $"{AuthenticationConstants.FirebaseAuthUrl}/accounts:signInWithPassword?key={AuthenticationConstants.FirebaseWebApiKey}";
             
             var payload = new
             {
@@ -295,7 +273,7 @@ public class AuthenticationService : IAuthenticationService
             var parameters = new Dictionary<string, string>
             {
                 { "code", authCode },
-                { "client_id", GoogleClientId },
+                { "client_id", AuthenticationConstants.GoogleClientId },
                 { "redirect_uri", redirectUri },
                 { "grant_type", "authorization_code" }
             };
@@ -339,7 +317,7 @@ public class AuthenticationService : IAuthenticationService
         try
         {
             using var client = new HttpClient();
-            var requestUri = $"{FirebaseAuthUrl}/accounts:signInWithIdp?key={FirebaseWebApiKey}";
+            var requestUri = $"{AuthenticationConstants.FirebaseAuthUrl}/accounts:signInWithIdp?key={AuthenticationConstants.FirebaseWebApiKey}";
             
             var payload = new
             {
@@ -398,9 +376,9 @@ public class AuthenticationService : IAuthenticationService
             IsAuthenticated = false;
             
             // Clear saved auth data
-            SecureStorage.Remove(FirebaseTokenKey);
-            SecureStorage.Remove(FirebaseUserIdKey);
-            SecureStorage.Remove(FirebaseUserEmailKey);
+            SecureStorage.Remove(AuthenticationConstants.FirebaseTokenKey);
+            SecureStorage.Remove(AuthenticationConstants.FirebaseUserIdKey);
+            SecureStorage.Remove(AuthenticationConstants.FirebaseUserEmailKey);
         }
         catch (Exception ex)
         {
@@ -412,9 +390,9 @@ public class AuthenticationService : IAuthenticationService
     {
         try
         {
-            var token = SecureStorage.GetAsync(FirebaseTokenKey).Result;
-            var userId = SecureStorage.GetAsync(FirebaseUserIdKey).Result;
-            var email = SecureStorage.GetAsync(FirebaseUserEmailKey).Result;
+            var token = SecureStorage.GetAsync(AuthenticationConstants.FirebaseTokenKey).Result;
+            var userId = SecureStorage.GetAsync(AuthenticationConstants.FirebaseUserIdKey).Result;
+            var email = SecureStorage.GetAsync(AuthenticationConstants.FirebaseUserEmailKey).Result;
 
             if (!string.IsNullOrEmpty(token) && !string.IsNullOrEmpty(userId))
             {
@@ -436,9 +414,9 @@ public class AuthenticationService : IAuthenticationService
     {
         try
         {
-            await SecureStorage.SetAsync(FirebaseTokenKey, token);
-            await SecureStorage.SetAsync(FirebaseUserIdKey, userId);
-            await SecureStorage.SetAsync(FirebaseUserEmailKey, email);
+            await SecureStorage.SetAsync(AuthenticationConstants.FirebaseTokenKey, token);
+            await SecureStorage.SetAsync(AuthenticationConstants.FirebaseUserIdKey, userId);
+            await SecureStorage.SetAsync(AuthenticationConstants.FirebaseUserEmailKey, email);
         }
         catch (Exception ex)
         {
@@ -465,7 +443,7 @@ public class AuthenticationService : IAuthenticationService
             using var client = new HttpClient();
             
             // First, re-authenticate with current password
-            var signInUri = $"{FirebaseAuthUrl}/accounts:signInWithPassword?key={FirebaseWebApiKey}";
+            var signInUri = $"{AuthenticationConstants.FirebaseAuthUrl}/accounts:signInWithPassword?key={AuthenticationConstants.FirebaseWebApiKey}";
             var signInPayload = new
             {
                 email = CurrentUserEmail,
@@ -494,7 +472,7 @@ public class AuthenticationService : IAuthenticationService
                 return false;
 
             // Now update password
-            var updateUri = $"{FirebaseAuthUrl}/accounts:update?key={FirebaseWebApiKey}";
+            var updateUri = $"{AuthenticationConstants.FirebaseAuthUrl}/accounts:update?key={AuthenticationConstants.FirebaseWebApiKey}";
             var updatePayload = new
             {
                 idToken = idToken.GetString(),
@@ -518,7 +496,7 @@ public class AuthenticationService : IAuthenticationService
                 if (updateResult.TryGetProperty("idToken", out var newToken))
                 {
                     // Save new token
-                    await SecureStorage.SetAsync(FirebaseTokenKey, newToken.GetString() ?? "");
+                    await SecureStorage.SetAsync(AuthenticationConstants.FirebaseTokenKey, newToken.GetString() ?? "");
                     return true;
                 }
             }
@@ -540,12 +518,12 @@ public class AuthenticationService : IAuthenticationService
                 return false;
 
             using var client = new HttpClient();
-            var token = await SecureStorage.GetAsync(FirebaseTokenKey);
+            var token = await SecureStorage.GetAsync(AuthenticationConstants.FirebaseTokenKey);
             
             if (string.IsNullOrEmpty(token))
                 return false;
 
-            var updateUri = $"{FirebaseAuthUrl}/accounts:update?key={FirebaseWebApiKey}";
+            var updateUri = $"{AuthenticationConstants.FirebaseAuthUrl}/accounts:update?key={AuthenticationConstants.FirebaseWebApiKey}";
             var updatePayload = new
             {
                 idToken = token,
@@ -570,8 +548,8 @@ public class AuthenticationService : IAuthenticationService
                     updateResult.TryGetProperty("email", out var email))
                 {
                     // Update stored auth data
-                    await SecureStorage.SetAsync(FirebaseTokenKey, newToken.GetString() ?? "");
-                    await SecureStorage.SetAsync(FirebaseUserEmailKey, email.GetString() ?? "");
+                    await SecureStorage.SetAsync(AuthenticationConstants.FirebaseTokenKey, newToken.GetString() ?? "");
+                    await SecureStorage.SetAsync(AuthenticationConstants.FirebaseUserEmailKey, email.GetString() ?? "");
                     CurrentUserEmail = email.GetString();
                     return true;
                 }
@@ -596,7 +574,7 @@ public class AuthenticationService : IAuthenticationService
             using var client = new HttpClient();
             
             // First, re-authenticate with password
-            var signInUri = $"{FirebaseAuthUrl}/accounts:signInWithPassword?key={FirebaseWebApiKey}";
+            var signInUri = $"{AuthenticationConstants.FirebaseAuthUrl}/accounts:signInWithPassword?key={AuthenticationConstants.FirebaseWebApiKey}";
             var signInPayload = new
             {
                 email = CurrentUserEmail,
@@ -625,7 +603,7 @@ public class AuthenticationService : IAuthenticationService
                 return false;
 
             // Now delete account
-            var deleteUri = $"{FirebaseAuthUrl}/accounts:delete?key={FirebaseWebApiKey}";
+            var deleteUri = $"{AuthenticationConstants.FirebaseAuthUrl}/accounts:delete?key={AuthenticationConstants.FirebaseWebApiKey}";
             var deletePayload = new
             {
                 idToken = idToken.GetString()

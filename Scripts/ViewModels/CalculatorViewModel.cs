@@ -31,7 +31,7 @@ public class CalculatorViewModel
         OpenAutoLoanCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(AutoLoanPage), animate: true));
         OpenSavingsCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(SavingsPage), animate: true));
         OpenInvestmentCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(InvestmentPage), animate: true));
-        NavigateToTransactionsCommand = new Command(async () => await Shell.Current.DisplayAlertAsync("Transactions", "Navigate to Transactions page", "OK"));
+        NavigateToTransactionsCommand = new Command(async () => await Shell.Current.GoToAsync("///transactions"));
         NavigateToDashboardCommand = new Command(async () => await NavBarNavigation.GoToDashboardAsync());
         NavigateToRequestLoanCommand = new Command(async () => await Shell.Current.DisplayAlertAsync("Request/Send Loan", "Navigate to Request/Send Loan page", "OK"));
         NavigateToCalculatorCommand = new Command(async () => await NavBarNavigation.GoToCalculatorAsync());

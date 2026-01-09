@@ -6,13 +6,16 @@ namespace Lender.Services;
 public static class NavBarNavigation
 {
     public static Task GoToDashboardAsync(bool isDemoMode = false)
-        => NavigateAsync("mainpage", isDemoMode, blockInDemo: true);
+        => NavigateAsync("///mainpage", isDemoMode, blockInDemo: true);
 
     public static Task GoToCalculatorAsync(bool isDemoMode = false)
-        => NavigateAsync("calculator", isDemoMode, blockInDemo: false);
+        => NavigateAsync("///calculator", isDemoMode, blockInDemo: false);
 
     public static Task GoToProfileAsync(bool isDemoMode = false)
-        => NavigateAsync("profile", isDemoMode, blockInDemo: false);
+        => NavigateAsync("///profile", isDemoMode, blockInDemo: false);
+        
+    public static Task GoToTransactionsAsync(bool isDemoMode = false) 
+        => NavigateAsync("///transactions", isDemoMode, blockInDemo: false);
 
     private static async Task NavigateAsync(string route, bool isDemoMode, bool blockInDemo)
     {
@@ -31,7 +34,7 @@ public static class NavBarNavigation
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[NavBarNavigation] Primary nav failed for route '{route}': {ex.Message}");
+            Debug.WriteLine($"[NavBarNavigation] Primary nav failed for route '{route}': {ex.Message} - NavBarNavigation.cs:37");
             // Fallback to absolute route to avoid crash
             await Shell.Current.GoToAsync($"//{route}", true);
         }

@@ -84,7 +84,7 @@ public class TransactionDisplayModel : INotifyPropertyChanged
     }
 }
 
-public class TransactionViewModel : INotifyPropertyChanged
+public class TransactionViewModel : NavigableViewModel
 {
     private ObservableCollection<TransactionDisplayModel> _allTransactions = new();
     private ObservableCollection<TransactionDisplayModel> _filteredTransactions = new();
@@ -97,10 +97,6 @@ public class TransactionViewModel : INotifyPropertyChanged
     public ICommand FilterByAllCommand { get; }
     public ICommand FilterByLendsCommand { get; }
     public ICommand FilterByBorrowsCommand { get; }
-    public ICommand NavigateToDashboardCommand { get; }
-    public ICommand NavigateToCalculatorCommand { get; }
-    public ICommand NavigateToLoansCommand { get; }
-    public ICommand NavigateToProfileCommand { get; }
 
     public TransactionViewModel()
     {
@@ -111,10 +107,6 @@ public class TransactionViewModel : INotifyPropertyChanged
         FilterByAllCommand = new Command(() => FilterByAll());
         FilterByLendsCommand = new Command(() => FilterByLends());
         FilterByBorrowsCommand = new Command(() => FilterByBorrows());
-        NavigateToDashboardCommand = new Command(async () => await NavigateToDashboard());
-        NavigateToCalculatorCommand = new Command(async () => await NavigateToCalculator());
-        NavigateToLoansCommand = new Command(async () => { await Shell.Current.GoToAsync("loanform"); });
-        NavigateToProfileCommand = new Command(async () => await NavigateToProfile());
     }
 
     public ObservableCollection<TransactionDisplayModel> FilteredTransactions
@@ -364,28 +356,5 @@ public class TransactionViewModel : INotifyPropertyChanged
             FilterByBorrows();
         else
             FilterByAll();
-    }
-
-    private async Task NavigateToDashboard()
-    {
-        await Shell.Current.GoToAsync("//mainpage");
-    }
-
-    private async Task NavigateToCalculator()
-    {
-        await Shell.Current.GoToAsync("//calculator");
-    }
-
-
-    private async Task NavigateToProfile()
-    {
-        await Shell.Current.GoToAsync("//profile");
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

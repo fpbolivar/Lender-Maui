@@ -5,7 +5,7 @@ using Lender.Services;
 
 namespace Lender.ViewModels;
 
-public class CalculatorViewModel
+public class CalculatorViewModel : NavigableViewModel
 {
     public ICommand BackCommand { get; }
     public ICommand OpenSimpleInterestCommand { get; }
@@ -15,11 +15,6 @@ public class CalculatorViewModel
     public ICommand OpenAutoLoanCommand { get; }
     public ICommand OpenSavingsCommand { get; }
     public ICommand OpenInvestmentCommand { get; }
-    public ICommand NavigateToTransactionsCommand { get; }
-    public ICommand NavigateToDashboardCommand { get; }
-    public ICommand NavigateToLoansCommand { get; }
-    public ICommand NavigateToCalculatorCommand { get; }
-    public ICommand NavigateToProfileCommand { get; }
 
     public CalculatorViewModel()
     {
@@ -31,10 +26,5 @@ public class CalculatorViewModel
         OpenAutoLoanCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(AutoLoanPage), animate: true));
         OpenSavingsCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(SavingsPage), animate: true));
         OpenInvestmentCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(InvestmentPage), animate: true));
-        NavigateToTransactionsCommand = new Command(async () => await Shell.Current.GoToAsync("///transactions"));
-        NavigateToDashboardCommand = new Command(async () => await NavBarNavigation.GoToDashboardAsync());
-        NavigateToLoansCommand = new Command(async () => await Shell.Current.GoToAsync("//loanform"));
-        NavigateToCalculatorCommand = new Command(async () => await NavBarNavigation.GoToCalculatorAsync());
-        NavigateToProfileCommand = new Command(async () => await NavBarNavigation.GoToProfileAsync());
     }
 }

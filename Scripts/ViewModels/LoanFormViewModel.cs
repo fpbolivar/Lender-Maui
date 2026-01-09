@@ -1,31 +1,15 @@
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using Lender.Calculators;
-using Lender.Helpers;
-using Lender.Models;
-using Lender.Models.Enums;
-using Lender.Services;
-using Microsoft.Maui.Controls;
-using Microsoft.Maui.Storage;
 
 namespace Lender.ViewModels;
 
-public class LoanFormViewModel : INotifyPropertyChanged
+public class LoanFormViewModel : NavigableViewModel
 {
     public ICommand BackCommand { get; }
     public ICommand UploadCollateralImageCommand { get; }
     public ICommand SubmitCommand { get; }
     public ICommand SetRequestModeCommand { get; }
     public ICommand SetSendModeCommand { get; }
-    
-    // Navigation commands for BottomNavView
-    public ICommand NavigateToTransactionsCommand { get; }
-    public ICommand NavigateToDashboardCommand { get; }
-    public ICommand NavigateToLoansCommand { get; }
-    public ICommand NavigateToCalculatorCommand { get; }
-    public ICommand NavigateToProfileCommand { get; }
 
     private string _amountText = "0";
     public string AmountText { get => _amountText; set => SetProperty(ref _amountText, value ?? "0"); }
@@ -46,8 +30,6 @@ public class LoanFormViewModel : INotifyPropertyChanged
     private int _totalPayments = 0;
     public int TotalPayments { get => _totalPayments; private set => SetProperty(ref _totalPayments, value); }
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-
     public LoanFormViewModel()
     {
         Debug.WriteLine("LoanFormViewModel constructor started");
@@ -61,30 +43,6 @@ public class LoanFormViewModel : INotifyPropertyChanged
         SetRequestModeCommand = new Command(() => { });
         SetSendModeCommand = new Command(() => { });
         
-        // Navigation commands
-        NavigateToTransactionsCommand = new Command(async () => await Shell.Current.GoToAsync("//transactions"));
-        NavigateToDashboardCommand = new Command(async () => await Shell.Current.GoToAsync("//mainpage"));
-        NavigateToLoansCommand = new Command(async () => await Shell.Current.GoToAsync("//loanform"));
-        NavigateToCalculatorCommand = new Command(async () => await Shell.Current.GoToAsync("//calculator"));
-        NavigateToProfileCommand = new Command(async () => await Shell.Current.GoToAsync("//profile"));
-        
         Debug.WriteLine("LoanFormViewModel constructor completed");
     }
-
-    private void OnPropertyChanged(string propertyName)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    private bool SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = "")
-    {
-        if (!EqualityComparer<T>.Default.Equals(field, value))
-        {
-            field = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-            return true;
-        }
-        return false;
-    }
 }
-

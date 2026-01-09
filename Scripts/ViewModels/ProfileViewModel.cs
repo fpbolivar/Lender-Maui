@@ -1,5 +1,3 @@
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using Lender.Helpers;
 using Lender.Services;
@@ -7,19 +5,10 @@ using Lender.Models;
 
 namespace Lender.ViewModels;
 
-public class ProfileViewModel : INotifyPropertyChanged
+public class ProfileViewModel : BaseViewModel
 {
-    private string _userName = string.Empty;
-    private string _userEmail = string.Empty;
-    private string _phoneNumber = string.Empty;
-    private string _dateOfBirth = string.Empty;
-    private string _memberSince = string.Empty;
-    private string _userInitials = "U";
-    private decimal _balance;
-    private int _totalLoans;
-    private decimal _totalLent;
-    private decimal _totalBorrowed;
-    private int _onTimeRate = 100;
+    private UserProfile _userProfile = new UserProfile();
+    private LoanStatistics _loanStatistics = LoanStatistics.CreateEmpty();
 
     private readonly IAuthenticationService _authService;
     private readonly FirestoreService _firestoreService;
@@ -62,37 +51,36 @@ public class ProfileViewModel : INotifyPropertyChanged
         NavigateToLoansCommand = new Command(async () => { await Shell.Current.GoToAsync("loanform"); });
         NavigateToCalculatorCommand = new Command(async () => await NavigateToCalculator());
         
-        // Initialize with defaults
-        UserName = "Loading...";
-        UserEmail = "Loading...";
-        PhoneNumber = "Not provided";
-        DateOfBirth = "Not provided";
-        MemberSince = "Recently";
-        UserInitials = "U";
+        // Initialize with demo data instead of loading text
+        // This ensures UI shows something immediately while refresh happens
+        _userProfile = UserProfile.CreateDemo();
+        _loanStatistics = LoanStatistics.CreateEmpty();
     }
 
+    // Expose UserProfile properties for data binding
     public string UserName
     {
-        get => _userName;
+        get => _userProfile.UserName;
         set
         {
-            if (_userName != value)
+            if (_userProfile.UserName != value)
             {
-                _userName = value;
+                _userProfile.UserName = value;
+                _userProfile.UpdateInitials();
                 OnPropertyChanged();
-                UpdateInitials();
+                OnPropertyChanged(nameof(UserInitials));
             }
         }
     }
 
     public string UserEmail
     {
-        get => _userEmail;
+        get => _userProfile.UserEmail;
         set
         {
-            if (_userEmail != value)
+            if (_userProfile.UserEmail != value)
             {
-                _userEmail = value;
+                _userProfile.UserEmail = value;
                 OnPropertyChanged();
             }
         }
@@ -100,12 +88,12 @@ public class ProfileViewModel : INotifyPropertyChanged
 
     public string PhoneNumber
     {
-        get => _phoneNumber;
+        get => _userProfile.PhoneNumber;
         set
         {
-            if (_phoneNumber != value)
+            if (_userProfile.PhoneNumber != value)
             {
-                _phoneNumber = value;
+                _userProfile.PhoneNumber = value;
                 OnPropertyChanged();
             }
         }
@@ -113,12 +101,12 @@ public class ProfileViewModel : INotifyPropertyChanged
 
     public string DateOfBirth
     {
-        get => _dateOfBirth;
+        get => _userProfile.DateOfBirthDisplay;
         set
         {
-            if (_dateOfBirth != value)
+            if (_userProfile.DateOfBirthDisplay != value)
             {
-                _dateOfBirth = value;
+                _userProfile.DateOfBirthDisplay = value;
                 OnPropertyChanged();
             }
         }
@@ -126,12 +114,12 @@ public class ProfileViewModel : INotifyPropertyChanged
 
     public string MemberSince
     {
-        get => _memberSince;
+        get => _userProfile.MemberSince;
         set
         {
-            if (_memberSince != value)
+            if (_userProfile.MemberSince != value)
             {
-                _memberSince = value;
+                _userProfile.MemberSince = value;
                 OnPropertyChanged();
             }
         }
@@ -139,12 +127,12 @@ public class ProfileViewModel : INotifyPropertyChanged
 
     public string UserInitials
     {
-        get => _userInitials;
+        get => _userProfile.UserInitials;
         set
         {
-            if (_userInitials != value)
+            if (_userProfile.UserInitials != value)
             {
-                _userInitials = value;
+                _userProfile.UserInitials = value;
                 OnPropertyChanged();
             }
         }
@@ -152,25 +140,26 @@ public class ProfileViewModel : INotifyPropertyChanged
 
     public decimal Balance
     {
-        get => _balance;
+        get => _userProfile.Balance;
         set
         {
-            if (_balance != value)
+            if (_userProfile.Balance != value)
             {
-                _balance = value;
+                _userProfile.Balance = value;
                 OnPropertyChanged();
             }
         }
     }
 
+    // Expose LoanStatistics properties for data binding
     public int TotalLoans
     {
-        get => _totalLoans;
+        get => _loanStatistics.TotalLoans;
         set
         {
-            if (_totalLoans != value)
+            if (_loanStatistics.TotalLoans != value)
             {
-                _totalLoans = value;
+                _loanStatistics.TotalLoans = value;
                 OnPropertyChanged();
             }
         }
@@ -178,12 +167,12 @@ public class ProfileViewModel : INotifyPropertyChanged
 
     public decimal TotalLent
     {
-        get => _totalLent;
+        get => _loanStatistics.TotalLent;
         set
         {
-            if (_totalLent != value)
+            if (_loanStatistics.TotalLent != value)
             {
-                _totalLent = value;
+                _loanStatistics.TotalLent = value;
                 OnPropertyChanged();
             }
         }
@@ -191,12 +180,12 @@ public class ProfileViewModel : INotifyPropertyChanged
 
     public decimal TotalBorrowed
     {
-        get => _totalBorrowed;
+        get => _loanStatistics.TotalBorrowed;
         set
         {
-            if (_totalBorrowed != value)
+            if (_loanStatistics.TotalBorrowed != value)
             {
-                _totalBorrowed = value;
+                _loanStatistics.TotalBorrowed = value;
                 OnPropertyChanged();
             }
         }
@@ -204,12 +193,12 @@ public class ProfileViewModel : INotifyPropertyChanged
 
     public int OnTimeRate
     {
-        get => _onTimeRate;
+        get => _loanStatistics.OnTimePaymentRate;
         set
         {
-            if (_onTimeRate != value)
+            if (_loanStatistics.OnTimePaymentRate != value)
             {
-                _onTimeRate = value;
+                _loanStatistics.OnTimePaymentRate = value;
                 OnPropertyChanged();
             }
         }
@@ -223,67 +212,53 @@ public class ProfileViewModel : INotifyPropertyChanged
             if (string.IsNullOrEmpty(currentEmail))
             {
                 // Demo mode fallback – ensure no previous user data leaks
-                UserName = "Demo User";
-                UserEmail = "demo@example.com";
-                PhoneNumber = "Not provided";
-                DateOfBirth = "Not provided";
-                MemberSince = "Demo";
-                Balance = 0;
-                TotalLoans = 0;
-                TotalLent = 0;
-                TotalBorrowed = 0;
-                OnTimeRate = 100;
-                UpdateInitials();
-                System.Diagnostics.Debug.WriteLine("Profile set to demo defaults (no user email)");
+                _userProfile = UserProfile.CreateDemo();
+                _loanStatistics = LoanStatistics.CreateEmpty();
+                
+                // Notify all properties
+                NotifyAllPropertiesChanged();
+                
+                System.Diagnostics.Debug.WriteLine("Profile set to demo defaults (no user email) - ProfileViewModel.cs:221");
                 return;
             }
 
             var user = await _firestoreService.GetUserAsync(currentEmail);
             if (user != null)
             {
-                UserName = user.FullName ?? "User";
-                UserEmail = user.Email ?? currentEmail;
-                PhoneNumber = string.IsNullOrEmpty(user.PhoneNumber) ? "Not provided" : user.PhoneNumber;
-                DateOfBirth = user.DateOfBirth != DateTime.MinValue ? user.DateOfBirth.ToString("MMMM dd, yyyy") : "Not provided";
-                Balance = user.Balance;
-
-                // Parse member since from joinDate
-                if (user.JoinDate != DateTime.MinValue)
-                {
-                    MemberSince = user.JoinDate.ToString("MMMM yyyy");
-                }
-                else
-                {
-                    MemberSince = "Recently";
-                }
-
+                _userProfile = UserProfile.FromUser(user);
+                
                 // TODO: Load loan statistics from Firestore when loans collection is implemented
-                TotalLoans = 0;
-                TotalLent = 0;
-                TotalBorrowed = 0;
-                OnTimeRate = 100;
+                _loanStatistics = LoanStatistics.CreateEmpty();
+                
+                // Notify all properties
+                NotifyAllPropertiesChanged();
             }
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error loading profile: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Error loading profile: {ex.Message} - ProfileViewModel.cs:239");
         }
+    }
+
+    private void NotifyAllPropertiesChanged()
+    {
+        OnPropertyChanged(nameof(UserName));
+        OnPropertyChanged(nameof(UserEmail));
+        OnPropertyChanged(nameof(PhoneNumber));
+        OnPropertyChanged(nameof(DateOfBirth));
+        OnPropertyChanged(nameof(MemberSince));
+        OnPropertyChanged(nameof(UserInitials));
+        OnPropertyChanged(nameof(Balance));
+        OnPropertyChanged(nameof(TotalLoans));
+        OnPropertyChanged(nameof(TotalLent));
+        OnPropertyChanged(nameof(TotalBorrowed));
+        OnPropertyChanged(nameof(OnTimeRate));
     }
 
     private void UpdateInitials()
     {
-        if (!string.IsNullOrEmpty(UserName))
-        {
-            var parts = UserName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length >= 2)
-            {
-                UserInitials = $"{parts[0][0]}{parts[1][0]}".ToUpper();
-            }
-            else if (parts.Length == 1)
-            {
-                UserInitials = parts[0][0].ToString().ToUpper();
-            }
-        }
+        _userProfile.UpdateInitials();
+        OnPropertyChanged(nameof(UserInitials));
     }
 
     private async Task GoBack()
@@ -295,14 +270,11 @@ public class ProfileViewModel : INotifyPropertyChanged
     {
         try
         {
-            var page = Application.Current?.Windows[0]?.Page;
-            if (page == null) return;
-            
-            string newName = await page.DisplayPromptAsync(
-                "Edit Profile",
+            string? newName = await DialogService.ShowPromptAsync(
                 "Enter your new name:",
-                initialValue: UserName,
-                placeholder: "Your Name");
+                "Edit Profile",
+                "Your Name",
+                UserName);
 
             if (!string.IsNullOrWhiteSpace(newName) && newName != UserName && newName != "Loading...")
             {
@@ -316,15 +288,13 @@ public class ProfileViewModel : INotifyPropertyChanged
                     await _firestoreService.UpdateUserAsync(user);
                     
                     UserName = newName;
-                    await page.DisplayAlertAsync("Success", "Profile updated successfully!", "OK");
+                    await DialogService.ShowSuccessAsync("Profile updated successfully!");
                 }
             }
         }
         catch (Exception ex)
         {
-            var page = Application.Current?.Windows[0]?.Page;
-            if (page != null)
-                await page.DisplayAlertAsync("Error", $"Failed to update profile: {ex.Message}", "OK");
+            await DialogService.ShowErrorAsync($"Failed to update profile: {ex.Message}");
         }
     }
 
@@ -332,59 +302,50 @@ public class ProfileViewModel : INotifyPropertyChanged
     {
         try
         {
-            var page = Application.Current?.Windows[0]?.Page;
-            if (page == null) return;
-            
-            string currentPassword = await page.DisplayPromptAsync(
-                "Change Password",
+            string? currentPassword = await DialogService.ShowPromptAsync(
                 "Enter your current password:",
-                placeholder: "Current password",
-                maxLength: 50);
+                "Change Password",
+                "Current password");
 
             if (string.IsNullOrWhiteSpace(currentPassword))
                 return;
 
-            string newPassword = await page.DisplayPromptAsync(
-                "Change Password",
+            string? newPassword = await DialogService.ShowPromptAsync(
                 "Enter your new password (min 6 characters):",
-                placeholder: "New password",
-                maxLength: 50);
+                "Change Password",
+                "New password");
 
             if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 6)
             {
-                await page.DisplayAlertAsync("Error", "Password must be at least 6 characters", "OK");
+                await DialogService.ShowErrorAsync("Password must be at least 6 characters");
                 return;
             }
 
-            string confirmPassword = await page.DisplayPromptAsync(
-                "Change Password",
+            string? confirmPassword = await DialogService.ShowPromptAsync(
                 "Confirm your new password:",
-                placeholder: "Confirm password",
-                maxLength: 50);
+                "Change Password",
+                "Confirm password");
 
             if (newPassword != confirmPassword)
             {
-                await page.DisplayAlertAsync("Error", "Passwords do not match", "OK");
+                await DialogService.ShowErrorAsync("Passwords do not match");
                 return;
             }
 
-            // Update password via authentication service
             bool success = await _authService.ChangePasswordAsync(currentPassword, newPassword);
             
             if (success)
             {
-                await page.DisplayAlertAsync("Success", "Password changed successfully!", "OK");
+                await DialogService.ShowSuccessAsync("Password changed successfully!");
             }
             else
             {
-                await page.DisplayAlertAsync("Error", "Failed to change password. Check your current password.", "OK");
+                await DialogService.ShowErrorAsync("Failed to change password. Check your current password.");
             }
         }
         catch (Exception ex)
         {
-            var page = Application.Current?.Windows[0]?.Page;
-            if (page != null)
-                await page.DisplayAlertAsync("Error", $"Failed to change password: {ex.Message}", "OK");
+            await DialogService.ShowErrorAsync($"Failed to change password: {ex.Message}");
         }
     }
 
@@ -567,11 +528,9 @@ public class ProfileViewModel : INotifyPropertyChanged
 
     private async Task SignOut()
     {
-        bool confirm = await Shell.Current.DisplayAlertAsync(
-            "Sign Out",
+        bool confirm = await DialogService.ShowConfirmAsync(
             "Are you sure you want to sign out?",
-            "Yes",
-            "Cancel");
+            "Sign Out");
 
         if (confirm)
         {
@@ -695,12 +654,5 @@ public class ProfileViewModel : INotifyPropertyChanged
     private async Task NavigateToCalculator()
     {
         await NavBarNavigation.GoToCalculatorAsync();
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

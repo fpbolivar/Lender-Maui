@@ -50,7 +50,7 @@ public class AuthenticationService : IAuthenticationService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Authentication initialization failed: {ex.Message} - AuthenticationService.cs:71");
+            Debug.WriteLine($"Authentication initialization failed: {ex.Message} - AuthenticationService.cs:53");
         }
     }
 
@@ -61,8 +61,8 @@ public class AuthenticationService : IAuthenticationService
             using var client = new HttpClient();
             var requestUri = $"{AuthenticationConstants.FirebaseAuthUrl}/accounts:signUp?key={AuthenticationConstants.FirebaseWebApiKey}";
             
-            Debug.WriteLine($"SignUp request URI: {requestUri}");
-            Debug.WriteLine($"Email: {email}, FirstName: {firstName}, LastName: {lastName}, DateOfBirth: {dateOfBirth:yyyy-MM-dd}, Password length: {password.Length}");
+            Debug.WriteLine($"SignUp request URI: {requestUri} - AuthenticationService.cs:64");
+            Debug.WriteLine($"Email: {email}, FirstName: {firstName}, LastName: {lastName}, DateOfBirth: {dateOfBirth:yyyyMMdd}, Password length: {password.Length} - AuthenticationService.cs:65");
             
             var payload = new
             {
@@ -72,7 +72,7 @@ public class AuthenticationService : IAuthenticationService
             };
 
             var jsonPayload = JsonSerializer.Serialize(payload);
-            Debug.WriteLine($"SignUp payload: {jsonPayload}");
+            Debug.WriteLine($"SignUp payload: {jsonPayload} - AuthenticationService.cs:75");
             
             var jsonContent = new StringContent(
                 jsonPayload,
@@ -82,12 +82,12 @@ public class AuthenticationService : IAuthenticationService
 
             var response = await client.PostAsync(requestUri, jsonContent);
             
-            Debug.WriteLine($"SignUp response status: {response.StatusCode}");
+            Debug.WriteLine($"SignUp response status: {response.StatusCode} - AuthenticationService.cs:85");
             
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();
-                Debug.WriteLine($"SignUp response content: {content}");
+                Debug.WriteLine($"SignUp response content: {content} - AuthenticationService.cs:90");
                 var result = JsonSerializer.Deserialize<JsonElement>(content);
                 
                 if (result.TryGetProperty("idToken", out var idToken) &&
@@ -117,7 +117,7 @@ public class AuthenticationService : IAuthenticationService
                         JoinDate = DateTime.UtcNow
                     };
                     
-                    Debug.WriteLine($"[AuthenticationService] Creating user in Firestore: {newUser.Email}");
+                    Debug.WriteLine($"[AuthenticationService] Creating user in Firestore: {newUser.Email} - AuthenticationService.cs:120");
                     try
                     {
                         var firebaseService = FirestoreService.Instance;
@@ -125,20 +125,20 @@ public class AuthenticationService : IAuthenticationService
                         
                         if (saveSuccess)
                         {
-                            Debug.WriteLine($"[AuthenticationService] ✅ User {newUser.Email} successfully created in Firestore with full profile");
+                            Debug.WriteLine($"[AuthenticationService] ✅ User {newUser.Email} successfully created in Firestore with full profile - AuthenticationService.cs:128");
                             return true;
                         }
                         else
                         {
-                            Debug.WriteLine($"[AuthenticationService] ⚠️ User created in Firebase Auth but FAILED to save to Firestore!");
+                            Debug.WriteLine($"[AuthenticationService] ⚠️ User created in Firebase Auth but FAILED to save to Firestore! - AuthenticationService.cs:133");
                             // Still return true because Firebase Auth worked
                             return true;
                         }
                     }
                     catch (Exception firestoreEx)
                     {
-                        Debug.WriteLine($"[AuthenticationService] EXCEPTION saving to Firestore: {firestoreEx.Message}");
-                        Debug.WriteLine($"[AuthenticationService] Stack: {firestoreEx.StackTrace}");
+                        Debug.WriteLine($"[AuthenticationService] EXCEPTION saving to Firestore: {firestoreEx.Message} - AuthenticationService.cs:140");
+                        Debug.WriteLine($"[AuthenticationService] Stack: {firestoreEx.StackTrace} - AuthenticationService.cs:141");
                         return true; // Auth still succeeded
                     }
                 }
@@ -146,7 +146,7 @@ public class AuthenticationService : IAuthenticationService
             else
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
-                Debug.WriteLine($"Sign up HTTP error {response.StatusCode}: {errorContent}");
+                Debug.WriteLine($"Sign up HTTP error {response.StatusCode}: {errorContent} - AuthenticationService.cs:149");
                 
                 // Try to parse Firebase error message
                 try
@@ -155,7 +155,7 @@ public class AuthenticationService : IAuthenticationService
                     if (errorResult.TryGetProperty("error", out var error) && 
                         error.TryGetProperty("message", out var message))
                     {
-                        Debug.WriteLine($"Firebase error message: {message.GetString()}");
+                        Debug.WriteLine($"Firebase error message: {message.GetString()} - AuthenticationService.cs:158");
                     }
                 }
                 catch { }
@@ -165,8 +165,8 @@ public class AuthenticationService : IAuthenticationService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Sign up exception: {ex.Message}");
-            Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+            Debug.WriteLine($"Sign up exception: {ex.Message} - AuthenticationService.cs:168");
+            Debug.WriteLine($"Stack trace: {ex.StackTrace} - AuthenticationService.cs:169");
             return false;
         }
     }
@@ -218,7 +218,7 @@ public class AuthenticationService : IAuthenticationService
             else
             {
                 var error = await response.Content.ReadAsStringAsync();
-                Debug.WriteLine($"Sign in error: {error} - AuthenticationService.cs:181");
+                Debug.WriteLine($"Sign in error: {error} - AuthenticationService.cs:221");
             }
 
             IsAuthenticated = false;
@@ -226,7 +226,7 @@ public class AuthenticationService : IAuthenticationService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Sign in exception: {ex.Message} - AuthenticationService.cs:189");
+            Debug.WriteLine($"Sign in exception: {ex.Message} - AuthenticationService.cs:229");
             return false;
         }
     }
@@ -235,26 +235,26 @@ public class AuthenticationService : IAuthenticationService
     {
         try
         {
-            Debug.WriteLine("Starting native Google SignIn - AuthenticationService.cs:198");
+            Debug.WriteLine("Starting native Google SignIn - AuthenticationService.cs:238");
             
             var result = await GoogleSignInService.SignInAsync();
             
             if (result != null && !string.IsNullOrEmpty(result.IdToken))
             {
-                Debug.WriteLine($"Got Google ID token for: {result.Email} - AuthenticationService.cs:204");
+                Debug.WriteLine($"Got Google ID token for: {result.Email} - AuthenticationService.cs:244");
                 return await SignInWithGoogleIdToken(result.IdToken);
             }
             else
             {
-                Debug.WriteLine("Google SignIn returned null or no token - AuthenticationService.cs:209");
+                Debug.WriteLine("Google SignIn returned null or no token - AuthenticationService.cs:249");
             }
             
             return false;
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Google sign in exception: {ex.Message} - AuthenticationService.cs:216");
-            Debug.WriteLine($"Stack trace: {ex.StackTrace} - AuthenticationService.cs:217");
+            Debug.WriteLine($"Google sign in exception: {ex.Message} - AuthenticationService.cs:256");
+            Debug.WriteLine($"Stack trace: {ex.StackTrace} - AuthenticationService.cs:257");
             return false;
         }
     }
@@ -263,7 +263,7 @@ public class AuthenticationService : IAuthenticationService
     {
         try
         {
-            Debug.WriteLine($"Exchanging auth code for token... - AuthenticationService.cs:226");
+            Debug.WriteLine($"Exchanging auth code for token... - AuthenticationService.cs:266");
             
             // Exchange code for tokens with Google
             using var client = new HttpClient();
@@ -281,7 +281,7 @@ public class AuthenticationService : IAuthenticationService
             var response = await client.PostAsync(tokenUrl, content);
             
             var json = await response.Content.ReadAsStringAsync();
-            Debug.WriteLine($"Token exchange response: {response.StatusCode}  {json} - AuthenticationService.cs:244");
+            Debug.WriteLine($"Token exchange response: {response.StatusCode}  {json} - AuthenticationService.cs:284");
             
             if (response.IsSuccessStatusCode)
             {
@@ -289,24 +289,24 @@ public class AuthenticationService : IAuthenticationService
                 
                 if (result.TryGetProperty("id_token", out var idToken))
                 {
-                    Debug.WriteLine("Successfully got ID token - AuthenticationService.cs:252");
+                    Debug.WriteLine("Successfully got ID token - AuthenticationService.cs:292");
                     return idToken.GetString();
                 }
                 else
                 {
-                    Debug.WriteLine("No id_token in response - AuthenticationService.cs:257");
+                    Debug.WriteLine("No id_token in response - AuthenticationService.cs:297");
                 }
             }
             else
             {
-                Debug.WriteLine($"Token exchange failed with status: {response.StatusCode} - AuthenticationService.cs:262");
+                Debug.WriteLine($"Token exchange failed with status: {response.StatusCode} - AuthenticationService.cs:302");
             }
             
             return null;
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Token exchange exception: {ex.Message} - AuthenticationService.cs:269");
+            Debug.WriteLine($"Token exchange exception: {ex.Message} - AuthenticationService.cs:309");
             return null;
         }
     }
@@ -361,7 +361,7 @@ public class AuthenticationService : IAuthenticationService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Firebase Google sign in failed: {ex.Message} - AuthenticationService.cs:324");
+            Debug.WriteLine($"Firebase Google sign in failed: {ex.Message} - AuthenticationService.cs:364");
             return false;
         }
     }
@@ -370,18 +370,28 @@ public class AuthenticationService : IAuthenticationService
     {
         try
         {
+            // Clear in-memory state
             CurrentUserId = null;
             CurrentUserEmail = null;
             IsAuthenticated = false;
             
-            // Clear saved auth data
+            // Clear all SecureStorage data (tokens, user ID, email, etc.)
             SecureStorage.Remove(AuthenticationConstants.FirebaseTokenKey);
             SecureStorage.Remove(AuthenticationConstants.FirebaseUserIdKey);
             SecureStorage.Remove(AuthenticationConstants.FirebaseUserEmailKey);
+            
+            // Clear all SecureStorage to ensure nothing is left behind
+            SecureStorage.RemoveAll();
+            
+            // Clear any preferences/settings
+            Preferences.Clear();
+            
+            Debug.WriteLine("[AuthenticationService] ✅ Sign out completed  all auth data cleared - AuthenticationService.cs:389");
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Sign out failed: {ex.Message} - AuthenticationService.cs:344");
+            Debug.WriteLine($"[AuthenticationService] ❌ Sign out failed: {ex.Message} - AuthenticationService.cs:393");
+            Debug.WriteLine($"[AuthenticationService] Stack trace: {ex.StackTrace} - AuthenticationService.cs:394");
         }
     }
 
@@ -403,7 +413,7 @@ public class AuthenticationService : IAuthenticationService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Session restoration failed: {ex.Message} - AuthenticationService.cs:366");
+            Debug.WriteLine($"Session restoration failed: {ex.Message} - AuthenticationService.cs:416");
         }
 
         return false;
@@ -419,7 +429,7 @@ public class AuthenticationService : IAuthenticationService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to save auth data: {ex.Message} - AuthenticationService.cs:382");
+            Debug.WriteLine($"Failed to save auth data: {ex.Message} - AuthenticationService.cs:432");
         }
     }
 
@@ -460,7 +470,7 @@ public class AuthenticationService : IAuthenticationService
             
             if (!signInResponse.IsSuccessStatusCode)
             {
-                Debug.WriteLine("Re-authentication failed - invalid current password");
+                Debug.WriteLine("Reauthentication failed  invalid current password - AuthenticationService.cs:473");
                 return false;
             }
 
@@ -504,7 +514,7 @@ public class AuthenticationService : IAuthenticationService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Change password failed: {ex.Message}");
+            Debug.WriteLine($"Change password failed: {ex.Message} - AuthenticationService.cs:517");
             return false;
         }
     }
@@ -558,7 +568,7 @@ public class AuthenticationService : IAuthenticationService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Change email failed: {ex.Message}");
+            Debug.WriteLine($"Change email failed: {ex.Message} - AuthenticationService.cs:571");
             return false;
         }
     }
@@ -591,7 +601,7 @@ public class AuthenticationService : IAuthenticationService
             
             if (!signInResponse.IsSuccessStatusCode)
             {
-                Debug.WriteLine("Re-authentication failed - invalid password");
+                Debug.WriteLine("Reauthentication failed  invalid password - AuthenticationService.cs:604");
                 return false;
             }
 
@@ -627,7 +637,7 @@ public class AuthenticationService : IAuthenticationService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Delete account failed: {ex.Message}");
+            Debug.WriteLine($"Delete account failed: {ex.Message} - AuthenticationService.cs:640");
             return false;
         }
     }

@@ -1,6 +1,4 @@
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,20 +8,12 @@ using Lender.Services;
 
 namespace Lender.ViewModels;
 
-public class DashboardViewModel : INotifyPropertyChanged
+public class DashboardViewModel : BaseViewModel
 {
     private bool _isDemoMode = false;
     private string _modeLabel = "Live data";
-    private string _userName = "User";
-    private string _userEmail = string.Empty;
-    private string _phoneNumber = "";
-    private string _dateOfBirthDisplay = "";
-    private string _status = "Active";
-    private decimal _balanceUser;
-    private decimal _totalLentAmount;
-    private decimal _totalBorrowedAmount;
-    private decimal _expectedReturn;
-    private string _nextPaymentDisplay = string.Empty;
+    private UserProfile _userProfile = UserProfile.CreateDemo();
+    private LoanStatistics _loanStatistics = LoanStatistics.CreateDemo();
     private ObservableCollection<LoanRequest> _recentLoans = null!;
     private ObservableCollection<Transaction> _recentTransactions = null!;
     private readonly IAuthenticationService _authService;
@@ -59,37 +49,24 @@ public class DashboardViewModel : INotifyPropertyChanged
     public bool IsDemoMode
     {
         get => _isDemoMode;
-        set
-        {
-            if (_isDemoMode != value)
-            {
-                _isDemoMode = value;
-                OnPropertyChanged();
-            }
-        }
+        set => SetProperty(ref _isDemoMode, value);
     }
 
     public string ModeLabel
     {
         get => _modeLabel;
-        set
-        {
-            if (_modeLabel != value)
-            {
-                _modeLabel = value;
-                OnPropertyChanged();
-            }
-        }
+        set => SetProperty(ref _modeLabel, value);
     }
 
+    // Expose UserProfile properties for data binding
     public string UserName
     {
-        get => _userName;
+        get => _userProfile.UserName;
         set
         {
-            if (_userName != value)
+            if (_userProfile.UserName != value)
             {
-                _userName = value;
+                _userProfile.UserName = value;
                 OnPropertyChanged();
             }
         }
@@ -97,12 +74,12 @@ public class DashboardViewModel : INotifyPropertyChanged
 
     public string UserEmail
     {
-        get => _userEmail;
+        get => _userProfile.UserEmail;
         set
         {
-            if (_userEmail != value)
+            if (_userProfile.UserEmail != value)
             {
-                _userEmail = value;
+                _userProfile.UserEmail = value;
                 OnPropertyChanged();
             }
         }
@@ -110,12 +87,12 @@ public class DashboardViewModel : INotifyPropertyChanged
 
     public string PhoneNumber
     {
-        get => _phoneNumber;
+        get => _userProfile.PhoneNumber;
         set
         {
-            if (_phoneNumber != value)
+            if (_userProfile.PhoneNumber != value)
             {
-                _phoneNumber = value;
+                _userProfile.PhoneNumber = value;
                 OnPropertyChanged();
             }
         }
@@ -123,12 +100,12 @@ public class DashboardViewModel : INotifyPropertyChanged
 
     public string DateOfBirthDisplay
     {
-        get => _dateOfBirthDisplay;
+        get => _userProfile.DateOfBirthDisplay;
         set
         {
-            if (_dateOfBirthDisplay != value)
+            if (_userProfile.DateOfBirthDisplay != value)
             {
-                _dateOfBirthDisplay = value;
+                _userProfile.DateOfBirthDisplay = value;
                 OnPropertyChanged();
             }
         }
@@ -136,12 +113,12 @@ public class DashboardViewModel : INotifyPropertyChanged
 
     public string Status
     {
-        get => _status;
+        get => _userProfile.Status;
         set
         {
-            if (_status != value)
+            if (_userProfile.Status != value)
             {
-                _status = value;
+                _userProfile.Status = value;
                 OnPropertyChanged();
             }
         }
@@ -149,25 +126,26 @@ public class DashboardViewModel : INotifyPropertyChanged
 
     public decimal BalanceUser
     {
-        get => _balanceUser;
+        get => _userProfile.Balance;
         set
         {
-            if (_balanceUser != value)
+            if (_userProfile.Balance != value)
             {
-                _balanceUser = value;
+                _userProfile.Balance = value;
                 OnPropertyChanged();
             }
         }
     }
 
+    // Expose LoanStatistics properties for data binding
     public decimal TotalLentAmount
     {
-        get => _totalLentAmount;
+        get => _loanStatistics.TotalLent;
         set
         {
-            if (_totalLentAmount != value)
+            if (_loanStatistics.TotalLent != value)
             {
-                _totalLentAmount = value;
+                _loanStatistics.TotalLent = value;
                 OnPropertyChanged();
             }
         }
@@ -175,12 +153,12 @@ public class DashboardViewModel : INotifyPropertyChanged
 
     public decimal TotalBorrowedAmount
     {
-        get => _totalBorrowedAmount;
+        get => _loanStatistics.TotalBorrowed;
         set
         {
-            if (_totalBorrowedAmount != value)
+            if (_loanStatistics.TotalBorrowed != value)
             {
-                _totalBorrowedAmount = value;
+                _loanStatistics.TotalBorrowed = value;
                 OnPropertyChanged();
             }
         }
@@ -188,12 +166,12 @@ public class DashboardViewModel : INotifyPropertyChanged
 
     public decimal ExpectedReturn
     {
-        get => _expectedReturn;
+        get => _loanStatistics.ExpectedReturn;
         set
         {
-            if (_expectedReturn != value)
+            if (_loanStatistics.ExpectedReturn != value)
             {
-                _expectedReturn = value;
+                _loanStatistics.ExpectedReturn = value;
                 OnPropertyChanged();
             }
         }
@@ -201,12 +179,12 @@ public class DashboardViewModel : INotifyPropertyChanged
 
     public string NextPaymentDisplay
     {
-        get => _nextPaymentDisplay;
+        get => _loanStatistics.NextPaymentDisplay;
         set
         {
-            if (_nextPaymentDisplay != value)
+            if (_loanStatistics.NextPaymentDisplay != value)
             {
-                _nextPaymentDisplay = value;
+                _loanStatistics.NextPaymentDisplay = value;
                 OnPropertyChanged();
             }
         }
@@ -215,27 +193,13 @@ public class DashboardViewModel : INotifyPropertyChanged
     public ObservableCollection<LoanRequest> RecentLoans
     {
         get => _recentLoans;
-        set
-        {
-            if (_recentLoans != value)
-            {
-                _recentLoans = value;
-                OnPropertyChanged();
-            }
-        }
+        set => SetProperty(ref _recentLoans, value);
     }
 
     public ObservableCollection<Transaction> RecentTransactions
     {
         get => _recentTransactions;
-        set
-        {
-            if (_recentTransactions != value)
-            {
-                _recentTransactions = value;
-                OnPropertyChanged();
-            }
-        }
+        set => SetProperty(ref _recentTransactions, value);
     }
 
     private void InitializeData()
@@ -264,12 +228,16 @@ public class DashboardViewModel : INotifyPropertyChanged
                 return;
             }
 
-            UserName = string.IsNullOrWhiteSpace(user.FullName) ? user.Email : user.FullName;
-            UserEmail = user.Email;
-            PhoneNumber = user.PhoneNumber;
-            DateOfBirthDisplay = user.DateOfBirth == DateTime.MinValue ? "" : user.DateOfBirth.ToString("yyyy-MM-dd");
-            Status = user.Status.ToString();
-            BalanceUser = user.Balance;
+            // Update user profile from User model
+            _userProfile = UserProfile.FromUser(user);
+            
+            // Notify all properties that depend on UserProfile
+            OnPropertyChanged(nameof(UserName));
+            OnPropertyChanged(nameof(UserEmail));
+            OnPropertyChanged(nameof(PhoneNumber));
+            OnPropertyChanged(nameof(DateOfBirthDisplay));
+            OnPropertyChanged(nameof(Status));
+            OnPropertyChanged(nameof(BalanceUser));
 
             IsDemoMode = false;
             ModeLabel = "Live data";
@@ -277,14 +245,17 @@ public class DashboardViewModel : INotifyPropertyChanged
             // Clear demo data and load real data (from Firestore in future)
             RecentLoans = new ObservableCollection<LoanRequest>();
             RecentTransactions = new ObservableCollection<Transaction>();
-            TotalLentAmount = 0;
-            TotalBorrowedAmount = 0;
-            ExpectedReturn = 0;
-            NextPaymentDisplay = "No payments scheduled";
+            
+            // Reset loan statistics
+            _loanStatistics = LoanStatistics.CreateEmpty();
+            OnPropertyChanged(nameof(TotalLentAmount));
+            OnPropertyChanged(nameof(TotalBorrowedAmount));
+            OnPropertyChanged(nameof(ExpectedReturn));
+            OnPropertyChanged(nameof(NextPaymentDisplay));
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] LoadUserDataAsync error: {ex.Message} - DashboardViewModel.cs:287");
+            System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] LoadUserDataAsync error: {ex.Message}");
             EnableDemoMode();
         }
     }
@@ -298,12 +269,22 @@ public class DashboardViewModel : INotifyPropertyChanged
     {
         IsDemoMode = true;
         ModeLabel = "Demo mode";
-        UserName = "Demo User";
-        UserEmail = "demo@example.com";
-        PhoneNumber = "";
-        DateOfBirthDisplay = "";
-        Status = "Active";
-        BalanceUser = 0;
+        
+        // Use pre-built demo profile and statistics
+        _userProfile = UserProfile.CreateDemo();
+        _loanStatistics = LoanStatistics.CreateDemo();
+        
+        // Notify all properties
+        OnPropertyChanged(nameof(UserName));
+        OnPropertyChanged(nameof(UserEmail));
+        OnPropertyChanged(nameof(PhoneNumber));
+        OnPropertyChanged(nameof(DateOfBirthDisplay));
+        OnPropertyChanged(nameof(Status));
+        OnPropertyChanged(nameof(BalanceUser));
+        OnPropertyChanged(nameof(TotalLentAmount));
+        OnPropertyChanged(nameof(TotalBorrowedAmount));
+        OnPropertyChanged(nameof(ExpectedReturn));
+        OnPropertyChanged(nameof(NextPaymentDisplay));
         
         // Demo loan data
         RecentLoans = new ObservableCollection<LoanRequest>
@@ -349,18 +330,6 @@ public class DashboardViewModel : INotifyPropertyChanged
                 CreatedDate = DateTime.UtcNow.AddDays(-5)
             }
         };
-        
-        TotalLentAmount = RecentLoans.Where(l => l.Category == "Given").Sum(l => l.Amount);
-        TotalBorrowedAmount = RecentLoans.Where(l => l.Category == "Received").Sum(l => l.Amount);
-        ExpectedReturn = RecentLoans.Where(l => l.Category == "Given").Sum(l => l.Amount + (l.Amount * (l.InterestRate / 100m)));
-        NextPaymentDisplay = "Jan 15, 2026 - $420 due";
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
     private async void SignOutAsync()
@@ -374,7 +343,7 @@ public class DashboardViewModel : INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Sign out error: {ex.Message} - DashboardViewModel.cs:377");
+            System.Diagnostics.Debug.WriteLine($"Sign out error: {ex.Message}");
         }
     }
 
@@ -404,4 +373,3 @@ public class DashboardViewModel : INotifyPropertyChanged
         await NavBarNavigation.GoToProfileAsync(IsDemoMode);
     }
 }
-

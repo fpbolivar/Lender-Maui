@@ -19,7 +19,6 @@ public class DashboardViewModel : INotifyPropertyChanged
     private string _phoneNumber = "";
     private string _dateOfBirthDisplay = "";
     private string _status = "Active";
-    private decimal _creditScoreUser;
     private decimal _balanceUser;
     private decimal _totalLentAmount;
     private decimal _totalBorrowedAmount;
@@ -35,7 +34,7 @@ public class DashboardViewModel : INotifyPropertyChanged
     public ICommand ToggleDemoCommand { get; }
     public ICommand NavigateToTransactionsCommand { get; }
     public ICommand NavigateToDashboardCommand { get; }
-    public ICommand NavigateToRequestLoanCommand { get; }
+    public ICommand NavigateToLoansCommand { get; }
     public ICommand NavigateToCalculatorCommand { get; }
     public ICommand NavigateToProfileCommand { get; }
 
@@ -50,7 +49,7 @@ public class DashboardViewModel : INotifyPropertyChanged
         ToggleDemoCommand = new Command(EnableDemoMode);
         NavigateToTransactionsCommand = new Command(async () => await NavigateToTransactions());
         NavigateToDashboardCommand = new Command(async () => await NavigateToDashboard());
-        NavigateToRequestLoanCommand = new Command(async () => await NavigateToRequestLoan());
+        NavigateToLoansCommand = new Command(async () => { await Shell.Current.GoToAsync("loanform"); });
         NavigateToCalculatorCommand = new Command(async () => await NavigateToCalculator());
         NavigateToProfileCommand = new Command(async () => await NavigateToProfile());
         InitializeData();
@@ -143,19 +142,6 @@ public class DashboardViewModel : INotifyPropertyChanged
             if (_status != value)
             {
                 _status = value;
-                OnPropertyChanged();
-            }
-        }
-    }
-
-    public decimal CreditScoreUser
-    {
-        get => _creditScoreUser;
-        set
-        {
-            if (_creditScoreUser != value)
-            {
-                _creditScoreUser = value;
                 OnPropertyChanged();
             }
         }
@@ -283,7 +269,6 @@ public class DashboardViewModel : INotifyPropertyChanged
             PhoneNumber = user.PhoneNumber;
             DateOfBirthDisplay = user.DateOfBirth == DateTime.MinValue ? "" : user.DateOfBirth.ToString("yyyy-MM-dd");
             Status = user.Status.ToString();
-            CreditScoreUser = user.CreditScore;
             BalanceUser = user.Balance;
 
             IsDemoMode = false;
@@ -299,7 +284,7 @@ public class DashboardViewModel : INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] LoadUserDataAsync error: {ex.Message} - DashboardViewModel.cs:302");
+            System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] LoadUserDataAsync error: {ex.Message} - DashboardViewModel.cs:287");
             EnableDemoMode();
         }
     }
@@ -318,7 +303,6 @@ public class DashboardViewModel : INotifyPropertyChanged
         PhoneNumber = "";
         DateOfBirthDisplay = "";
         Status = "Active";
-        CreditScoreUser = 720;
         BalanceUser = 0;
         
         // Demo loan data
@@ -390,7 +374,7 @@ public class DashboardViewModel : INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Sign out error: {ex.Message} - DashboardViewModel.cs:393");
+            System.Diagnostics.Debug.WriteLine($"Sign out error: {ex.Message} - DashboardViewModel.cs:377");
         }
     }
 
@@ -409,17 +393,6 @@ public class DashboardViewModel : INotifyPropertyChanged
         await NavBarNavigation.GoToDashboardAsync(IsDemoMode);
     }
 
-    private async Task NavigateToRequestLoan()
-    {
-        if (IsDemoMode)
-        {
-            await Shell.Current.DisplayAlertAsync("Demo mode", "Navigation is disabled in demo mode. Sign in to access this section.", "OK");
-            return;
-        }
-        await Shell.Current.DisplayAlertAsync("Request/Send Loan", "Navigate to Request/Send Loan page", "OK");
-        // TODO: Implement navigation when page is created
-        // await Shell.Current.GoToAsync("//requestloan");
-    }
 
     private async Task NavigateToCalculator()
     {

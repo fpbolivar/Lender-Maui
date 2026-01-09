@@ -20,11 +20,6 @@ public class User
     public decimal Balance { get; set; } = 0;
 
     /// <summary>
-    /// Credit score (default 750, ranges 300-850)
-    /// </summary>
-    public decimal CreditScore { get; set; } = 750;
-
-    /// <summary>
     /// Number of loans user has given out
     /// </summary>
     public int LoansGiven { get; set; } = 0;

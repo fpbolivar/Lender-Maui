@@ -19,5 +19,9 @@ public partial class BottomNavView : ContentView
     public BottomNavView()
     {
         InitializeComponent();
+        BindingContextChanged += (s, e) =>
+        {
+            // Propagate binding context to children if needed
+        };
     }
 }

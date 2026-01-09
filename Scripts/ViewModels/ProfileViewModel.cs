@@ -16,7 +16,6 @@ public class ProfileViewModel : INotifyPropertyChanged
     private string _memberSince = string.Empty;
     private string _userInitials = "U";
     private decimal _balance;
-    private int _creditScore;
     private int _totalLoans;
     private decimal _totalLent;
     private decimal _totalBorrowed;
@@ -38,7 +37,7 @@ public class ProfileViewModel : INotifyPropertyChanged
     public ICommand DeleteAccountCommand { get; }
     public ICommand NavigateToTransactionsCommand { get; }
     public ICommand NavigateToDashboardCommand { get; }
-    public ICommand NavigateToRequestLoanCommand { get; }
+    public ICommand NavigateToLoansCommand { get; }
     public ICommand NavigateToCalculatorCommand { get; }
 
     public ProfileViewModel()
@@ -60,7 +59,7 @@ public class ProfileViewModel : INotifyPropertyChanged
         DeleteAccountCommand = new Command(async () => await DeleteAccount());
         NavigateToTransactionsCommand = new Command(async () => await NavigateToTransactions());
         NavigateToDashboardCommand = new Command(async () => await NavigateToDashboard());
-        NavigateToRequestLoanCommand = new Command(async () => await NavigateToRequestLoan());
+        NavigateToLoansCommand = new Command(async () => { await Shell.Current.GoToAsync("loanform"); });
         NavigateToCalculatorCommand = new Command(async () => await NavigateToCalculator());
         
         // Initialize with defaults
@@ -164,19 +163,6 @@ public class ProfileViewModel : INotifyPropertyChanged
         }
     }
 
-    public int CreditScore
-    {
-        get => _creditScore;
-        set
-        {
-            if (_creditScore != value)
-            {
-                _creditScore = value;
-                OnPropertyChanged();
-            }
-        }
-    }
-
     public int TotalLoans
     {
         get => _totalLoans;
@@ -243,7 +229,6 @@ public class ProfileViewModel : INotifyPropertyChanged
                 DateOfBirth = "Not provided";
                 MemberSince = "Demo";
                 Balance = 0;
-                CreditScore = 0;
                 TotalLoans = 0;
                 TotalLent = 0;
                 TotalBorrowed = 0;
@@ -261,7 +246,6 @@ public class ProfileViewModel : INotifyPropertyChanged
                 PhoneNumber = string.IsNullOrEmpty(user.PhoneNumber) ? "Not provided" : user.PhoneNumber;
                 DateOfBirth = user.DateOfBirth != DateTime.MinValue ? user.DateOfBirth.ToString("MMMM dd, yyyy") : "Not provided";
                 Balance = user.Balance;
-                CreditScore = (int)user.CreditScore;
 
                 // Parse member since from joinDate
                 if (user.JoinDate != DateTime.MinValue)
@@ -707,11 +691,6 @@ public class ProfileViewModel : INotifyPropertyChanged
         await NavBarNavigation.GoToDashboardAsync();
     }
 
-    private async Task NavigateToRequestLoan()
-    {
-        await Shell.Current.DisplayAlertAsync("Request/Send Loan", "Navigate to Request/Send Loan page", "OK");
-        // TODO: await Shell.Current.GoToAsync("//requestloan");
-    }
 
     private async Task NavigateToCalculator()
     {

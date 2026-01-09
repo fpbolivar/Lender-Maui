@@ -20,6 +20,7 @@ public partial class AppShell : Shell
 		// Register routes for navigation
 		Routing.RegisterRoute("profile", typeof(ProfilePage));
 		Routing.RegisterRoute("calculator", typeof(CalculatorPage));
+		Routing.RegisterRoute("loanform", typeof(LoanFormPage));
 		
 		// Register calculator detail routes with modal presentation for slide-up animation
 		Routing.RegisterRoute(nameof(SimpleInterestPage), typeof(SimpleInterestPage));
@@ -81,7 +82,7 @@ public partial class AppShell : Shell
 		}
 		catch (Exception ex)
 		{
-			System.Diagnostics.Debug.WriteLine($"Shell navigation guard error: {ex.Message} - AppShell.xaml.cs:63");
+			System.Diagnostics.Debug.WriteLine($"Shell navigation guard error: {ex.Message} - AppShell.xaml.cs:87");
 		}
 	}
 
@@ -112,7 +113,7 @@ public partial class AppShell : Shell
 		}
 		catch (Exception ex)
 		{
-			System.Diagnostics.Debug.WriteLine($"Auth check error: {ex.Message} - AppShell.xaml.cs:76");
+			System.Diagnostics.Debug.WriteLine($"Auth check error: {ex.Message} - AppShell.xaml.cs:118");
 			await GoToAsync("//login", animate: false);
 		}
 	}
@@ -132,7 +133,7 @@ public partial class AppShell : Shell
 		}
 		catch (Exception ex)
 		{
-			System.Diagnostics.Debug.WriteLine($"Sign out error: {ex.Message} - AppShell.xaml.cs:96");
+			System.Diagnostics.Debug.WriteLine($"Sign out error: {ex.Message} - AppShell.xaml.cs:138");
 		}
 	}
 }

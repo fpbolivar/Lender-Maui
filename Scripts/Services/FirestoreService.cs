@@ -288,7 +288,6 @@ public class FirestoreService
             
             // Loan Information
             { "balance", new { doubleValue = (double)user.Balance } },
-            { "creditScore", new { doubleValue = (double)user.CreditScore } },
             { "loansGiven", new { integerValue = user.LoansGiven } },
             { "loansReceived", new { integerValue = user.LoansReceived } },
             { "totalLent", new { doubleValue = (double)user.TotalLent } },
@@ -327,7 +326,6 @@ public class FirestoreService
                 PhoneNumber = GetStringValue(fields, "phoneNumber"),
                 DateOfBirth = DateTime.TryParse(GetStringValue(fields, "dateOfBirth"), out var dob) ? dob : DateTime.MinValue,
                 Balance = (decimal)GetDoubleValue(fields, "balance"),
-                CreditScore = (decimal)GetDoubleValue(fields, "creditScore"),
                 LoansGiven = GetIntValue(fields, "loansGiven"),
                 LoansReceived = GetIntValue(fields, "loansReceived"),
                 JoinDate = GetDateTimeValue(fields, "joinDate"),
@@ -358,8 +356,19 @@ public class FirestoreService
             { "category", new { stringValue = loan.Category } },
             { "fundedPercentage", new { integerValue = loan.FundedPercentage } },
             { "amountFunded", new { doubleValue = (double)loan.AmountFunded } },
-            { "minCreditScore", new { doubleValue = (double)loan.MinCreditScore } },
-            { "riskRating", new { stringValue = loan.RiskRating } }
+            { "riskRating", new { stringValue = loan.RiskRating } },
+            // extended fields
+            { "isOffer", new { booleanValue = loan.IsOffer } },
+            { "interestType", new { stringValue = loan.InterestType.ToString() } },
+            { "paymentsPerYear", new { integerValue = loan.PaymentsPerYear } },
+            { "termUnit", new { stringValue = loan.TermUnit.ToString() } },
+            { "termLength", new { integerValue = loan.TermLength } },
+            { "hasDownPayment", new { booleanValue = loan.HasDownPayment } },
+            { "downPaymentAmount", new { doubleValue = (double)loan.DownPaymentAmount } },
+            { "hasCollateral", new { booleanValue = loan.HasCollateral } },
+            { "collateralName", new { stringValue = loan.CollateralName } },
+            { "collateralImageUrl", new { stringValue = loan.CollateralImageUrl } },
+            { "notes", new { stringValue = loan.Notes } }
         };
 
         return JsonSerializer.Serialize(new { fields });
@@ -386,8 +395,19 @@ public class FirestoreService
                 Category = GetStringValue(fields, "category"),
                 FundedPercentage = GetIntValue(fields, "fundedPercentage"),
                 AmountFunded = (decimal)GetDoubleValue(fields, "amountFunded"),
-                MinCreditScore = (decimal)GetDoubleValue(fields, "minCreditScore"),
-                RiskRating = GetStringValue(fields, "riskRating")
+                RiskRating = GetStringValue(fields, "riskRating"),
+                // extended fields
+                IsOffer = GetBoolValue(fields, "isOffer"),
+                InterestType = Enum.TryParse<Lender.Models.Enums.InterestType>(GetStringValue(fields, "interestType"), out var it) ? it : Lender.Models.Enums.InterestType.Amortized,
+                PaymentsPerYear = GetIntValue(fields, "paymentsPerYear"),
+                TermUnit = Enum.TryParse<Lender.Models.Enums.TermUnit>(GetStringValue(fields, "termUnit"), out var tu) ? tu : Lender.Models.Enums.TermUnit.Months,
+                TermLength = GetIntValue(fields, "termLength"),
+                HasDownPayment = GetBoolValue(fields, "hasDownPayment"),
+                DownPaymentAmount = (decimal)GetDoubleValue(fields, "downPaymentAmount"),
+                HasCollateral = GetBoolValue(fields, "hasCollateral"),
+                CollateralName = GetStringValue(fields, "collateralName"),
+                CollateralImageUrl = GetStringValue(fields, "collateralImageUrl"),
+                Notes = GetStringValue(fields, "notes")
             };
         }
         catch (Exception ex)

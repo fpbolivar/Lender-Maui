@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:Lender.Views"
+             x:Class="Lender.LoanFormPage"
+             Title="Loan Form"
+             BackgroundColor="#0A1929"
+             Padding="0"
+             SafeAreaEdges="None">
+    <Grid RowDefinitions="*,Auto" BackgroundColor="#0A1929">
+        <!-- Main Content -->
+        <ScrollView Grid.Row="0" Padding="16">
+            <VerticalStackLayout Spacing="16">
+                <Label Text="Loan Form" FontSize="28" FontAttributes="Bold" TextColor="White" Padding="0,20,0,0" />
+                <Label Text="Navigation successful!" FontSize="16" TextColor="#FF9F43" />
+                <Button Text="Back to Dashboard" Clicked="OnBackClicked" BackgroundColor="#FF9F43" TextColor="#0A1929" Padding="16" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Bottom Navigation -->
+        <views:BottomNavView Grid.Row="1" SelectedTab="Loans" />
+    </Grid>
+</ContentPage>

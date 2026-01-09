@@ -44,7 +44,7 @@ public class MortgageViewModel : INotifyPropertyChanged
     public MortgageViewModel()
     {
         CalculateCommand = new Command(Calculate);
-        BackCommand = new Command(async () => await Shell.Current.GoToAsync("//calculator"));
+        BackCommand = new Command(async () => await Shell.Current.GoToAsync(".."));
     }
 
     private void Calculate()

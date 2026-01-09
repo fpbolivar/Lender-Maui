@@ -75,11 +75,6 @@
                    FontSize="14"
                    TextColor="White" />
 
-            <Label Text="{Binding CreditScore, StringFormat='Credit Score: {0}'}"
-                   FontSize="16"
-                   FontAttributes="Bold"
-                   TextColor="#FF9F43" />
-
             <Label Text="{Binding Balance, StringFormat='Account Balance: ${0:F2}'}"
                    FontSize="16"
                    FontAttributes="Bold"

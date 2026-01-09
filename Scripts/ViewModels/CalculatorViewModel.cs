@@ -17,7 +17,7 @@ public class CalculatorViewModel
     public ICommand OpenInvestmentCommand { get; }
     public ICommand NavigateToTransactionsCommand { get; }
     public ICommand NavigateToDashboardCommand { get; }
-    public ICommand NavigateToRequestLoanCommand { get; }
+    public ICommand NavigateToLoansCommand { get; }
     public ICommand NavigateToCalculatorCommand { get; }
     public ICommand NavigateToProfileCommand { get; }
 
@@ -33,7 +33,7 @@ public class CalculatorViewModel
         OpenInvestmentCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(InvestmentPage), animate: true));
         NavigateToTransactionsCommand = new Command(async () => await Shell.Current.GoToAsync("///transactions"));
         NavigateToDashboardCommand = new Command(async () => await NavBarNavigation.GoToDashboardAsync());
-        NavigateToRequestLoanCommand = new Command(async () => await Shell.Current.DisplayAlertAsync("Request/Send Loan", "Navigate to Request/Send Loan page", "OK"));
+        NavigateToLoansCommand = new Command(async () => await Shell.Current.GoToAsync("//loanform"));
         NavigateToCalculatorCommand = new Command(async () => await NavBarNavigation.GoToCalculatorAsync());
         NavigateToProfileCommand = new Command(async () => await NavBarNavigation.GoToProfileAsync());
     }

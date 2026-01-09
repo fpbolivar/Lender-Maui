@@ -55,7 +55,7 @@
         <!-- Request/Send Loan (Main) -->
         <VerticalStackLayout Grid.Column="2" Spacing="4" HorizontalOptions="Center" Margin="0,-20,0,0">
             <VerticalStackLayout.GestureRecognizers>
-                <TapGestureRecognizer Command="{Binding NavigateToRequestLoanCommand}" />
+                <TapGestureRecognizer Command="{Binding NavigateToLoansCommand}" />
             </VerticalStackLayout.GestureRecognizers>
             <Frame CornerRadius="30"
                    BackgroundColor="{StaticResource AccentOrange}"
@@ -69,7 +69,7 @@
                 <Label.Triggers>
                     <DataTrigger TargetType="Label"
                                  Binding="{Binding SelectedTab, Source={RelativeSource AncestorType={x:Type views:BottomNavView}}}"
-                                 Value="RequestLoan">
+                                 Value="Loans">
                         <Setter Property="TextColor" Value="{StaticResource AccentOrange}" />
                         <Setter Property="FontAttributes" Value="Bold" />
                     </DataTrigger>

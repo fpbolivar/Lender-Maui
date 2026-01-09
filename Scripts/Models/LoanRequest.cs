@@ -76,12 +76,23 @@ public class LoanRequest
     public DateTime? FundedDate { get; set; }
 
     /// <summary>
-    /// Credit score required to invest in this loan
-    /// </summary>
-    public decimal MinCreditScore { get; set; } = 700;
-
-    /// <summary>
     /// Risk rating for investors
     /// </summary>
     public string RiskRating { get; set; } = "Medium";
+
+    // Extended fields for richer loan details
+    public bool IsOffer { get; set; } = false; // true if user is offering to lend
+    public Lender.Models.Enums.InterestType InterestType { get; set; } = Lender.Models.Enums.InterestType.Amortized;
+    public int PaymentsPerYear { get; set; } = 12;
+    public Lender.Models.Enums.TermUnit TermUnit { get; set; } = Lender.Models.Enums.TermUnit.Months;
+    public int TermLength { get; set; } = 12; // value in selected TermUnit
+
+    public bool HasDownPayment { get; set; } = false;
+    public decimal DownPaymentAmount { get; set; } = 0m;
+
+    public bool HasCollateral { get; set; } = false;
+    public string CollateralName { get; set; } = string.Empty;
+    public string CollateralImageUrl { get; set; } = string.Empty;
+
+    public string Notes { get; set; } = string.Empty;
 }

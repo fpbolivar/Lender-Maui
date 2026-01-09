@@ -23,6 +23,7 @@
     <Grid RowDefinitions="Auto,*,Auto" Padding="0" BackgroundColor="{StaticResource DarkBg}" SafeAreaEdges="None">
         <Grid.GestureRecognizers>
             <SwipeGestureRecognizer Direction="Left" Command="{Binding NavigateToCalculatorCommand}" />
+            <SwipeGestureRecognizer Direction="Right" Command="{Binding NavigateToTransactionsCommand}" />
         </Grid.GestureRecognizers>
         <VerticalStackLayout Grid.Row="0" Padding="16,50,16,16" Spacing="8" BackgroundColor="{StaticResource DarkBg}">
             <!-- Header with Sign In button -->
@@ -70,8 +71,6 @@
                         <VerticalStackLayout Spacing="4" HorizontalOptions="End" WidthRequest="120">
                             <Label Text="Balance" FontSize="12" TextColor="{StaticResource TextLight}" />
                             <Label Text="{Binding BalanceUser, StringFormat='${0:F2}'}" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource AccentOrange}" />
-                            <Label Text="Credit Score" FontSize="12" TextColor="{StaticResource TextLight}" />
-                            <Label Text="{Binding CreditScoreUser}" FontSize="16" TextColor="{StaticResource TextWhite}" />
                             <Label Text="{Binding Status}" FontSize="12" TextColor="{StaticResource AccentGreen}" />
                         </VerticalStackLayout>
                     </HorizontalStackLayout>
@@ -183,6 +182,7 @@
                 </VerticalStackLayout>
 
                 <Button Text="REVIEW REQUESTS" 
+                        Command="{Binding NavigateToLoansCommand}"
                         BackgroundColor="{StaticResource AccentOrange}"
                         TextColor="{StaticResource DarkBg}"
                         CornerRadius="8"
@@ -204,6 +204,7 @@
                        TextColor="{StaticResource TextLight}"
                        HorizontalTextAlignment="Center" />
                 <Button Text="CREATE LOAN" 
+                        Command="{Binding NavigateToLoansCommand}"
                         BackgroundColor="{StaticResource AccentOrange}"
                         TextColor="{StaticResource DarkBg}"
                         CornerRadius="8"

@@ -39,6 +39,12 @@
         FlyoutItemIsVisible="False" />
 
     <ShellContent
+        Title="Loan Form"
+        ContentTemplate="{DataTemplate local:LoanFormPage}"
+        Route="loanform"
+        FlyoutItemIsVisible="False" />
+
+    <ShellContent
         Title="Transactions"
         ContentTemplate="{DataTemplate local:TransactionPage}"
         Route="transactions"

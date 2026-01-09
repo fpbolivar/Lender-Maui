@@ -99,7 +99,7 @@ public class TransactionViewModel : INotifyPropertyChanged
     public ICommand FilterByBorrowsCommand { get; }
     public ICommand NavigateToDashboardCommand { get; }
     public ICommand NavigateToCalculatorCommand { get; }
-    public ICommand NavigateToRequestLoanCommand { get; }
+    public ICommand NavigateToLoansCommand { get; }
     public ICommand NavigateToProfileCommand { get; }
 
     public TransactionViewModel()
@@ -113,7 +113,7 @@ public class TransactionViewModel : INotifyPropertyChanged
         FilterByBorrowsCommand = new Command(() => FilterByBorrows());
         NavigateToDashboardCommand = new Command(async () => await NavigateToDashboard());
         NavigateToCalculatorCommand = new Command(async () => await NavigateToCalculator());
-        NavigateToRequestLoanCommand = new Command(async () => await NavigateToRequestLoan());
+        NavigateToLoansCommand = new Command(async () => { await Shell.Current.GoToAsync("loanform"); });
         NavigateToProfileCommand = new Command(async () => await NavigateToProfile());
     }
 
@@ -376,11 +376,6 @@ public class TransactionViewModel : INotifyPropertyChanged
         await Shell.Current.GoToAsync("//calculator");
     }
 
-    private async Task NavigateToRequestLoan()
-    {
-        // await Shell.Current.GoToAsync("//requestloan");
-        await Shell.Current.DisplayAlertAsync("Request/Send Loan", "Navigate to Request/Send Loan page", "OK");
-    }
 
     private async Task NavigateToProfile()
     {

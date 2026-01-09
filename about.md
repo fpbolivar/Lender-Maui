@@ -30,7 +30,7 @@ Track peer-to-peer loans you lend or borrow, focusing on terms, payments, confir
 
 ## Dashboard & Profile
 - Dashboard: totals (lent, borrowed, expected return, next payment), active loans list, recent transactions.
-- Profile: full name, email, phone, DOB, credit score, balances, account settings (edit profile, change password, notifications), destructive actions (sign out, delete account with confirmation).
+- Profile: full name, email, phone, DOB, balances, account settings (edit profile, change password, notifications), destructive actions (sign out, delete account with confirmation).
 
 ## Output & Demo
 - PDF export goal: parties, terms, schedule, payments-to-date, remaining balance, collateral, notes.

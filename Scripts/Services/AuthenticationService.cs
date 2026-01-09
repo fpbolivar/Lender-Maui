@@ -113,7 +113,6 @@ public class AuthenticationService : IAuthenticationService
                         PhoneNumber = phoneNumber ?? "",
                         DateOfBirth = dateOfBirth ?? DateTime.UtcNow,
                         Balance = 0,
-                        CreditScore = 0,
                         Status = UserStatus.Active,
                         JoinDate = DateTime.UtcNow
                     };

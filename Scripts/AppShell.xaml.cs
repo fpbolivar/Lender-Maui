@@ -24,6 +24,7 @@ public partial class AppShell : Shell
 		Routing.RegisterRoute("loansummary", typeof(LoanSummaryPage));
 		Routing.RegisterRoute("loanrequesterinfo", typeof(LoanRequesterInfoPage));
 		Routing.RegisterRoute("loanfinalsummary", typeof(LoanFinalSummaryPage));
+		Routing.RegisterRoute(nameof(TransactionDetailPage), typeof(TransactionDetailPage));
 		
 		// Register calculator detail routes with modal presentation for slide-up animation
 		Routing.RegisterRoute(nameof(SimpleInterestPage), typeof(SimpleInterestPage));

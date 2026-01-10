@@ -38,7 +38,21 @@
 
                 <!-- Information Form -->
                 <Frame CornerRadius="12" BackgroundColor="#132F4C" Padding="16" HasShadow="False">
-                    <VerticalStackLayout Spacing="16">
+                    <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,Auto">
+                        <!-- Debug-only autofill button -->
+                        <Button Grid.Row="0" Grid.Column="1"
+                                Text="$"
+                                IsVisible="{Binding IsDebugMode}"
+                                Command="{Binding AutoFillRequesterDemoCommand}"
+                                BackgroundColor="#0A1929"
+                                TextColor="#FF9F43"
+                                FontAttributes="Bold"
+                                WidthRequest="32"
+                                HeightRequest="32"
+                                CornerRadius="16"
+                                Padding="0" />
+
+                        <VerticalStackLayout Grid.Row="1" Grid.ColumnSpan="2" Spacing="16">
                         <!-- Full Name -->
                         <VerticalStackLayout Spacing="8">
                             <Label Text="Full Name" TextColor="White" />
@@ -102,7 +116,8 @@
                                 <Entry Text="{Binding RequesterIdNumber}" Placeholder="Enter ID number" TextColor="White" BackgroundColor="Transparent" />
                             </Frame>
                         </VerticalStackLayout>
-                    </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Grid>
                 </Frame>
 
                 <!-- Notification Type -->

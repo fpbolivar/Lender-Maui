@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Lender.Helpers;
 using Lender.Models;
 using Lender.Services;
+using Lender;
 
 namespace Lender.ViewModels;
 
@@ -27,6 +28,7 @@ public class DashboardViewModel : BaseViewModel
     public ICommand NavigateToLoansCommand { get; }
     public ICommand NavigateToCalculatorCommand { get; }
     public ICommand NavigateToProfileCommand { get; }
+    public ICommand OpenTransactionFromDashboardCommand { get; }
 
     public DashboardViewModel()
     {
@@ -42,6 +44,7 @@ public class DashboardViewModel : BaseViewModel
         NavigateToLoansCommand = new Command(async () => { await Shell.Current.GoToAsync("loanform"); });
         NavigateToCalculatorCommand = new Command(async () => await NavigateToCalculator());
         NavigateToProfileCommand = new Command(async () => await NavigateToProfile());
+        OpenTransactionFromDashboardCommand = new Command<Transaction>(async (tx) => await OpenTransactionFromDashboardAsync(tx));
         InitializeData();
         _ = LoadUserDataAsync();
     }
@@ -242,9 +245,13 @@ public class DashboardViewModel : BaseViewModel
             IsDemoMode = false;
             ModeLabel = "Live data";
             
-            // Clear demo data and load real data (from Firestore in future)
+            // Clear demo data and load real data
             RecentLoans = new ObservableCollection<LoanRequest>();
-            RecentTransactions = new ObservableCollection<Transaction>();
+            
+            // Load recent transactions matching current user's email, sorted by date (newest first)
+            var userTx = await _firestoreService.GetUserTransactionsAsync(_authService.CurrentUserEmail);
+            var sortedTx = userTx.OrderByDescending(t => t.CreatedDate).ToList();
+            RecentTransactions = new ObservableCollection<Transaction>(sortedTx);
             
             // Reset loan statistics
             _loanStatistics = LoanStatistics.CreateEmpty();
@@ -255,7 +262,7 @@ public class DashboardViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] LoadUserDataAsync error: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] LoadUserDataAsync error: {ex.Message} - DashboardViewModel.cs:265");
             EnableDemoMode();
         }
     }
@@ -322,12 +329,38 @@ public class DashboardViewModel : BaseViewModel
             new Transaction
             {
                 Id = "T-DEMO-001",
-                Amount = 500m,
-                Merchant = "Payment from Carlos",
-                Category = "Loan Payment",
+                Amount = 200m,
+                RequesterName = "Carlos Ruiz",
+                RequesterEmail = "carlos@example.com",
+                PaybackDuration = "12 months",
+                PeriodicPayment = 200m,
                 Type = TransactionType.Transfer,
                 Status = TransactionStatus.Completed,
+                CreatedDate = DateTime.UtcNow.AddDays(-2)
+            },
+            new Transaction
+            {
+                Id = "T-DEMO-002",
+                Amount = 1000m,
+                RequesterName = "Maria Santos",
+                RequesterEmail = "maria@example.com",
+                PaybackDuration = "6 months",
+                PeriodicPayment = 180m,
+                Type = TransactionType.Funding,
+                Status = TransactionStatus.Pending,
                 CreatedDate = DateTime.UtcNow.AddDays(-5)
+            },
+            new Transaction
+            {
+                Id = "T-DEMO-003",
+                Amount = 1000m,
+                RequesterName = "Juan Perez",
+                RequesterEmail = "juan@example.com",
+                PaybackDuration = "3 months",
+                PeriodicPayment = 350m,
+                Type = TransactionType.Funding,
+                Status = TransactionStatus.Pending,
+                CreatedDate = DateTime.UtcNow.AddDays(-7)
             }
         };
     }
@@ -343,7 +376,7 @@ public class DashboardViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Sign out error: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Sign out error: {ex.Message} - DashboardViewModel.cs:379");
         }
     }
 
@@ -371,5 +404,23 @@ public class DashboardViewModel : BaseViewModel
     private async Task NavigateToProfile()
     {
         await NavBarNavigation.GoToProfileAsync(IsDemoMode);
+    }
+
+    private async Task OpenTransactionFromDashboardAsync(Transaction? tx)
+    {
+        if (tx == null) return;
+
+        try
+        {
+            var currentEmail = _authService.CurrentUserEmail ?? string.Empty;
+
+            // Create display model directly from transaction (data is denormalized)
+            var displayModel = new TransactionDisplayModel(tx, currentEmail);
+            await Shell.Current.Navigation.PushAsync(new TransactionDetailPage(displayModel));
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] OpenTransaction error: {ex.Message} - DashboardViewModel.cs:423");
+        }
     }
 }

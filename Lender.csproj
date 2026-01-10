@@ -50,7 +50,7 @@
 
 	<ItemGroup>
 		<!-- App Icon -->
-		<MauiIcon Include="Scripts\Resources\AppIcon\appicon.svg" ForegroundFile="Scripts\Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+		<MauiIcon Include="Scripts\Resources\AppIcon\appicon.png" Color="#512BD4" BaseSize="128,128" />
 
 		<!-- Splash Screen - DISABLED FOR TESTING -->
 		<!-- <MauiSplashScreen Include="Scripts\Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" /> -->
@@ -74,6 +74,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="itext7" Version="7.2.5" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />

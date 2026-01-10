@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:views="clr-namespace:Lender.Views"
              x:Class="Lender.TransactionPage"
+             x:Name="TransactionsPageRoot"
              Title="Transactions"
              BackgroundColor="#0A1929"
              Padding="0"
@@ -75,6 +76,10 @@
                                    BackgroundColor="{StaticResource CardBg}"
                                    Padding="16"
                                    Margin="0,2,0,2">
+                                <Frame.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding BindingContext.OpenTransactionCommand, Source={x:Reference Name=TransactionsPageRoot}}"
+                                                          CommandParameter="{Binding}" />
+                                </Frame.GestureRecognizers>
                                 <VerticalStackLayout Spacing="12">
                                     <!-- Header: Type and Amount -->
                                     <HorizontalStackLayout Spacing="12" VerticalOptions="Center">

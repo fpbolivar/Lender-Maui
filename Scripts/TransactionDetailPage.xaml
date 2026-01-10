@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Lender.TransactionDetailPage"
+             Title="Transaction Detail"
+             BackgroundColor="#0A1929"
+             Padding="0"
+             SafeAreaEdges="None">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Color x:Key="DarkBg">#0A1929</Color>
+            <Color x:Key="CardBg">#132F4C</Color>
+            <Color x:Key="AccentOrange">#FF9F43</Color>
+            <Color x:Key="AccentGreen">#1ABC9C</Color>
+            <Color x:Key="TextLight">#B0BEC5</Color>
+            <Color x:Key="TextWhite">#FFFFFF</Color>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*" BackgroundColor="{StaticResource DarkBg}" SafeAreaEdges="None">
+        <!-- Header -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*" Padding="12,50,16,12" BackgroundColor="{StaticResource DarkBg}">
+            <Button Text="&lt;"
+                    Command="{Binding GoBackCommand}"
+                    BackgroundColor="Transparent"
+                    TextColor="{StaticResource AccentOrange}"
+                    FontSize="28"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    CornerRadius="22"
+                    Padding="0"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Center" />
+            <VerticalStackLayout Grid.Column="1" Spacing="2" HorizontalOptions="Start" VerticalOptions="Center">
+                <Label Text="Transaction Summary"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource TextWhite}" />
+                <Label Text="Review details and collateral"
+                       FontSize="12"
+                       TextColor="{StaticResource TextLight}" />
+            </VerticalStackLayout>
+        </Grid>
+
+        <!-- Content -->
+        <ScrollView Grid.Row="1" BackgroundColor="{StaticResource DarkBg}">
+            <VerticalStackLayout Padding="16" Spacing="14" BackgroundColor="{StaticResource DarkBg}">
+                <!-- Amount, Status, Type -->
+                <Frame CornerRadius="12" BackgroundColor="{StaticResource CardBg}" Padding="16">
+                    <VerticalStackLayout Spacing="12">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Amount" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding AmountDisplay}" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource AccentOrange}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Total Payment" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding TotalPaymentDisplay}" FontSize="14" TextColor="{StaticResource TextWhite}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Total Interest" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding TotalInterestDisplay}" FontSize="14" TextColor="{StaticResource TextWhite}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Status" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding Status}" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource AccentGreen}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Type" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding TransactionType}" FontSize="14" TextColor="{StaticResource TextWhite}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Created" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding CreatedDateDisplay}" FontSize="12" TextColor="{StaticResource TextWhite}" />
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Interest Details -->
+                <Frame CornerRadius="12" BackgroundColor="{StaticResource CardBg}" Padding="16">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Interest Details" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource TextWhite}" />
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Interest Rate" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding InterestRateDisplay}" FontSize="14" TextColor="{StaticResource TextWhite}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Interest Method" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding InterestMethodDisplay}" FontSize="12" TextColor="{StaticResource TextWhite}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Interest Type" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding InterestTypeDisplay}" FontSize="12" TextColor="{StaticResource TextWhite}" />
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Payment Schedule -->
+                <Frame CornerRadius="12" BackgroundColor="{StaticResource CardBg}" Padding="16">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Payment Schedule" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource TextWhite}" />
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Duration" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding DurationDisplay}" FontSize="12" TextColor="{StaticResource TextWhite}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Payment Frequency" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding PaymentFrequencyDisplay}" FontSize="12" TextColor="{StaticResource TextWhite}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Periodic Payment" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding PeriodicPaymentDisplay}" FontSize="12" TextColor="{StaticResource TextWhite}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Total Payments" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding TotalPaymentsDisplay}" FontSize="12" TextColor="{StaticResource TextWhite}" />
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Requester Info -->
+                <Frame CornerRadius="12" BackgroundColor="{StaticResource CardBg}" Padding="16">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Requester Information" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource TextWhite}" />
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Name" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding RequesterName}" FontSize="12" TextColor="{StaticResource TextWhite}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Email" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding RequesterEmail}" FontSize="12" TextColor="{StaticResource TextWhite}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Phone" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding RequesterPhone}" FontSize="12" TextColor="{StaticResource TextWhite}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Address" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding RequesterAddress}" FontSize="12" TextColor="{StaticResource TextWhite}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="ID Number" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding RequesterIdNumber}" FontSize="12" TextColor="{StaticResource TextWhite}" />
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Petitioner Info -->
+                <Frame CornerRadius="12" BackgroundColor="{StaticResource CardBg}" Padding="16">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Petitioner Information" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource TextWhite}" />
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Name" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding PetitionerName}" FontSize="12" TextColor="{StaticResource TextWhite}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Email" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding PetitionerEmail}" FontSize="12" TextColor="{StaticResource TextWhite}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Phone" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding PetitionerPhone}" FontSize="12" TextColor="{StaticResource TextWhite}" />
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Notification Info -->
+                <Frame CornerRadius="12" BackgroundColor="{StaticResource CardBg}" Padding="16">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Notification" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource TextWhite}" />
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Type" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding NotificationType}" FontSize="12" TextColor="{StaticResource TextWhite}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Target" FontSize="12" TextColor="{StaticResource TextLight}" />
+                            <Label Text="{Binding NotificationTarget}" FontSize="12" TextColor="{StaticResource TextWhite}" />
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- PDF Preview Button -->
+                <Button Text="📄 Preview PDF"
+                        Command="{Binding PreviewPdfCommand}"
+                        BackgroundColor="{StaticResource AccentGreen}"
+                        TextColor="{StaticResource TextWhite}"
+                        CornerRadius="12"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        Padding="16,14"
+                        HorizontalOptions="Fill"
+                        Margin="0,10,0,0" />
+
+                <!-- Collateral -->
+                <Frame CornerRadius="12" BackgroundColor="{StaticResource CardBg}" Padding="16" IsVisible="{Binding HasCollateral}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Collateral" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource TextWhite}" />
+                        <Label Text="{Binding CollateralDescription}" FontSize="12" TextColor="{StaticResource TextLight}" />
+                        <Button Text="Download"
+                                Command="{Binding DownloadCollateralCommand}"
+                                BackgroundColor="{StaticResource AccentOrange}"
+                                TextColor="{StaticResource DarkBg}"
+                                CornerRadius="8"
+                                FontAttributes="Bold"
+                                Padding="12,10"
+                                HorizontalOptions="Start" />
+                    </VerticalStackLayout>
+                </Frame>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

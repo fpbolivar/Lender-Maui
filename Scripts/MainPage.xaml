@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:views="clr-namespace:Lender.Views"
              x:Class="Lender.MainPage"
+             x:Name="DashboardRoot"
              Title="Lender"
              BackgroundColor="#0A1929"
              Padding="0"
@@ -214,6 +215,104 @@
                         Margin="0,20,0,0"
                         HorizontalOptions="Center" />
             </VerticalStackLayout>
+
+                <!-- Recent Transactions -->
+                <VerticalStackLayout Spacing="12">
+                    <HorizontalStackLayout Spacing="12">
+                        <Label Text="RECENT TRANSACTIONS" 
+                               FontSize="12" 
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource TextLight}"
+                               HorizontalOptions="StartAndExpand" />
+                        <Label Text="View all >" 
+                               FontSize="12" 
+                               TextColor="{StaticResource TextLight}">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding NavigateToTransactionsCommand}" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </HorizontalStackLayout>
+
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecentTransactions}" Spacing="12">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <Frame CornerRadius="12"
+                                       BorderColor="{StaticResource CardBg}"
+                                       BackgroundColor="{StaticResource CardBg}"
+                                       Padding="16"
+                                       Margin="0,4,0,4">
+                                    <Frame.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding BindingContext.OpenTransactionFromDashboardCommand, Source={x:Reference Name=DashboardRoot}}"
+                                                              CommandParameter="{Binding}" />
+                                    </Frame.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="16">
+                                        <!-- Column 1: Name and Email -->
+                                        <VerticalStackLayout Spacing="6" HorizontalOptions="FillAndExpand" WidthRequest="120">
+                                            <Label Text="Name"
+                                                   FontSize="10"
+                                                   TextColor="{StaticResource TextLight}"
+                                                   Opacity="0.7" />
+                                            <Label Text="{Binding RequesterName, FallbackValue='Loan Agreement'}"
+                                                   FontSize="15"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{StaticResource TextWhite}"
+                                                   LineBreakMode="TailTruncation" />
+                                            <Label Text="Email"
+                                                   FontSize="10"
+                                                   TextColor="{StaticResource TextLight}"
+                                                   Opacity="0.7"
+                                                   Margin="0,4,0,0" />
+                                            <Label Text="{Binding RequesterEmail, FallbackValue='Email'}"
+                                                   FontSize="12"
+                                                   TextColor="{StaticResource TextWhite}"
+                                                   LineBreakMode="TailTruncation" />
+                                        </VerticalStackLayout>
+                                        
+                                        <!-- Column 2:  Installments and Periodic Payment -->
+                                        <VerticalStackLayout Spacing="6" WidthRequest="90">
+                                            <Label Text="Installments"
+                                                   FontSize="10"
+                                                   TextColor="{StaticResource TextLight}"
+                                                   Opacity="0.7" />
+                                            <Label Text="{Binding PaybackDuration, FallbackValue='N/A'}"
+                                                   FontSize="13"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{StaticResource TextWhite}" />
+                                            <Label Text="Payments"
+                                                   FontSize="10"
+                                                   TextColor="{StaticResource TextLight}"
+                                                   Opacity="0.7"
+                                                   Margin="0,4,0,0" />
+                                            <Label Text="{Binding PeriodicPayment, StringFormat='${0:F2}'}"
+                                                   FontSize="12"
+                                                   TextColor="{StaticResource TextWhite}" />
+                                        </VerticalStackLayout>
+                                        
+                                        <!-- Column 3: Amount and Status -->
+                                        <VerticalStackLayout Spacing="6" HorizontalOptions="End" WidthRequest="90">
+                                            <Label Text="Amount"
+                                                   FontSize="10"
+                                                   TextColor="{StaticResource TextLight}"
+                                                   Opacity="0.7" />
+                                            <Label Text="{Binding Amount, StringFormat='${0:F2}'}"
+                                                   FontSize="16"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{StaticResource AccentOrange}" />
+                                            <Label Text="Status"
+                                                   FontSize="10"
+                                                   TextColor="{StaticResource TextLight}"
+                                                   Opacity="0.7"
+                                                   Margin="0,4,0,0" />
+                                            <Label Text="{Binding Status}"
+                                                   FontSize="12"
+                                                   TextColor="{StaticResource AccentGreen}" />
+                                        </VerticalStackLayout>
+                                    </HorizontalStackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
 
             </VerticalStackLayout>
         </ScrollView>

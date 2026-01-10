@@ -12,6 +12,8 @@ internal static class AuthenticationConstants
     public const string FirebaseAuthUrl = "https://identitytoolkit.googleapis.com/v1";
     public const string FirebaseProjectId = "lender-d0412";
     public const string FirebaseTokenKey = "firebase_auth_token";
+    public const string FirebaseRefreshTokenKey = "firebase_refresh_token";
     public const string FirebaseUserIdKey = "firebase_user_id";
     public const string FirebaseUserEmailKey = "firebase_user_email";
+    public const string FirebaseSecureTokenUrl = "https://securetoken.googleapis.com/v1/token";
 }

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Lender.Helpers;
 using Lender.Models;
 using Lender.Services;
+using Lender;
 
 namespace Lender.ViewModels;
 
@@ -17,16 +18,20 @@ namespace Lender.ViewModels;
 public class TransactionDisplayModel : INotifyPropertyChanged
 {
     private readonly Transaction _transaction;
-    private readonly LoanRequest? _loanRequest;
-    private readonly User? _otherUser;
     private readonly string _currentUserId;
 
-    public TransactionDisplayModel(Transaction transaction, LoanRequest? loanRequest, User? otherUser, string currentUserId)
+    // Precomputed other party email for fallbacks
+    private readonly string _otherPartyEmail;
+
+    public TransactionDisplayModel(Transaction transaction, string currentUserId)
     {
         _transaction = transaction;
-        _loanRequest = loanRequest;
-        _otherUser = otherUser;
         _currentUserId = currentUserId;
+
+        // Determine the other party email once to reuse in bindings and fallbacks
+        _otherPartyEmail = _transaction.FromUserId == _currentUserId
+            ? _transaction.ToUserId
+            : _transaction.FromUserId;
     }
 
     public string TransactionTypeDisplay => _transaction.Type switch
@@ -42,7 +47,25 @@ public class TransactionDisplayModel : INotifyPropertyChanged
 
     public decimal Amount => _transaction.Amount;
 
-    public string OtherPartyName => _otherUser?.FullName ?? "Unknown";
+    // Determine other party name from transaction data
+    public string OtherPartyName
+    {
+        get
+        {
+            // If current user is the requester, other party is petitioner (lender)
+            if (_transaction.RequesterEmail == _currentUserId && !string.IsNullOrWhiteSpace(_transaction.PetitionerName))
+                return _transaction.PetitionerName;
+            
+            // If current user is the petitioner, other party is requester (borrower)
+            if (_transaction.PetitionerEmail == _currentUserId && !string.IsNullOrWhiteSpace(_transaction.RequesterName))
+                return _transaction.RequesterName;
+            
+            // Fallback to email or "Unknown"
+            return !string.IsNullOrWhiteSpace(_otherPartyEmail) ? _otherPartyEmail : "Unknown";
+        }
+    }
+
+    public string OtherPartyEmail => _otherPartyEmail;
 
     public string Status => _transaction.Status.ToString();
 
@@ -50,31 +73,24 @@ public class TransactionDisplayModel : INotifyPropertyChanged
         ? Color.FromArgb("#1ABC9C")  // Green for lending
         : Color.FromArgb("#FF9F43"); // Orange for borrowing
 
-    public decimal InterestRate => _loanRequest?.InterestRate ?? 0;
+    public decimal InterestRate => _transaction.InterestRate;
 
     public string InterestRateDisplay => $"{InterestRate:F2}%";
 
-    public bool HasCollateral => !string.IsNullOrEmpty(_loanRequest?.Category);
+    public bool HasCollateral => _transaction.HasCollateral;
 
-    public string CollateralName => _loanRequest?.Category ?? string.Empty;
+    public string CollateralName => _transaction.CollateralDescription ?? string.Empty;
 
-    public bool HasNextPayment => _loanRequest?.DueDate > DateTime.UtcNow;
+    public string? CollateralImageId => _transaction.CollateralImageId;
 
-    public string NextPaymentDateDisplay => _loanRequest?.DueDate.ToString("MMM dd, yyyy") ?? "N/A";
+    public string? CollateralOwnerEmail => _transaction.PetitionerEmail ?? _transaction.FromUserId;
 
-    // Calculate next payment amount based on loan terms
-    public decimal NextPaymentAmount => CalculatePaymentAmount();
-
-    public string NextPaymentAmountDisplay => NextPaymentAmount > 0 ? $"${NextPaymentAmount:F2}" : "N/A";
-
-    private decimal CalculatePaymentAmount()
-    {
-        if (_loanRequest == null) return 0;
-
-        // Simple calculation: (Principal + (Principal * Rate / 100)) / Duration
-        decimal totalWithInterest = _loanRequest.Amount * (1 + _loanRequest.InterestRate / 100);
-        return totalWithInterest / _loanRequest.DurationMonths;
-    }
+    // Payment details from transaction
+    public decimal PeriodicPayment => _transaction.PeriodicPayment;
+    public string PeriodicPaymentDisplay => PeriodicPayment > 0 ? $"${PeriodicPayment:F2}" : "N/A";
+    
+    public int TotalPayments => _transaction.TotalPayments;
+    public string PaymentFrequencyLabel => _transaction.PaymentFrequencyLabel ?? "N/A";
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -82,6 +98,8 @@ public class TransactionDisplayModel : INotifyPropertyChanged
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
+
+    public Transaction UnderlyingTransaction => _transaction;
 }
 
 public class TransactionViewModel : NavigableViewModel
@@ -93,6 +111,8 @@ public class TransactionViewModel : NavigableViewModel
     private bool _isBorrowsSelected = false;
     private readonly IAuthenticationService _authService;
     private readonly FirestoreService _firestoreService;
+
+    public ICommand OpenTransactionCommand { get; }
 
     public ICommand FilterByAllCommand { get; }
     public ICommand FilterByLendsCommand { get; }
@@ -107,6 +127,7 @@ public class TransactionViewModel : NavigableViewModel
         FilterByAllCommand = new Command(() => FilterByAll());
         FilterByLendsCommand = new Command(() => FilterByLends());
         FilterByBorrowsCommand = new Command(() => FilterByBorrows());
+        OpenTransactionCommand = new Command<TransactionDisplayModel>(async (tx) => await OpenTransactionAsync(tx));
     }
 
     public ObservableCollection<TransactionDisplayModel> FilteredTransactions
@@ -203,19 +224,6 @@ public class TransactionViewModel : NavigableViewModel
             Category = "Equipment"
         };
 
-        // Demo user (other party)
-        var demoUser1 = new User
-        {
-            FullName = "Carlos Ruiz",
-            Email = "carlos@example.com"
-        };
-
-        var demoUser2 = new User
-        {
-            FullName = "Sarah Johnson",
-            Email = "sarah@example.com"
-        };
-
         // Demo transactions
         var transaction1 = new TransactionDisplayModel(
             new Transaction
@@ -228,10 +236,16 @@ public class TransactionViewModel : NavigableViewModel
                 ToUserId = "carlos@example.com",
                 LoanRequestId = "L-DEMO-001",
                 CreatedDate = DateTime.UtcNow.AddDays(-30),
-                InterestAmount = 425m
+                InterestAmount = 425m,
+                InterestRate = 8.5m,
+                PeriodicPayment = 450m,
+                TotalPayments = 12,
+                PaymentFrequencyLabel = "Monthly",
+                RequesterName = "Carlos Ruiz",
+                RequesterEmail = "carlos@example.com",
+                PetitionerName = "Demo User",
+                PetitionerEmail = "demo@example.com"
             },
-            demoLoan1,
-            demoUser1,
             "demo@example.com"
         );
 
@@ -246,10 +260,16 @@ public class TransactionViewModel : NavigableViewModel
                 ToUserId = "demo@example.com",
                 LoanRequestId = "L-DEMO-002",
                 CreatedDate = DateTime.UtcNow.AddDays(-15),
-                InterestAmount = 100m
+                InterestAmount = 100m,
+                InterestRate = 6.0m,
+                PeriodicPayment = 210m,
+                TotalPayments = 10,
+                PaymentFrequencyLabel = "Monthly",
+                RequesterName = "Demo User",
+                RequesterEmail = "demo@example.com",
+                PetitionerName = "Sarah Johnson",
+                PetitionerEmail = "sarah@example.com"
             },
-            demoLoan2,
-            demoUser2,
             "demo@example.com"
         );
 
@@ -264,10 +284,16 @@ public class TransactionViewModel : NavigableViewModel
                 ToUserId = "carlos@example.com",
                 LoanRequestId = "L-DEMO-001",
                 CreatedDate = DateTime.UtcNow.AddDays(-5),
-                InterestAmount = 35m
+                InterestAmount = 35m,
+                InterestRate = 8.5m,
+                PeriodicPayment = 35m,
+                TotalPayments = 12,
+                PaymentFrequencyLabel = "Monthly",
+                RequesterName = "Demo User",
+                RequesterEmail = "demo@example.com",
+                PetitionerName = "Carlos Martinez",
+                PetitionerEmail = "carlos@example.com"
             },
-            demoLoan1,
-            demoUser1,
             "demo@example.com"
         );
 
@@ -286,21 +312,15 @@ public class TransactionViewModel : NavigableViewModel
             var currentUserEmail = _authService.CurrentUserEmail;
             if (string.IsNullOrEmpty(currentUserEmail)) return;
 
-            // Load all transactions for the current user
+            // Load canonical loan agreement transactions for the current user
             var transactions = await _firestoreService.GetUserTransactionsAsync(currentUserEmail);
 
             _allTransactions.Clear();
 
-            // Process each transaction with related loan and user data
+            // Process each transaction - no need to fetch user data, it's denormalized in transaction
             foreach (var transaction in transactions)
             {
-                var loanRequest = await _firestoreService.GetLoanAsync(transaction.LoanRequestId);
-                
-                // Determine the other party (for/from whom)
-                var otherUserId = transaction.FromUserId == currentUserEmail ? transaction.ToUserId : transaction.FromUserId;
-                var otherUser = await _firestoreService.GetUserAsync(otherUserId);
-
-                var displayModel = new TransactionDisplayModel(transaction, loanRequest, otherUser, currentUserEmail);
+                var displayModel = new TransactionDisplayModel(transaction, currentUserEmail);
                 _allTransactions.Add(displayModel);
             }
 
@@ -309,7 +329,7 @@ public class TransactionViewModel : NavigableViewModel
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Error loading transactions: {ex.Message}");
+            Debug.WriteLine($"Error loading transactions: {ex.Message} - TransactionViewModel.cs:342");
         }
     }
 
@@ -356,5 +376,19 @@ public class TransactionViewModel : NavigableViewModel
             FilterByBorrows();
         else
             FilterByAll();
+    }
+
+    private async Task OpenTransactionAsync(TransactionDisplayModel? tx)
+    {
+        if (tx == null) return;
+
+        try
+        {
+            await Shell.Current.Navigation.PushAsync(new TransactionDetailPage(tx));
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[TransactionViewModel] Navigation to detail failed: {ex.Message} - TransactionViewModel.cs:401");
+        }
     }
 }

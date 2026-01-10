@@ -2,6 +2,14 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows.Input;
 using Lender.Helpers;
+using Lender.Services;
+using Lender.Documents;
+using Microsoft.Maui.Media;
+#if IOS
+using Foundation;
+using UIKit;
+#endif
+using Microsoft.Maui.Media;
 
 namespace Lender.ViewModels;
 
@@ -9,6 +17,8 @@ public class LoanFormViewModel : NavigableViewModel
 {
     public ICommand BackCommand { get; }
     public ICommand UploadCollateralImageCommand { get; }
+    public ICommand PickCollateralImageCommand { get; }
+    public ICommand CaptureCollateralImageCommand { get; }
     public ICommand SubmitCommand { get; }
     public ICommand SetRequestModeCommand { get; }
     public ICommand SetSendModeCommand { get; }
@@ -27,6 +37,42 @@ public class LoanFormViewModel : NavigableViewModel
     public ICommand SetNotificationTypeCommand { get; }
     public ICommand ContinueToFinalSummaryCommand { get; }
     public ICommand SubmitLoanRequestCommand { get; }
+    public ICommand GeneratePdfCommand { get; }
+    public ICommand AutoFillRequesterDemoCommand { get; }
+
+    public bool IsDebugMode
+    {
+        get
+        {
+            bool isDebug = false;
+#if DEBUG
+            isDebug = true;
+#endif
+            return isDebug;
+        }
+    }
+
+    private async Task<Transaction> BuildTransactionDocumentAsync()
+    {
+        // Gather petitioner (logged-in user) info
+        string petitionerName = "Not available";
+        string petitionerEmail = "Not available";
+        string petitionerPhone = "Not available";
+
+        var authService = ServiceHelper.GetService<IAuthenticationService>();
+        if (!string.IsNullOrWhiteSpace(authService?.CurrentUserEmail))
+        {
+            petitionerEmail = authService.CurrentUserEmail;
+            var userProfile = await FirestoreService.Instance.GetUserAsync(authService.CurrentUserEmail);
+            if (userProfile != null)
+            {
+                petitionerName = string.IsNullOrWhiteSpace(userProfile.FullName) ? petitionerName : userProfile.FullName;
+                petitionerPhone = string.IsNullOrWhiteSpace(userProfile.PhoneNumber) ? petitionerPhone : userProfile.PhoneNumber;
+            }
+        }
+
+        return Transaction.FromViewModel(this, petitionerName, petitionerEmail, petitionerPhone);
+    }
 
     private string _amountText = "";
     public string AmountText 
@@ -199,6 +245,27 @@ private bool _isNoInterestSelected = false;
     private bool _showNextButton = false;
     public bool ShowNextButton { get => _showNextButton; set => SetProperty(ref _showNextButton, value); }
 
+    // Collateral details
+    private string _collateralDescription = string.Empty;
+    public string CollateralDescription { get => _collateralDescription; set => SetProperty(ref _collateralDescription, value); }
+
+    private byte[]? _collateralFileBytes;
+    public byte[]? CollateralFileBytes { get => _collateralFileBytes; set { if (SetProperty(ref _collateralFileBytes, value)) OnPropertyChanged(nameof(HasCollateralFile)); } }
+
+    private string _collateralFileId = string.Empty;
+    public string CollateralFileId { get => _collateralFileId; set { if (SetProperty(ref _collateralFileId, value)) OnPropertyChanged(nameof(HasCollateralFile)); } }
+
+    private string _collateralFileType = string.Empty; // image or pdf
+    public string CollateralFileType { get => _collateralFileType; set => SetProperty(ref _collateralFileType, value); }
+
+    public bool HasCollateralFile => (CollateralFileBytes != null && CollateralFileBytes.Length > 0) || !string.IsNullOrWhiteSpace(CollateralFileId);
+
+    // Backward compatibility properties (for Transaction/PDF that still use base64)
+    public string CollateralFileBase64 => CollateralFileBytes != null ? Convert.ToBase64String(CollateralFileBytes) : string.Empty;
+    public string CollateralImageBase64 => CollateralFileBase64;
+    public string CollateralImageId { get => CollateralFileId; set => CollateralFileId = value; }
+    public bool HasCollateralImage => HasCollateralFile;
+
     // Requester Information
     private string _requesterName = "";
     public string RequesterName { get => _requesterName; set => SetProperty(ref _requesterName, value); }
@@ -303,13 +370,24 @@ private bool _isNoInterestSelected = false;
 
     public LoanFormViewModel()
     {
-        Debug.WriteLine("LoanFormViewModel constructor started - LoanFormViewModel.cs:266");
+        Debug.WriteLine("LoanFormViewModel constructor started - LoanFormViewModel.cs:373");
         BackCommand = new Command(async () => 
         {
-            Debug.WriteLine("BackCommand executing - LoanFormViewModel.cs:269");
+            Debug.WriteLine("BackCommand executing - LoanFormViewModel.cs:376");
             await Shell.Current.GoToAsync("..");
         });
-        UploadCollateralImageCommand = new Command(async () => await Task.CompletedTask);
+        UploadCollateralImageCommand = new Command(async () =>
+        {
+            await PickCollateralImageAsync();
+        });
+        PickCollateralImageCommand = new Command(async () =>
+        {
+            await PickCollateralImageAsync();
+        });
+        CaptureCollateralImageCommand = new Command(async () =>
+        {
+            await CaptureCollateralImageAsync();
+        });
         SubmitCommand = new Command(async () =>
         {
             // Navigate to requester info page
@@ -320,6 +398,20 @@ private bool _isNoInterestSelected = false;
         
         ContinueToRequesterInfoCommand = new Command(async () =>
         {
+            // Validate: if collateral is selected, description is required
+            if (IsYesCollateralSelected && string.IsNullOrWhiteSpace(CollateralDescription))
+            {
+                var page = Application.Current?.Windows[0]?.Page;
+                if (page != null)
+                {
+                    await page.DisplayAlertAsync(
+                        "Missing Collateral Description",
+                        "Please enter a description for the collateral.",
+                        "OK");
+                }
+                return;
+            }
+
             // Navigate to requester info page
             var requesterInfoPage = new LoanRequesterInfoPage();
             requesterInfoPage.BindingContext = this;
@@ -343,13 +435,189 @@ private bool _isNoInterestSelected = false;
         
         SubmitLoanRequestCommand = new Command(async () =>
         {
-            // TODO: Implement actual loan request submission
-            if (Application.Current?.MainPage != null)
+            try
             {
-                await Application.Current.MainPage.DisplayAlertAsync("Success", "Loan request submitted successfully!", "OK");
+            await EnsureCollateralImageSizeAsync();
+                // Upload collateral file to Firebase Storage if present
+                if (IsYesCollateralSelected && CollateralFileBytes != null && CollateralFileBytes.Length > 0)
+                {
+                    try
+                    {
+                        var fileExt = CollateralFileType.Equals("pdf", StringComparison.OrdinalIgnoreCase) ? "pdf" : "jpg";
+                        var authService = ServiceHelper.GetService<IAuthenticationService>();
+                        System.Diagnostics.Debug.WriteLine($"[Upload] Auth state - IsAuthenticated: {authService?.IsAuthenticated}, CurrentUserId: {authService?.CurrentUserId}, CurrentUserEmail: {authService?.CurrentUserEmail} - LoanFormViewModel.cs:451");
+                        
+                        // Use email for the storage path instead of UID
+                        var userEmail = authService?.CurrentUserEmail;
+                        if (string.IsNullOrWhiteSpace(userEmail))
+                        {
+                            var page = Application.Current?.Windows[0]?.Page;
+                            if (page != null)
+                            {
+                                await page.DisplayAlertAsync(
+                                    "Error",
+                                    "Unable to identify logged-in user. Please log in again.",
+                                    "OK");
+                            }
+                            return;
+                        }
+                        
+                        System.Diagnostics.Debug.WriteLine($"[Upload] User email: {userEmail} - LoanFormViewModel.cs:465");
+                        
+                        // Generate unique image ID
+                        var imageId = $"{Guid.NewGuid():N}";
+                        var imageIdWithExt = $"{imageId}.{fileExt}";
+                        
+                        // Build full storage path: users/{email}/collateral/{imageId.ext}
+                        var fullPath = $"users/{userEmail}/collateral/{imageIdWithExt}";
+                        System.Diagnostics.Debug.WriteLine($"[Upload] Full file path: {fullPath} - LoanFormViewModel.cs:473");
+                        var storage = new FirebaseStorageService();
+                        var contentType = CollateralFileType.Equals("pdf", StringComparison.OrdinalIgnoreCase) ? "application/pdf" : "image/jpeg";
+                        System.Diagnostics.Debug.WriteLine($"[Upload] File size: {CollateralFileBytes.Length} bytes, Content-Type: {contentType} - LoanFormViewModel.cs:476");
+                        var uploadedName = await storage.UploadImageAsync(CollateralFileBytes, fullPath, contentType);
+                        if (!string.IsNullOrWhiteSpace(uploadedName))
+                        {
+                            // Store ONLY the image ID (filename), not the full path
+                            CollateralFileId = imageIdWithExt;
+                            System.Diagnostics.Debug.WriteLine($"[Upload] Stored image ID in Firestore: {imageIdWithExt} - LoanFormViewModel.cs:481");
+                            // Clear bytes to avoid oversized memory usage
+                            CollateralFileBytes = null;
+                        }
+                        else
+                        {
+                            // Upload failed; prevent submission
+                            var page = Application.Current?.Windows[0]?.Page;
+                            if (page != null)
+                            {
+                                await page.DisplayAlertAsync(
+                                    "Upload Failed",
+                                    "Collateral file upload to storage failed. Please try again.",
+                                    "OK");
+                            }
+                            return;
+                        }
+                    }
+                    catch (Exception upEx)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Collateral upload failed: {upEx.Message} - LoanFormViewModel.cs:471");
+                        var page = Application.Current?.Windows[0]?.Page;
+                        if (page != null)
+                        {
+                            await page.DisplayAlertAsync(
+                                "Upload Error",
+                                $"Failed to upload collateral file: {upEx.Message}",
+                                "OK");
+                        }
+                        return;
+                    }
+                }
+
+                var transactionDoc = await BuildTransactionDocumentAsync();
+                var docId = await FirestoreService.Instance.CreateTransactionDocumentAsync(transactionDoc);
+
+                if (!string.IsNullOrEmpty(docId))
+                {
+                    // Also save transaction to user's sub-collection
+                    var authService = ServiceHelper.GetService<IAuthenticationService>();
+                    if (authService != null && !string.IsNullOrWhiteSpace(authService.CurrentUserEmail))
+                    {
+                        // Save to user's transactions sub-collection
+                        await FirestoreService.Instance.CreateUserTransactionDocumentAsync(authService.CurrentUserEmail, transactionDoc);
+
+                        // Update user profile with new loan statistics
+                        var currentUser = await FirestoreService.Instance.GetUserAsync(authService.CurrentUserEmail);
+                        if (currentUser != null)
+                        {
+                            // Parse amount
+                            if (decimal.TryParse(AmountText, out var amount) && amount > 0)
+                            {
+                                // Update statistics based on mode
+                                if (Mode == "Send")
+                                {
+                                    // User is lending (sending money)
+                                    currentUser.LoansGiven++;
+                                    currentUser.TotalLent += amount;
+                                    // Deduct from balance (lent out)
+                                    currentUser.Balance -= amount;
+                                }
+                                else // Request mode
+                                {
+                                    // User is borrowing (requesting money)
+                                    currentUser.LoansReceived++;
+                                    currentUser.TotalBorrowed += amount;
+                                    // Add to balance (will receive)
+                                    currentUser.Balance += amount;
+                                }
+
+                                // Save updated user back to Firestore
+                                await FirestoreService.Instance.UpdateUserAsync(currentUser);
+                            }
+                        }
+                    }
+
+                    var page = Application.Current?.Windows[0]?.Page;
+                    if (page != null)
+                    {
+                        await page.DisplayAlertAsync("Success", "Loan request submitted successfully!", "OK");
+                    }
+                }
+                else
+                {
+                    var page = Application.Current?.Windows[0]?.Page;
+                    if (page != null)
+                    {
+                        await page.DisplayAlertAsync("Error", "Failed to submit loan request.", "OK");
+                    }
+                }
+
+                await Shell.Current.GoToAsync("//mainpage");
             }
-            await Shell.Current.GoToAsync("//loans");
+            catch (Exception ex)
+            {
+                var page = Application.Current?.Windows[0]?.Page;
+                if (page != null)
+                {
+                    await page.DisplayAlertAsync("Error", $"Failed to submit loan request: {ex.Message}", "OK");
+                }
+            }
         });
+        
+        GeneratePdfCommand = new Command(async () =>
+        {
+            try
+            {
+                await EnsureCollateralImageSizeAsync();
+                // In debug, attach a sample collateral file if missing
+                if (IsDebugMode && IsYesCollateralSelected && (CollateralFileBytes == null || CollateralFileBytes.Length == 0) && string.IsNullOrWhiteSpace(CollateralFileId))
+                {
+                    CollateralDescription = string.IsNullOrWhiteSpace(CollateralDescription) ? "Demo collateral file" : CollateralDescription;
+                    // 1x1 white PNG
+                    CollateralFileBytes = Convert.FromBase64String("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=");
+                    CollateralFileType = "image";
+                }
+
+                var transactionDoc = await BuildTransactionDocumentAsync();
+
+                var pdfService = new LoanPdfService();
+                string filePath = await pdfService.GenerateLoanPdf(transactionDoc);
+                
+                // Use Share to preview and allow user to save/share the PDF
+                await Share.Default.RequestAsync(new ShareFileRequest
+                {
+                    Title = "Loan Agreement Receipt",
+                    File = new ShareFile(filePath)
+                });
+            }
+            catch (Exception ex)
+            {
+                var page = Application.Current?.Windows[0]?.Page;
+                if (page != null)
+                {
+                    await page.DisplayAlertAsync("Error", $"Failed to generate PDF: {ex.Message}", "OK");
+                }
+            }
+        });
+        
         SetRequestModeCommand = new Command(() => {
             Mode = "Request";
             IsRequestSelected = true;
@@ -451,6 +719,33 @@ private bool _isNoInterestSelected = false;
             IsYesCollateralSelected = false;
             IsNoCollateralSelected = true;
             ShowNextButton = true;
+            CollateralDescription = string.Empty;
+            CollateralFileBytes = null;
+            CollateralFileId = string.Empty;
+            CollateralFileType = string.Empty;
+        });
+
+        AutoFillRequesterDemoCommand = new Command(() =>
+        {
+            RequesterName = "Test1";
+            RequesterPhone = "Test2";
+            RequesterEmail = "Test3";
+            RequesterAddress = "Test4";
+            RequesterCity = "Test5";
+            RequesterState = "Test6";
+            RequesterZipCode = "Test7";
+            RequesterIdNumber = "Test8";
+
+            // Set notification to Email for demo
+            IsNoNotificationSelected = false;
+            IsSMSNotificationSelected = false;
+            IsEmailNotificationSelected = true;
+
+            // Notify derived properties changed
+            OnPropertyChanged(nameof(HasAddress));
+            OnPropertyChanged(nameof(FullAddress));
+            OnPropertyChanged(nameof(HasIdNumber));
+            OnPropertyChanged(nameof(NotificationTypeDisplay));
         });
 
         SetInterestMethodTotalCommand = new Command(() =>
@@ -480,7 +775,7 @@ private bool _isNoInterestSelected = false;
         IsRequestSelected = true;
         IsInterestMethodTotalSelected = true;
         
-        Debug.WriteLine("LoanFormViewModel constructor completed - LoanFormViewModel.cs:435");
+        Debug.WriteLine("LoanFormViewModel constructor completed - LoanFormViewModel.cs:742");
     }
 
     private void CalculateLoanDetails()
@@ -586,6 +881,162 @@ private bool _isNoInterestSelected = false;
                     }
                 }
             }
+        }
+    }
+
+    private async Task PickCollateralImageAsync()
+    {
+        try
+        {
+            // File picker for images and PDFs (documents)
+            var result = await FilePicker.Default.PickAsync(new PickOptions
+            {
+                PickerTitle = "Select collateral (image or PDF)",
+                FileTypes = new FilePickerFileType(
+                    new Dictionary<DevicePlatform, IEnumerable<string>>
+                    {
+                        { DevicePlatform.iOS, new[] { "public.image", "com.adobe.pdf" } },
+                        { DevicePlatform.Android, new[] { "image/*", "application/pdf" } }
+                    })
+            });
+
+            if (result != null)
+            {
+                using var stream = await result.OpenReadAsync();
+                using var ms = new MemoryStream();
+                await stream.CopyToAsync(ms);
+                var fileType = result.FileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase) ? "pdf" : "image";
+                TrySetCollateralFileBase64FromBytes(ms.ToArray(), fileType);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"PickCollateralImageAsync error: {ex.Message} - LoanFormViewModel.cs:878");
+        }
+    }
+
+    private async Task CaptureCollateralImageAsync()
+    {
+        try
+        {
+            // Photo library picker (gallery) for both iOS and Android
+#pragma warning disable CS0618 // Type or member is obsolete
+            var photo = await MediaPicker.PickPhotoAsync(new MediaPickerOptions
+            {
+                Title = "Select photo from gallery"
+            });
+#pragma warning restore CS0618
+
+            if (photo != null)
+            {
+                using var stream = await photo.OpenReadAsync();
+                using var ms = new MemoryStream();
+                await stream.CopyToAsync(ms);
+                TrySetCollateralFileBase64FromBytes(ms.ToArray(), "image");
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"CaptureCollateralImageAsync error: {ex.Message} - LoanFormViewModel.cs:902");
+        }
+    }
+
+    private void TrySetCollateralFileBase64FromBytes(byte[] bytes, string fileType)
+    {
+        try
+        {
+            if (bytes.Length == 0)
+                return;
+
+            CollateralFileType = fileType;
+
+            // For images, attempt iOS-specific JPEG compression
+            if (fileType.Equals("image", StringComparison.OrdinalIgnoreCase))
+            {
+#if IOS
+                try
+                {
+                    using var data = NSData.FromArray(bytes);
+                    using var uiImage = UIImage.LoadFromData(data);
+                    if (uiImage != null)
+                    {
+                        using var jpgData = uiImage.AsJPEG(0.7f); // 70% quality
+                        if (jpgData != null)
+                        {
+                            CollateralFileBytes = jpgData.ToArray();
+                            return;
+                        }
+                    }
+                }
+                catch (Exception iosEx)
+                {
+                    Debug.WriteLine($"iOS compression failed, fallback to raw: {iosEx.Message} - LoanFormViewModel.cs:932");
+                }
+#endif
+            }
+
+            CollateralFileBytes = bytes;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"TrySetCollateralFileBase64FromBytes error: {ex.Message} - LoanFormViewModel.cs:941");
+        }
+    }
+
+    private async Task EnsureCollateralImageSizeAsync()
+    {
+        // No longer needed since we're uploading bytes directly to storage
+        // instead of storing in Firestore as base64
+        await Task.CompletedTask;
+    }
+
+    private string? TryGenerateThumbnailBase64(string base64, int maxWidth)
+    {
+        try
+        {
+#if IOS
+            // Decode base64 into UIImage
+            var bytes = Convert.FromBase64String(base64);
+            using var data = NSData.FromArray(bytes);
+            using var uiImage = UIImage.LoadFromData(data);
+            if (uiImage == null || uiImage.Size.Width <= 0 || uiImage.Size.Height <= 0)
+            {
+                return null;
+            }
+
+            // Compute target size maintaining aspect ratio
+            var aspect = uiImage.Size.Height / uiImage.Size.Width;
+            nfloat targetWidth = maxWidth;
+            nfloat targetHeight = (nfloat)(maxWidth * aspect);
+
+            // Use modern UIGraphicsImageRenderer for iOS 17+ compatibility
+            var renderer = new UIGraphicsImageRenderer(new CoreGraphics.CGSize(targetWidth, targetHeight));
+            var resized = renderer.CreateImage((context) =>
+            {
+                uiImage.Draw(new CoreGraphics.CGRect(0, 0, targetWidth, targetHeight));
+            });
+
+            if (resized == null)
+            {
+                return null;
+            }
+
+            using var jpgData = resized.AsJPEG(0.6f);
+            if (jpgData == null)
+            {
+                return null;
+            }
+
+            return Convert.ToBase64String(jpgData.ToArray());
+#else
+            // Non-iOS: no thumbnail support implemented
+            return null;
+#endif
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"TryGenerateThumbnailBase64 error: {ex.Message} - LoanFormViewModel.cs:996");
+            return null;
         }
     }
 }

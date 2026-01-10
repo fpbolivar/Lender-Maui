@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Lender.Services;
+using Lender.Services.Interfaces;
 using Lender.ViewModels;
 
 namespace Lender;
@@ -36,6 +37,9 @@ public static class MauiProgram
 	{
 		// Register authentication services
 		builder.Services.AddSingleton<IAuthenticationService, AuthenticationService>();
+		
+		// Register App Check service for Firebase Security
+		builder.Services.AddSingleton<IAppCheckService, AppCheckService>();
 		
 		// Register view models
 		builder.Services.AddTransient<LoginViewModel>();

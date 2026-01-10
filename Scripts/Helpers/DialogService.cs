@@ -12,7 +12,7 @@ public static class DialogService
     {
         var page = Application.Current?.Windows[0]?.Page;
         if (page != null)
-            await page.DisplayAlert(title, message, "OK");
+            await page.DisplayAlertAsync(title, message, "OK");
     }
 
     /// <summary>
@@ -22,7 +22,7 @@ public static class DialogService
     {
         var page = Application.Current?.Windows[0]?.Page;
         if (page != null)
-            await page.DisplayAlert(title, message, "OK");
+            await page.DisplayAlertAsync(title, message, "OK");
     }
 
     /// <summary>
@@ -32,7 +32,7 @@ public static class DialogService
     {
         var page = Application.Current?.Windows[0]?.Page;
         if (page != null)
-            await page.DisplayAlert(title, message, "OK");
+            await page.DisplayAlertAsync(title, message, "OK");
     }
 
     /// <summary>
@@ -42,7 +42,7 @@ public static class DialogService
     {
         var page = Application.Current?.Windows[0]?.Page;
         if (page != null)
-            return await page.DisplayAlert(title, message, accept, cancel);
+            return await page.DisplayAlertAsync(title, message, accept, cancel);
         return false;
     }
 

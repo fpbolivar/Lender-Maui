@@ -34,49 +34,61 @@
 
                 <!-- Loan Details Card -->
                 <Frame CornerRadius="12" BackgroundColor="#132F4C" Padding="16" HasShadow="False">
-                    <VerticalStackLayout Spacing="16">
-                        <Label Text="Loan Details" FontSize="18" FontAttributes="Bold" TextColor="White" />
-                        
-                        <HorizontalStackLayout Spacing="8">
-                            <Label Text="Type:" TextColor="#B0BEC5" WidthRequest="120" />
-                            <Label Text="{Binding Mode}" TextColor="White" FontAttributes="Bold" />
-                        </HorizontalStackLayout>
+                    <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,Auto">
+                        <Label Text="Loan Details" FontSize="18" FontAttributes="Bold" TextColor="White" Grid.Row="0" Grid.Column="0" />
+                        <Button Text="📄" 
+                                Command="{Binding GeneratePdfCommand}"
+                                BackgroundColor="Transparent"
+                                TextColor="#FF9F43"
+                                FontSize="20"
+                                Padding="8"
+                                WidthRequest="40"
+                                HeightRequest="40"
+                                CornerRadius="20"
+                                Grid.Row="0"
+                                Grid.Column="1" />
+                        <VerticalStackLayout Spacing="16" Grid.Row="1" Grid.ColumnSpan="2">
+                            <HorizontalStackLayout Spacing="8">
+                                <Label Text="Type:" TextColor="#B0BEC5" WidthRequest="120" />
+                                <Label Text="{Binding Mode}" TextColor="White" FontAttributes="Bold" />
+                            </HorizontalStackLayout>
 
-                        <HorizontalStackLayout Spacing="8">
-                            <Label Text="Amount:" TextColor="#B0BEC5" WidthRequest="120" />
-                            <Label Text="{Binding AmountText, StringFormat='${0}'}" TextColor="#FF9F43" FontSize="16" FontAttributes="Bold" />
-                        </HorizontalStackLayout>
+                            <HorizontalStackLayout Spacing="8">
+                                <Label Text="Amount:" TextColor="#B0BEC5" WidthRequest="120" />
+                                <Label Text="{Binding AmountText, StringFormat='${0}'}" TextColor="#FF9F43" FontSize="16" FontAttributes="Bold" />
+                            </HorizontalStackLayout>
 
-                        <HorizontalStackLayout Spacing="8">
-                            <Label Text="Payback:" TextColor="#B0BEC5" WidthRequest="120" />
-                            <Label Text="{Binding PaybackDisplay}" TextColor="White" />
-                        </HorizontalStackLayout>
+                            <HorizontalStackLayout Spacing="8">
+                                <Label Text="Payback:" TextColor="#B0BEC5" WidthRequest="120" />
+                                <Label Text="{Binding PaybackDisplay}" TextColor="White" />
+                            </HorizontalStackLayout>
 
-                        <HorizontalStackLayout Spacing="8">
-                            <Label Text="Interest Type:" TextColor="#B0BEC5" WidthRequest="120" />
-                            <Label Text="{Binding InterestTypeDisplay}" TextColor="White" />
-                        </HorizontalStackLayout>
+                            <HorizontalStackLayout Spacing="8">
+                                <Label Text="Interest Type:" TextColor="#B0BEC5" WidthRequest="120" />
+                                <Label Text="{Binding InterestTypeDisplay}" TextColor="White" />
+                            </HorizontalStackLayout>
 
-                        <HorizontalStackLayout Spacing="8" IsVisible="{Binding IsInterestDetailsVisible}">
-                            <Label Text="Interest Rate:" TextColor="#B0BEC5" WidthRequest="120" />
-                            <Label Text="{Binding InterestRate, StringFormat='{0}%'}" TextColor="White" />
-                        </HorizontalStackLayout>
+                            <HorizontalStackLayout Spacing="8" IsVisible="{Binding IsInterestDetailsVisible}">
+                                <Label Text="Interest Rate:" TextColor="#B0BEC5" WidthRequest="120" />
+                                <Label Text="{Binding InterestRate, StringFormat='{0}%'}" TextColor="White" />
+                            </HorizontalStackLayout>
 
-                        <HorizontalStackLayout Spacing="8" IsVisible="{Binding IsInterestDetailsVisible}">
-                            <Label Text="Interest Method:" TextColor="#B0BEC5" WidthRequest="120" />
-                            <Label Text="{Binding InterestMethodDisplay}" TextColor="White" />
-                        </HorizontalStackLayout>
+                            <HorizontalStackLayout Spacing="8" IsVisible="{Binding IsInterestDetailsVisible}">
+                                <Label Text="Interest Method:" TextColor="#B0BEC5" WidthRequest="120" />
+                                <Label Text="{Binding InterestMethodDisplay}" TextColor="White" />
+                            </HorizontalStackLayout>
 
-                        <HorizontalStackLayout Spacing="8" IsVisible="{Binding IsPaymentFrequencyVisible}">
-                            <Label Text="Payment Frequency:" TextColor="#B0BEC5" WidthRequest="120" />
-                            <Label Text="{Binding SelectedPaymentFrequencyLabel}" TextColor="White" />
-                        </HorizontalStackLayout>
+                            <HorizontalStackLayout Spacing="8" IsVisible="{Binding IsPaymentFrequencyVisible}">
+                                <Label Text="Payment Frequency:" TextColor="#B0BEC5" WidthRequest="120" />
+                                <Label Text="{Binding SelectedPaymentFrequencyLabel}" TextColor="White" />
+                            </HorizontalStackLayout>
 
-                        <HorizontalStackLayout Spacing="8">
-                            <Label Text="Collateral:" TextColor="#B0BEC5" WidthRequest="120" />
-                            <Label Text="{Binding CollateralDisplay}" TextColor="White" />
-                        </HorizontalStackLayout>
-                    </VerticalStackLayout>
+                            <HorizontalStackLayout Spacing="8">
+                                <Label Text="Collateral:" TextColor="#B0BEC5" WidthRequest="120" />
+                                <Label Text="{Binding CollateralDisplay}" TextColor="White" />
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </Grid>
                 </Frame>
 
                 <!-- Payment Plan Card -->

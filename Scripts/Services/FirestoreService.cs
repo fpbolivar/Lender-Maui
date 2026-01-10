@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using Lender.Models;
 using Lender.Services.Constants;
+using DocTransaction = Lender.Documents.Transaction;
 
 namespace Lender.Services;
 
@@ -36,47 +37,47 @@ public class FirestoreService
     {
         try
         {
-            Debug.WriteLine($"[FirestoreService] ===== START SAVE USER =====");
-            Debug.WriteLine($"[FirestoreService] Starting SaveUserAsync for user: {user.Email} (ID: {user.Id})");
+            Debug.WriteLine($"[FirestoreService] ===== START SAVE USER ===== - FirestoreService.cs:40");
+            Debug.WriteLine($"[FirestoreService] Starting SaveUserAsync for user: {user.Email} (ID: {user.Id}) - FirestoreService.cs:41");
             
             // Use email as document ID for easier access
             var documentId = Uri.EscapeDataString(user.Email);
             var url = $"{_baseUrl}/{FirestoreCollections.Users}/{documentId}?key={FirestoreConstants.ApiKey}";
-            Debug.WriteLine($"[FirestoreService] URL: {url}");
+            Debug.WriteLine($"[FirestoreService] URL: {url} - FirestoreService.cs:46");
             
             var payload = UserToJson(user);
-            Debug.WriteLine($"[FirestoreService] Payload length: {payload.Length} chars");
-            Debug.WriteLine($"[FirestoreService] Payload: {payload}");
+            Debug.WriteLine($"[FirestoreService] Payload length: {payload.Length} chars - FirestoreService.cs:49");
+            Debug.WriteLine($"[FirestoreService] Payload: {payload} - FirestoreService.cs:50");
             
             var content = new StringContent(payload, Encoding.UTF8, "application/json");
             
-            Debug.WriteLine($"[FirestoreService] Sending PATCH request...");
+            Debug.WriteLine($"[FirestoreService] Sending PATCH request... - FirestoreService.cs:54");
             var response = await _httpClient.PatchAsync(url, content);
-            Debug.WriteLine($"[FirestoreService] Response Status: {response.StatusCode} ({(int)response.StatusCode})");
+            Debug.WriteLine($"[FirestoreService] Response Status: {response.StatusCode} ({(int)response.StatusCode}) - FirestoreService.cs:56");
             
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
-                Debug.WriteLine($"[FirestoreService] Success! Response length: {responseContent.Length}");
-                Debug.WriteLine($"[FirestoreService] Response: {responseContent}");
-                Debug.WriteLine($"[FirestoreService] ✅ User {user.Email} saved to Firestore successfully");
-                Debug.WriteLine($"[FirestoreService] ===== END SAVE USER SUCCESS =====");
+                Debug.WriteLine($"[FirestoreService] Success! Response length: {responseContent.Length} - FirestoreService.cs:61");
+                Debug.WriteLine($"[FirestoreService] Response: {responseContent} - FirestoreService.cs:62");
+                Debug.WriteLine($"[FirestoreService] ✅ User {user.Email} saved to Firestore successfully - FirestoreService.cs:63");
+                Debug.WriteLine($"[FirestoreService] ===== END SAVE USER SUCCESS ===== - FirestoreService.cs:64");
                 return true;
             }
             
             var errorContent = await response.Content.ReadAsStringAsync();
-            Debug.WriteLine($"[FirestoreService] ❌ Error saving user - Status: {response.StatusCode}");
-            Debug.WriteLine($"[FirestoreService] Error response length: {errorContent.Length}");
-            Debug.WriteLine($"[FirestoreService] Error response: {errorContent}");
-            Debug.WriteLine($"[FirestoreService] ===== END SAVE USER FAIL =====");
+            Debug.WriteLine($"[FirestoreService] ❌ Error saving user  Status: {response.StatusCode} - FirestoreService.cs:69");
+            Debug.WriteLine($"[FirestoreService] Error response length: {errorContent.Length} - FirestoreService.cs:70");
+            Debug.WriteLine($"[FirestoreService] Error response: {errorContent} - FirestoreService.cs:71");
+            Debug.WriteLine($"[FirestoreService] ===== END SAVE USER FAIL ===== - FirestoreService.cs:72");
             return false;
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[FirestoreService] ❌ EXCEPTION saving user: {ex.GetType().Name}");
-            Debug.WriteLine($"[FirestoreService] Exception message: {ex.Message}");
-            Debug.WriteLine($"[FirestoreService] Stack trace: {ex.StackTrace}");
-            Debug.WriteLine($"[FirestoreService] ===== END SAVE USER EXCEPTION =====");
+            Debug.WriteLine($"[FirestoreService] ❌ EXCEPTION saving user: {ex.GetType().Name} - FirestoreService.cs:77");
+            Debug.WriteLine($"[FirestoreService] Exception message: {ex.Message} - FirestoreService.cs:78");
+            Debug.WriteLine($"[FirestoreService] Stack trace: {ex.StackTrace} - FirestoreService.cs:79");
+            Debug.WriteLine($"[FirestoreService] ===== END SAVE USER EXCEPTION ===== - FirestoreService.cs:80");
             return false;
         }
     }
@@ -88,28 +89,28 @@ public class FirestoreService
     {
         try
         {
-            Debug.WriteLine($"[FirestoreService] Getting user: {email}");
+            Debug.WriteLine($"[FirestoreService] Getting user: {email} - FirestoreService.cs:92");
             
             var documentId = Uri.EscapeDataString(email);
             var url = $"{_baseUrl}/{FirestoreCollections.Users}/{documentId}?key={FirestoreConstants.ApiKey}";
             var response = await _httpClient.GetAsync(url);
             
-            Debug.WriteLine($"[FirestoreService] Get user response status: {response.StatusCode}");
+            Debug.WriteLine($"[FirestoreService] Get user response status: {response.StatusCode} - FirestoreService.cs:98");
             
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
-                Debug.WriteLine($"[FirestoreService] Error getting user: {errorContent}");
+                Debug.WriteLine($"[FirestoreService] Error getting user: {errorContent} - FirestoreService.cs:103");
                 return null;
             }
 
             var content = await response.Content.ReadAsStringAsync();
-            Debug.WriteLine($"[FirestoreService] User data received, parsing...");
+            Debug.WriteLine($"[FirestoreService] User data received, parsing... - FirestoreService.cs:108");
             return JsonToUser(email, content);
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[FirestoreService] Exception getting user: {ex.Message}");
+            Debug.WriteLine($"[FirestoreService] Exception getting user: {ex.Message} - FirestoreService.cs:113");
             return null;
         }
     }
@@ -132,7 +133,7 @@ public class FirestoreService
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
                 var docId = ExtractDocumentId(responseContent);
-                Debug.WriteLine($"Loan created with ID: {docId} - FirestoreService.cs:105");
+                Debug.WriteLine($"Loan created with ID: {docId} - FirestoreService.cs:136");
                 return docId;
             }
 
@@ -140,7 +141,7 @@ public class FirestoreService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Error creating loan: {ex.Message} - FirestoreService.cs:113");
+            Debug.WriteLine($"Error creating loan: {ex.Message} - FirestoreService.cs:144");
             return null;
         }
     }
@@ -162,7 +163,7 @@ public class FirestoreService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Error getting loan: {ex.Message} - FirestoreService.cs:135");
+            Debug.WriteLine($"Error getting loan: {ex.Message} - FirestoreService.cs:166");
             return null;
         }
     }
@@ -183,7 +184,7 @@ public class FirestoreService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Error updating loan: {ex.Message} - FirestoreService.cs:156");
+            Debug.WriteLine($"Error updating loan: {ex.Message} - FirestoreService.cs:187");
             return false;
         }
     }
@@ -206,7 +207,7 @@ public class FirestoreService
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
                 var docId = ExtractDocumentId(responseContent);
-                Debug.WriteLine($"Transaction created with ID: {docId} - FirestoreService.cs:179");
+                Debug.WriteLine($"Transaction created with ID: {docId} - FirestoreService.cs:210");
                 return docId;
             }
 
@@ -214,7 +215,70 @@ public class FirestoreService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Error creating transaction: {ex.Message} - FirestoreService.cs:187");
+            Debug.WriteLine($"Error creating transaction: {ex.Message} - FirestoreService.cs:218");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Record a transaction document (loan request flow) with full details
+    /// </summary>
+    public async Task<string?> CreateTransactionDocumentAsync(DocTransaction transaction)
+    {
+        try
+        {
+            var url = $"{_baseUrl}/{FirestoreCollections.Transactions}?key={FirestoreConstants.ApiKey}";
+            var payload = TransactionDocumentToJson(transaction);
+            var content = new StringContent(payload, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync(url, content);
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var docId = ExtractDocumentId(responseContent);
+                Debug.WriteLine($"Transaction doc created with ID: {docId} - FirestoreService.cs:239");
+                return docId;
+            }
+
+            var errorContent = await response.Content.ReadAsStringAsync();
+            Debug.WriteLine($"Error creating transaction doc: {errorContent} - FirestoreService.cs:244");
+            return null;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Error creating transaction doc: {ex.Message} - FirestoreService.cs:249");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Create a transaction document in a user's sub-collection for easy access
+    /// </summary>
+    public async Task<string?> CreateUserTransactionDocumentAsync(string userEmail, DocTransaction transaction)
+    {
+        try
+        {
+            var documentId = Uri.EscapeDataString(userEmail);
+            var url = $"{_baseUrl}/{FirestoreCollections.Users}/{documentId}/transactions?key={FirestoreConstants.ApiKey}";
+            var payload = TransactionDocumentToJson(transaction);
+            var content = new StringContent(payload, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync(url, content);
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var docId = ExtractDocumentId(responseContent);
+                Debug.WriteLine($"User transaction doc created with ID: {docId} - FirestoreService.cs:279");
+                return docId;
+            }
+
+            var errorContent = await response.Content.ReadAsStringAsync();
+            Debug.WriteLine($"Error creating user transaction doc: {errorContent} - FirestoreService.cs:284");
+            return null;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Error creating user transaction doc: {ex.Message} - FirestoreService.cs:289");
             return null;
         }
     }
@@ -237,7 +301,7 @@ public class FirestoreService
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
                 var docId = ExtractDocumentId(responseContent);
-                Debug.WriteLine($"Investment created with ID: {docId} - FirestoreService.cs:210");
+                Debug.WriteLine($"Investment created with ID: {docId} - FirestoreService.cs:272");
                 return docId;
             }
 
@@ -245,7 +309,7 @@ public class FirestoreService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Error creating investment: {ex.Message} - FirestoreService.cs:218");
+            Debug.WriteLine($"Error creating investment: {ex.Message} - FirestoreService.cs:280");
             return null;
         }
     }
@@ -268,7 +332,7 @@ public class FirestoreService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Error saving budget: {ex.Message} - FirestoreService.cs:241");
+            Debug.WriteLine($"Error saving budget: {ex.Message} - FirestoreService.cs:303");
             return false;
         }
     }
@@ -306,8 +370,76 @@ public class FirestoreService
         };
 
         var json = JsonSerializer.Serialize(document);
-        Debug.WriteLine($"[FirestoreService] Generated User JSON: {json}");
+        Debug.WriteLine($"[FirestoreService] Generated User JSON: {json} - FirestoreService.cs:341");
         return json;
+    }
+
+    private string TransactionDocumentToJson(DocTransaction t)
+    {
+#pragma warning disable CS8604 // Possible null reference argument - nulls are removed from dictionary in cleanup step below
+        var fields = new Dictionary<string, object>
+        {
+            { "id", new { stringValue = t.Id } },
+            { "createdAt", new { timestampValue = t.CreatedAt.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss'Z'") } },
+            { "status", new { stringValue = t.Status.ToString() } },
+
+            // Loan core
+            { "mode", new { stringValue = t.Mode } },
+            { "amount", new { doubleValue = (double)t.Amount } },
+            { "paybackDate", t.PaybackDate.HasValue ? new { timestampValue = t.PaybackDate.Value.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss'Z'") } : (object?)null },
+            { "paybackDuration", string.IsNullOrWhiteSpace(t.PaybackDuration) ? (object?)null : new { stringValue = t.PaybackDuration } },
+            { "isDaysDuration", new { booleanValue = t.IsDaysDuration } },
+            // Omit display-only field to avoid duplication
+            // { "paybackDisplay", new { stringValue = t.PaybackDisplay } },
+
+            // Interest
+            { "interestType", new { stringValue = t.InterestType } },
+            { "interestRate", new { doubleValue = (double)t.InterestRate } },
+            { "interestMethod", new { stringValue = t.InterestMethod } },
+            // Omit display-only fields to avoid duplication
+            // { "interestTypeDisplay", new { stringValue = t.InterestTypeDisplay } },
+            // { "interestMethodDisplay", new { stringValue = t.InterestMethodDisplay } },
+
+            // Payments
+            { "paymentFrequencyLabel", new { stringValue = t.PaymentFrequencyLabel } },
+            { "paymentsPerYear", new { integerValue = t.PaymentsPerYear } },
+            { "totalPayments", new { integerValue = t.TotalPayments } },
+            { "periodicPayment", new { doubleValue = (double)t.PeriodicPayment } },
+            { "totalInterest", new { doubleValue = (double)t.TotalInterest } },
+            { "totalPayment", new { doubleValue = (double)t.TotalPayment } },
+
+            // Collateral
+            { "hasCollateral", new { booleanValue = t.HasCollateral } },
+            // Omit display-only field to avoid duplication
+            // { "collateralDisplay", new { stringValue = t.CollateralDisplay } },
+            { "collateralDescription", string.IsNullOrWhiteSpace(t.CollateralDescription) ? (object?)null : new { stringValue = t.CollateralDescription } },
+            { "collateralImageId", string.IsNullOrWhiteSpace(t.CollateralImageId) ? (object?)null : new { stringValue = t.CollateralImageId } },
+
+            // Requester
+            { "requesterName", new { stringValue = t.RequesterName } },
+            { "requesterPhone", new { stringValue = t.RequesterPhone } },
+            { "requesterEmail", new { stringValue = t.RequesterEmail } },
+            { "requesterAddress", string.IsNullOrWhiteSpace(t.RequesterAddress) ? (object?)null : new { stringValue = t.RequesterAddress } },
+            { "requesterIdNumber", string.IsNullOrWhiteSpace(t.RequesterIdNumber) ? (object?)null : new { stringValue = t.RequesterIdNumber } },
+
+            // Petitioner
+            { "petitionerName", new { stringValue = t.PetitionerName } },
+            { "petitionerPhone", new { stringValue = t.PetitionerPhone } },
+            { "petitionerEmail", new { stringValue = t.PetitionerEmail } },
+
+            // Notification
+            { "notificationType", new { stringValue = t.NotificationType } },
+            { "notificationTarget", new { stringValue = t.NotificationTarget } }
+        };
+#pragma warning restore CS8604
+
+        // Remove null entries to avoid Firestore errors
+        var cleaned = fields
+            .Where(kvp => kvp.Value != null)
+            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+        var document = new { fields = cleaned };
+        return JsonSerializer.Serialize(document);
     }
 
     private User? JsonToUser(string email, string json)
@@ -337,7 +469,7 @@ public class FirestoreService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Error parsing user JSON: {ex.Message} - FirestoreService.cs:298");
+            Debug.WriteLine($"Error parsing user JSON: {ex.Message} - FirestoreService.cs:436");
             return null;
         }
     }
@@ -412,7 +544,7 @@ public class FirestoreService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Error parsing loan JSON: {ex.Message} - FirestoreService.cs:351");
+            Debug.WriteLine($"Error parsing loan JSON: {ex.Message} - FirestoreService.cs:511");
             return null;
         }
     }
@@ -546,12 +678,12 @@ public class FirestoreService
     {
         try
         {
-            Debug.WriteLine($"[FirestoreService] Updating user: {user.Email}");
+            Debug.WriteLine($"[FirestoreService] Updating user: {user.Email} - FirestoreService.cs:645");
             return await SaveUserAsync(user); // PATCH operation handles create or update
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[FirestoreService] Error updating user: {ex.Message}");
+            Debug.WriteLine($"[FirestoreService] Error updating user: {ex.Message} - FirestoreService.cs:650");
             return false;
         }
     }
@@ -565,7 +697,7 @@ public class FirestoreService
     {
         try
         {
-            Debug.WriteLine($"[FirestoreService] Deleting user: {email}");
+            Debug.WriteLine($"[FirestoreService] Deleting user: {email} - FirestoreService.cs:664");
             
             var documentId = Uri.EscapeDataString(email);
             var url = $"{_baseUrl}/{FirestoreCollections.Users}/{documentId}?key={FirestoreConstants.ApiKey}";
@@ -573,16 +705,16 @@ public class FirestoreService
             
             if (response.IsSuccessStatusCode)
             {
-                Debug.WriteLine($"[FirestoreService] ✅ User {email} deleted successfully");
+                Debug.WriteLine($"[FirestoreService] ✅ User {email} deleted successfully - FirestoreService.cs:672");
                 return true;
             }
             
-            Debug.WriteLine($"[FirestoreService] ❌ Error deleting user - Status: {response.StatusCode}");
+            Debug.WriteLine($"[FirestoreService] ❌ Error deleting user  Status: {response.StatusCode} - FirestoreService.cs:676");
             return false;
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[FirestoreService] ❌ Exception deleting user: {ex.Message}");
+            Debug.WriteLine($"[FirestoreService] ❌ Exception deleting user: {ex.Message} - FirestoreService.cs:681");
             return false;
         }
     }
@@ -594,23 +726,23 @@ public class FirestoreService
     {
         try
         {
-            Debug.WriteLine($"[FirestoreService] Deleting loan: {loanId}");
+            Debug.WriteLine($"[FirestoreService] Deleting loan: {loanId} - FirestoreService.cs:693");
             
             var url = $"{_baseUrl}/{FirestoreCollections.Loans}/{loanId}?key={FirestoreConstants.ApiKey}";
             var response = await _httpClient.DeleteAsync(url);
             
             if (response.IsSuccessStatusCode)
             {
-                Debug.WriteLine($"[FirestoreService] ✅ Loan {loanId} deleted successfully");
+                Debug.WriteLine($"[FirestoreService] ✅ Loan {loanId} deleted successfully - FirestoreService.cs:700");
                 return true;
             }
             
-            Debug.WriteLine($"[FirestoreService] ❌ Error deleting loan - Status: {response.StatusCode}");
+            Debug.WriteLine($"[FirestoreService] ❌ Error deleting loan  Status: {response.StatusCode} - FirestoreService.cs:704");
             return false;
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[FirestoreService] ❌ Exception deleting loan: {ex.Message}");
+            Debug.WriteLine($"[FirestoreService] ❌ Exception deleting loan: {ex.Message} - FirestoreService.cs:709");
             return false;
         }
     }
@@ -622,23 +754,23 @@ public class FirestoreService
     {
         try
         {
-            Debug.WriteLine($"[FirestoreService] Deleting transaction: {transactionId}");
+            Debug.WriteLine($"[FirestoreService] Deleting transaction: {transactionId} - FirestoreService.cs:721");
             
             var url = $"{_baseUrl}/{FirestoreCollections.Transactions}/{transactionId}?key={FirestoreConstants.ApiKey}";
             var response = await _httpClient.DeleteAsync(url);
             
             if (response.IsSuccessStatusCode)
             {
-                Debug.WriteLine($"[FirestoreService] ✅ Transaction {transactionId} deleted successfully");
+                Debug.WriteLine($"[FirestoreService] ✅ Transaction {transactionId} deleted successfully - FirestoreService.cs:728");
                 return true;
             }
             
-            Debug.WriteLine($"[FirestoreService] ❌ Error deleting transaction - Status: {response.StatusCode}");
+            Debug.WriteLine($"[FirestoreService] ❌ Error deleting transaction  Status: {response.StatusCode} - FirestoreService.cs:732");
             return false;
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[FirestoreService] ❌ Exception deleting transaction: {ex.Message}");
+            Debug.WriteLine($"[FirestoreService] ❌ Exception deleting transaction: {ex.Message} - FirestoreService.cs:737");
             return false;
         }
     }
@@ -650,18 +782,18 @@ public class FirestoreService
     {
         try
         {
-            Debug.WriteLine($"[FirestoreService] Getting loans for user: {email}");
+            Debug.WriteLine($"[FirestoreService] Getting loans for user: {email} - FirestoreService.cs:749");
             var loans = new List<LoanRequest>();
             
             // For now, return empty list - will be implemented when loan collection is created
             // TODO: Query loans where LenderEmail == email OR BorrowerEmail == email
             
-            Debug.WriteLine($"[FirestoreService] Found {loans.Count} loans for user");
+            Debug.WriteLine($"[FirestoreService] Found {loans.Count} loans for user - FirestoreService.cs:755");
             return loans;
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[FirestoreService] Error getting user loans: {ex.Message}");
+            Debug.WriteLine($"[FirestoreService] Error getting user loans: {ex.Message} - FirestoreService.cs:760");
             return new List<LoanRequest>();
         }
     }
@@ -673,7 +805,7 @@ public class FirestoreService
     {
         try
         {
-            Debug.WriteLine($"[FirestoreService] Getting transactions for user: {email}");
+            Debug.WriteLine($"[FirestoreService] Getting transactions for user: {email} - FirestoreService.cs:772");
             
             // Get all transactions and filter by user email
             var url = $"{_baseUrl}/{FirestoreCollections.Transactions}?key={FirestoreConstants.ApiKey}";
@@ -689,7 +821,7 @@ public class FirestoreService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[FirestoreService] Error getting user transactions: {ex.Message}");
+            Debug.WriteLine($"[FirestoreService] Error getting user transactions: {ex.Message} - FirestoreService.cs:788");
             return new List<Transaction>();
         }
     }
@@ -707,23 +839,72 @@ public class FirestoreService
                 {
                     if (document.TryGetProperty("fields", out var fields))
                     {
-                        var fromUserId = GetStringValue(fields, "FromUserId");
-                        var toUserId = GetStringValue(fields, "ToUserId");
-                        
+                        // Canonical transaction document produced by loan request flow
+                        var petitionerEmail = GetStringValue(fields, "petitionerEmail");
+                        var requesterEmail = GetStringValue(fields, "requesterEmail");
+                        var mode = GetStringValue(fields, "mode");
+
                         // Only include transactions involving this user
-                        if (fromUserId == userEmail || toUserId == userEmail)
+                        if (string.Equals(petitionerEmail, userEmail, StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(requesterEmail, userEmail, StringComparison.OrdinalIgnoreCase))
                         {
+                            // Map Mode to TransactionType for UI: Send => Funding, Request => Repayment
+                            var type = mode.Equals("Send", StringComparison.OrdinalIgnoreCase)
+                                ? TransactionType.Funding
+                                : TransactionType.Repayment;
+
+                            // Map status string to Models.TransactionStatus
+                            var statusString = GetStringValue(fields, "status");
+                            var status = MapStatus(statusString);
+
+                            // Extract document id from name
+                            var name = document.GetProperty("name").GetString() ?? string.Empty;
+                            var id = name.Split('/').LastOrDefault() ?? string.Empty;
+
                             transactions.Add(new Transaction
                             {
-                                Id = ExtractDocumentId(document.GetRawText()),
-                                LoanRequestId = GetStringValue(fields, "LoanRequestId"),
-                                FromUserId = fromUserId,
-                                ToUserId = toUserId,
-                                Amount = (decimal)GetDoubleValue(fields, "Amount"),
-                                Type = (TransactionType)GetIntValue(fields, "Type"),
-                                Status = (TransactionStatus)GetIntValue(fields, "Status"),
-                                CreatedDate = GetDateTimeValue(fields, "CreatedDate"),
-                                Description = GetStringValue(fields, "Description")
+                                Id = id,
+                                LoanRequestId = GetStringValue(fields, "id"), // using our doc id field as association
+                                FromUserId = petitionerEmail,
+                                ToUserId = requesterEmail,
+                                Amount = (decimal)GetDoubleValue(fields, "amount"),
+                                Type = type,
+                                Status = status,
+                                CreatedDate = GetDateTimeValue(fields, "createdAt"),
+                                Description = GetStringValue(fields, "notificationType"),
+                                HasCollateral = GetBoolValue(fields, "hasCollateral"),
+                                CollateralDescription = GetStringValue(fields, "collateralDescription"),
+                                CollateralImageId = GetStringValue(fields, "collateralImageId"),
+                                Mode = mode,
+                                PetitionerEmail = petitionerEmail,
+                                RequesterEmail = requesterEmail,
+                                
+                                // Extended fields
+                                TotalPayment = (decimal)GetDoubleValue(fields, "totalPayment"),
+                                TotalInterest = (decimal)GetDoubleValue(fields, "totalInterest"),
+                                InterestRate = (decimal)GetDoubleValue(fields, "interestRate"),
+                                InterestMethod = GetStringValue(fields, "interestMethod"),
+                                InterestType = GetStringValue(fields, "interestType"),
+                                PaybackDuration = GetStringValue(fields, "paybackDuration"),
+                                IsDaysDuration = GetBoolValue(fields, "isDaysDuration"),
+                                PaymentFrequencyLabel = GetStringValue(fields, "paymentFrequencyLabel"),
+                                PaymentsPerYear = (int)GetDoubleValue(fields, "paymentsPerYear"),
+                                PeriodicPayment = (decimal)GetDoubleValue(fields, "periodicPayment"),
+                                TotalPayments = (int)GetDoubleValue(fields, "totalPayments"),
+                                
+                                // Requester info
+                                RequesterName = GetStringValue(fields, "requesterName"),
+                                RequesterPhone = GetStringValue(fields, "requesterPhone"),
+                                RequesterAddress = GetStringValue(fields, "requesterAddress"),
+                                RequesterIdNumber = GetStringValue(fields, "requesterIdNumber"),
+                                
+                                // Petitioner info
+                                PetitionerName = GetStringValue(fields, "petitionerName"),
+                                PetitionerPhone = GetStringValue(fields, "petitionerPhone"),
+                                
+                                // Notification info
+                                NotificationTarget = GetStringValue(fields, "notificationTarget"),
+                                NotificationType = GetStringValue(fields, "notificationType")
                             });
                         }
                     }
@@ -732,9 +913,22 @@ public class FirestoreService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[FirestoreService] Error parsing transactions: {ex.Message}");
+            Debug.WriteLine($"[FirestoreService] Error parsing transactions: {ex.Message} - FirestoreService.cs:831");
         }
         
         return transactions;
+    }
+
+    private Lender.Models.TransactionStatus MapStatus(string status)
+    {
+        return status switch
+        {
+            "Pending" => Lender.Models.TransactionStatus.Pending,
+            "Completed" => Lender.Models.TransactionStatus.Completed,
+            "Cancelled" => Lender.Models.TransactionStatus.Cancelled,
+            "Active" => Lender.Models.TransactionStatus.Processing,
+            "InProgress" => Lender.Models.TransactionStatus.Processing,
+            _ => Lender.Models.TransactionStatus.Pending
+        };
     }
 }

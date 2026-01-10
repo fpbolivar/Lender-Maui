@@ -98,10 +98,12 @@ public class AuthenticationService : IAuthenticationService
                     CurrentUserEmail = userEmail.GetString();
                     IsAuthenticated = true;
                     
+                    string refreshToken = result.TryGetProperty("refreshToken", out var rt) ? (rt.GetString() ?? "") : "";
                     await SaveAuthDataAsync(
                         idToken.GetString() ?? "",
                         localId.GetString() ?? "",
-                        userEmail.GetString() ?? ""
+                        userEmail.GetString() ?? "",
+                        refreshToken
                     );
 
                     // Create user document in Firestore with complete profile
@@ -206,10 +208,12 @@ public class AuthenticationService : IAuthenticationService
                     CurrentUserEmail = userEmail.GetString();
                     IsAuthenticated = true;
                     
+                    string refreshToken = result.TryGetProperty("refreshToken", out var rt) ? (rt.GetString() ?? "") : "";
                     await SaveAuthDataAsync(
                         idToken.GetString() ?? "",
                         localId.GetString() ?? "",
-                        userEmail.GetString() ?? ""
+                        userEmail.GetString() ?? "",
+                        refreshToken
                     );
                     
                     return true;
@@ -347,10 +351,12 @@ public class AuthenticationService : IAuthenticationService
                     CurrentUserEmail = userEmail.GetString();
                     IsAuthenticated = true;
                     
+                    string refreshToken = result.TryGetProperty("refreshToken", out var rt) ? (rt.GetString() ?? "") : "";
                     await SaveAuthDataAsync(
                         firebaseToken.GetString() ?? "",
                         localId.GetString() ?? "",
-                        userEmail.GetString() ?? ""
+                        userEmail.GetString() ?? "",
+                        refreshToken
                     );
                     
                     return true;
@@ -419,17 +425,101 @@ public class AuthenticationService : IAuthenticationService
         return false;
     }
 
-    private async Task SaveAuthDataAsync(string token, string userId, string email)
+    private async Task SaveAuthDataAsync(string token, string userId, string email, string refreshToken)
     {
         try
         {
             await SecureStorage.SetAsync(AuthenticationConstants.FirebaseTokenKey, token);
             await SecureStorage.SetAsync(AuthenticationConstants.FirebaseUserIdKey, userId);
             await SecureStorage.SetAsync(AuthenticationConstants.FirebaseUserEmailKey, email);
+            if (!string.IsNullOrEmpty(refreshToken))
+            {
+                await SecureStorage.SetAsync(AuthenticationConstants.FirebaseRefreshTokenKey, refreshToken);
+            }
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"Failed to save auth data: {ex.Message} - AuthenticationService.cs:432");
+        }
+    }
+
+    public async Task<string?> GetValidIdTokenAsync()
+    {
+        try
+        {
+            var token = await SecureStorage.GetAsync(AuthenticationConstants.FirebaseTokenKey);
+            var refreshToken = await SecureStorage.GetAsync(AuthenticationConstants.FirebaseRefreshTokenKey);
+
+            // If we don't have a token but have a refresh token, refresh
+            if (string.IsNullOrWhiteSpace(token) && !string.IsNullOrWhiteSpace(refreshToken))
+            {
+                return await RefreshIdTokenAsync(refreshToken);
+            }
+
+            // Optionally: decode JWT to check expiry; for simplicity, refresh if we have a refresh token
+            if (!string.IsNullOrWhiteSpace(refreshToken))
+            {
+                // Proactively refresh to avoid 401/403 due to expiry
+                var newToken = await RefreshIdTokenAsync(refreshToken);
+                if (!string.IsNullOrWhiteSpace(newToken))
+                {
+                    return newToken;
+                }
+            }
+            return token;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"GetValidIdToken failed: {ex.Message} - AuthenticationService.cs:XXX");
+            return await SecureStorage.GetAsync(AuthenticationConstants.FirebaseTokenKey);
+        }
+    }
+
+    private async Task<string?> RefreshIdTokenAsync(string refreshToken)
+    {
+        try
+        {
+            using var client = new HttpClient();
+            var url = $"{AuthenticationConstants.FirebaseSecureTokenUrl}?key={AuthenticationConstants.FirebaseWebApiKey}";
+            var content = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                { "grant_type", "refresh_token" },
+                { "refresh_token", refreshToken }
+            });
+
+            var response = await client.PostAsync(url, content);
+            var body = await response.Content.ReadAsStringAsync();
+            Debug.WriteLine($"Refresh token response: {response.StatusCode} {body} - AuthenticationService.cs:YYY");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            var json = JsonSerializer.Deserialize<JsonElement>(body);
+            var newIdToken = json.TryGetProperty("id_token", out var idt) ? idt.GetString() : null;
+            var newRefreshToken = json.TryGetProperty("refresh_token", out var rt) ? rt.GetString() : null;
+            var userId = json.TryGetProperty("user_id", out var uid) ? uid.GetString() : CurrentUserId;
+
+            if (!string.IsNullOrWhiteSpace(newIdToken))
+            {
+                await SecureStorage.SetAsync(AuthenticationConstants.FirebaseTokenKey, newIdToken);
+            }
+            if (!string.IsNullOrWhiteSpace(newRefreshToken))
+            {
+                await SecureStorage.SetAsync(AuthenticationConstants.FirebaseRefreshTokenKey, newRefreshToken);
+            }
+            if (!string.IsNullOrWhiteSpace(userId))
+            {
+                await SecureStorage.SetAsync(AuthenticationConstants.FirebaseUserIdKey, userId);
+            }
+
+            return newIdToken;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"RefreshIdToken exception: {ex.Message} - AuthenticationService.cs:ZZZ");
+            return null;
         }
     }
 

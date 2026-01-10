@@ -84,4 +84,40 @@ public class Transaction
     /// Reference number for tracking
     /// </summary>
     public string ReferenceNumber { get; set; } = string.Empty;
-}
+
+    // Collateral metadata (optional)
+    public bool HasCollateral { get; set; } = false;
+    public string? CollateralDescription { get; set; }
+    public string? CollateralImageId { get; set; }
+
+    // Canonical document context
+    public string? Mode { get; set; } // Send / Request
+    public string? PetitionerEmail { get; set; }
+    public string? RequesterEmail { get; set; }
+    
+    // Extended transaction fields from database
+    public decimal TotalPayment { get; set; } = 0;
+    public decimal TotalInterest { get; set; } = 0;
+    public decimal InterestRate { get; set; } = 0;
+    public string? InterestMethod { get; set; } // "Total %", "Monthly %", etc.
+    public string? InterestType { get; set; } // "Simple", "Compound", etc.
+    public string? PaybackDuration { get; set; }
+    public bool IsDaysDuration { get; set; } = false;
+    public string? PaymentFrequencyLabel { get; set; }
+    public int PaymentsPerYear { get; set; } = 0;
+    public decimal PeriodicPayment { get; set; } = 0;
+    public int TotalPayments { get; set; } = 0;
+    
+    // Requester information
+    public string? RequesterName { get; set; }
+    public string? RequesterPhone { get; set; }
+    public string? RequesterAddress { get; set; }
+    public string? RequesterIdNumber { get; set; }
+    
+    // Petitioner information
+    public string? PetitionerName { get; set; }
+    public string? PetitionerPhone { get; set; }
+    
+    // Notification info
+    public string? NotificationTarget { get; set; }
+    public string? NotificationType { get; set; }}

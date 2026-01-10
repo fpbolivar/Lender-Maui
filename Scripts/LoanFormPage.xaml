@@ -2,13 +2,17 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:views="clr-namespace:Lender.Views"
+             xmlns:converters="clr-namespace:Lender.Converters"
              x:Class="Lender.LoanFormPage"
              Title="Loan Form"
              BackgroundColor="#0A1929"
              Padding="0"
              SafeAreaEdges="None">
     <ContentPage.Resources>
-        <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
+        <ResourceDictionary>
+            <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
+            <converters:BoolToOpacityConverter x:Key="BoolToOpacityConverter" />
+        </ResourceDictionary>
     </ContentPage.Resources>
     <Grid RowDefinitions="*,Auto" BackgroundColor="#0A1929">
         <!-- Main Content -->
@@ -54,15 +58,58 @@
                         <Binding Path="IsSimpleFormVisible" />
                     </VerticalStackLayout.IsVisible>
 
-                    <Label Text="Loan Amount" TextColor="White" />
+                    <HorizontalStackLayout Spacing="4">
+                        <Label Text="Loan Amount" TextColor="White" />
+                        <Label Text="*" TextColor="#FF6B6B" FontAttributes="Bold" />
+                    </HorizontalStackLayout>
                     <Frame Padding="10,6" BackgroundColor="#132F4C" CornerRadius="10" HasShadow="False">
-                        <Entry Text="{Binding AmountText}" Keyboard="Numeric" Placeholder="Enter amount" TextColor="White" BackgroundColor="Transparent" />
+                        <Entry Text="{Binding AmountText}" Keyboard="Numeric" Placeholder="Enter amount (required)" TextColor="White" BackgroundColor="Transparent" />
                     </Frame>
 
-                    <Label Text="Payback Date" TextColor="White" />
-                    <Frame Padding="0" BackgroundColor="White" CornerRadius="10" HasShadow="False">
-                        <DatePicker Date="{Binding PaybackDate}" TextColor="#0A1929" />
+                    <Label Text="Payback" TextColor="White" Padding="0,8,0,0" />
+                    <HorizontalStackLayout Spacing="8">
+                        <Button Text="By Date" 
+                                Command="{Binding SetByDateCommand}"
+                                TextColor="White" 
+                                CornerRadius="12" Padding="14,8"
+                                FontSize="13"
+                                BackgroundColor="{Binding IsByDateSelected, Converter={StaticResource BoolToColorConverter}}" />
+                        <Button Text="By Time" 
+                                Command="{Binding SetByTimeCommand}"
+                                TextColor="White" 
+                                CornerRadius="12" Padding="14,8"
+                                FontSize="13"
+                                BackgroundColor="{Binding IsByTimeSelected, Converter={StaticResource BoolToColorConverter}}" />
+                    </HorizontalStackLayout>
+
+                    <Label Text="Payback Date" TextColor="White" IsVisible="{Binding ShowDatePicker}" />
+                    <Frame Padding="0" BackgroundColor="White" CornerRadius="10" HasShadow="False" IsVisible="{Binding ShowDatePicker}">
+                        <DatePicker Date="{Binding PaybackDate}" 
+                                    MinimumDate="{Binding MinimumPaybackDate}"
+                                    MaximumDate="{Binding MaximumPaybackDate}"
+                                    TextColor="#0A1929" />
                     </Frame>
+
+                    <!-- Time-based payback -->
+                    <VerticalStackLayout Spacing="12" IsVisible="{Binding ShowTimeInput}">
+                        <Frame Padding="10,6" BackgroundColor="#132F4C" CornerRadius="10" HasShadow="False">
+                            <Entry Text="{Binding TimeDuration}" Keyboard="Numeric" Placeholder="Enter number" TextColor="White" BackgroundColor="Transparent" />
+                        </Frame>
+                        <HorizontalStackLayout Spacing="8">
+                            <Button Text="Days" 
+                                    Command="{Binding SetDaysCommand}"
+                                    TextColor="White" 
+                                    CornerRadius="12" Padding="14,8"
+                                    FontSize="13"
+                                    BackgroundColor="{Binding IsDaysSelected, Converter={StaticResource BoolToColorConverter}}" />
+                            <Button Text="Months" 
+                                    Command="{Binding SetMonthsCommand}"
+                                    TextColor="White" 
+                                    CornerRadius="12" Padding="14,8"
+                                    FontSize="13"
+                                    BackgroundColor="{Binding IsMonthsSelected, Converter={StaticResource BoolToColorConverter}}" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
                 </VerticalStackLayout>
 
                 <!-- Interest type selection -->
@@ -106,6 +153,23 @@
                         <Entry Text="{Binding InterestRate}" Keyboard="Numeric" Placeholder="e.g. 5" TextColor="White" BackgroundColor="Transparent" />
                     </Frame>
 
+                    <!-- Interest calculation method -->
+                    <Label Text="Interest Calculation Method" TextColor="White" Margin="0,8,0,0" />
+                    <HorizontalStackLayout Spacing="8">
+                        <Button Text="Total %" 
+                                Command="{Binding SetInterestMethodTotalCommand}" 
+                                TextColor="White" 
+                                CornerRadius="12" Padding="14,8"
+                                FontSize="13"
+                                BackgroundColor="{Binding IsInterestMethodTotalSelected, Converter={StaticResource BoolToColorConverter}}" />
+                        <Button Text="APR (Annual)" 
+                                Command="{Binding SetInterestMethodAPRCommand}" 
+                                TextColor="White" 
+                                CornerRadius="12" Padding="14,8"
+                                FontSize="13"
+                                BackgroundColor="{Binding IsInterestMethodAPRSelected, Converter={StaticResource BoolToColorConverter}}" />
+                    </HorizontalStackLayout>
+
                     <!-- No Next button; payment frequency is visible as part of the simple page flow -->
                 </VerticalStackLayout>
 
@@ -117,45 +181,91 @@
 
                     <Label Text="Payment Frequency" TextColor="White" />
                     <HorizontalStackLayout Spacing="8">
-                        <Button Text="Daily" 
+                        <Button Text="One Time" 
                                 Command="{Binding SelectPaymentFrequencyCommand}" 
                                 CommandParameter="{Binding PaymentFrequencies[0]}"
                                 TextColor="White" 
-                                CornerRadius="12" Padding="14,8"
-                                FontSize="13"
-                                BackgroundColor="{Binding IsDailySelected, Converter={StaticResource BoolToColorConverter}}" />
-                        <Button Text="Weekly" 
+                                CornerRadius="12" Padding="10,8"
+                                FontSize="11"
+                                BackgroundColor="{Binding IsOneTimeSelected, Converter={StaticResource BoolToColorConverter}}" />
+                        <Button Text="Two Payments" 
                                 Command="{Binding SelectPaymentFrequencyCommand}" 
                                 CommandParameter="{Binding PaymentFrequencies[1]}"
                                 TextColor="White" 
-                                CornerRadius="12" Padding="14,8"
-                                FontSize="13"
-                                BackgroundColor="{Binding IsWeeklySelected, Converter={StaticResource BoolToColorConverter}}" />
-                        <Button Text="Bi-week" 
+                                CornerRadius="12" Padding="10,8"
+                                FontSize="11"
+                                BackgroundColor="{Binding IsTwoPaymentsSelected, Converter={StaticResource BoolToColorConverter}}" />
+                        <Button Text="Daily" 
                                 Command="{Binding SelectPaymentFrequencyCommand}" 
                                 CommandParameter="{Binding PaymentFrequencies[2]}"
                                 TextColor="White" 
-                                CornerRadius="12" Padding="14,8"
-                                FontSize="13"
-                                BackgroundColor="{Binding IsBiweekSelected, Converter={StaticResource BoolToColorConverter}}" />
-                    </HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="8">
-                        <Button Text="Half Month" 
+                                CornerRadius="12" Padding="10,8"
+                                FontSize="11"
+                                BackgroundColor="{Binding IsDailySelected, Converter={StaticResource BoolToColorConverter}}" />
+                        <Button Text="Weekly" 
                                 Command="{Binding SelectPaymentFrequencyCommand}" 
                                 CommandParameter="{Binding PaymentFrequencies[3]}"
                                 TextColor="White" 
-                                CornerRadius="12" Padding="14,8"
-                                FontSize="13"
-                                BackgroundColor="{Binding IsHalfMonthSelected, Converter={StaticResource BoolToColorConverter}}" />
-                        <Button Text="Monthly" 
+                                CornerRadius="12" Padding="10,8"
+                                FontSize="11"
+                                BackgroundColor="{Binding IsWeeklySelected, Converter={StaticResource BoolToColorConverter}}" />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="8">
+                        <Button Text="Bi-week" 
                                 Command="{Binding SelectPaymentFrequencyCommand}" 
                                 CommandParameter="{Binding PaymentFrequencies[4]}"
                                 TextColor="White" 
-                                CornerRadius="12" Padding="14,8"
-                                FontSize="13"
+                                CornerRadius="12" Padding="10,8"
+                                FontSize="11"
+                                BackgroundColor="{Binding IsBiweekSelected, Converter={StaticResource BoolToColorConverter}}" />
+                        <Button Text="Half Month" 
+                                Command="{Binding SelectPaymentFrequencyCommand}" 
+                                CommandParameter="{Binding PaymentFrequencies[5]}"
+                                TextColor="White" 
+                                CornerRadius="12" Padding="10,8"
+                                FontSize="11"
+                                BackgroundColor="{Binding IsHalfMonthSelected, Converter={StaticResource BoolToColorConverter}}" />
+                        <Button Text="Monthly" 
+                                Command="{Binding SelectPaymentFrequencyCommand}" 
+                                CommandParameter="{Binding PaymentFrequencies[6]}"
+                                TextColor="White" 
+                                CornerRadius="12" Padding="10,8"
+                                FontSize="11"
                                 BackgroundColor="{Binding IsMonthlySelected, Converter={StaticResource BoolToColorConverter}}" />
                     </HorizontalStackLayout>
                 </VerticalStackLayout>
+
+                <!-- Add Collateral -->
+                <VerticalStackLayout Spacing="12" IsVisible="{Binding IsCollateralVisible}">
+                    <Label Text="Add Collateral" TextColor="White" />
+                    <HorizontalStackLayout Spacing="8">
+                        <Button Text="Yes" 
+                                Command="{Binding SetYesCollateralCommand}"
+                                TextColor="White" 
+                                CornerRadius="12" Padding="14,8"
+                                FontSize="13"
+                                BackgroundColor="{Binding IsYesCollateralSelected, Converter={StaticResource BoolToColorConverter}}" />
+                        <Button Text="No" 
+                                Command="{Binding SetNoCollateralCommand}"
+                                TextColor="White" 
+                                CornerRadius="12" Padding="14,8"
+                                FontSize="13"
+                                BackgroundColor="{Binding IsNoCollateralSelected, Converter={StaticResource BoolToColorConverter}}" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+
+                <!-- Next Button -->
+                <Button Text="Next" 
+                        Command="{Binding NextCommand}"
+                        IsVisible="{Binding ShowNextButton}"
+                        IsEnabled="{Binding IsLoanAmountValid}"
+                        BackgroundColor="#FF9F43"
+                        TextColor="#0A1929"
+                        FontAttributes="Bold"
+                        CornerRadius="12" 
+                        Padding="16,12"
+                        Margin="0,16,0,0"
+                        Opacity="{Binding IsLoanAmountValid, Converter={StaticResource BoolToOpacityConverter}}" />
             </VerticalStackLayout>
         </ScrollView>
 

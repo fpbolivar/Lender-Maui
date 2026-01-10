@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:Lender.Views"
+             x:Class="Lender.LoanFinalSummaryPage"
+             Title="Final Summary"
+             BackgroundColor="#0A1929"
+             Padding="0"
+             SafeAreaEdges="None">
+    <ContentPage.Resources>
+        <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
+    </ContentPage.Resources>
+    <Grid RowDefinitions="*,Auto" BackgroundColor="#0A1929">
+        <!-- Main Content -->
+        <ScrollView Grid.Row="0" Padding="16">
+            <VerticalStackLayout Spacing="16">
+                <!-- Header -->
+                <HorizontalStackLayout Spacing="10" Padding="0,10,0,0">
+                    <Button Text="&lt;"
+                            Command="{Binding BackCommand}"
+                            BackgroundColor="Transparent"
+                            TextColor="#FF9F43"
+                            FontSize="28"
+                            WidthRequest="44"
+                            HeightRequest="44"
+                            CornerRadius="22"
+                            Padding="0" />
+                    <Label Text="Final Summary"
+                           FontSize="24"
+                           FontAttributes="Bold"
+                           TextColor="White"
+                           VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+
+                <!-- Loan Details Card -->
+                <Frame CornerRadius="12" BackgroundColor="#132F4C" Padding="16" HasShadow="False">
+                    <VerticalStackLayout Spacing="16">
+                        <Label Text="Loan Details" FontSize="18" FontAttributes="Bold" TextColor="White" />
+                        
+                        <HorizontalStackLayout Spacing="8">
+                            <Label Text="Type:" TextColor="#B0BEC5" WidthRequest="120" />
+                            <Label Text="{Binding Mode}" TextColor="White" FontAttributes="Bold" />
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout Spacing="8">
+                            <Label Text="Amount:" TextColor="#B0BEC5" WidthRequest="120" />
+                            <Label Text="{Binding AmountText, StringFormat='${0}'}" TextColor="#FF9F43" FontSize="16" FontAttributes="Bold" />
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout Spacing="8">
+                            <Label Text="Payback:" TextColor="#B0BEC5" WidthRequest="120" />
+                            <Label Text="{Binding PaybackDisplay}" TextColor="White" />
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout Spacing="8">
+                            <Label Text="Interest Type:" TextColor="#B0BEC5" WidthRequest="120" />
+                            <Label Text="{Binding InterestTypeDisplay}" TextColor="White" />
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout Spacing="8" IsVisible="{Binding IsInterestDetailsVisible}">
+                            <Label Text="Interest Rate:" TextColor="#B0BEC5" WidthRequest="120" />
+                            <Label Text="{Binding InterestRate, StringFormat='{0}%'}" TextColor="White" />
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout Spacing="8" IsVisible="{Binding IsInterestDetailsVisible}">
+                            <Label Text="Interest Method:" TextColor="#B0BEC5" WidthRequest="120" />
+                            <Label Text="{Binding InterestMethodDisplay}" TextColor="White" />
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout Spacing="8" IsVisible="{Binding IsPaymentFrequencyVisible}">
+                            <Label Text="Payment Frequency:" TextColor="#B0BEC5" WidthRequest="120" />
+                            <Label Text="{Binding SelectedPaymentFrequencyLabel}" TextColor="White" />
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout Spacing="8">
+                            <Label Text="Collateral:" TextColor="#B0BEC5" WidthRequest="120" />
+                            <Label Text="{Binding CollateralDisplay}" TextColor="White" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Payment Plan Card -->
+                <Frame CornerRadius="12" BackgroundColor="#132F4C" Padding="16" HasShadow="False">
+                    <VerticalStackLayout Spacing="16">
+                        <Label Text="Payment Plan" FontSize="18" FontAttributes="Bold" TextColor="White" />
+
+                        <HorizontalStackLayout Spacing="8">
+                            <Label Text="Total Payments:" TextColor="#B0BEC5" WidthRequest="120" />
+                            <Label Text="{Binding TotalPayments}" TextColor="White" FontAttributes="Bold" />
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout Spacing="8">
+                            <Label Text="Payment Amount:" TextColor="#B0BEC5" WidthRequest="120" />
+                            <Label Text="{Binding PeriodicPayment, StringFormat='${0:F2}'}" TextColor="#1ABC9C" FontSize="16" FontAttributes="Bold" />
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout Spacing="8">
+                            <Label Text="Total Interest:" TextColor="#B0BEC5" WidthRequest="120" />
+                            <Label Text="{Binding TotalInterest, StringFormat='${0:F2}'}" TextColor="White" />
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout Spacing="8">
+                            <Label Text="Total Amount:" TextColor="#B0BEC5" WidthRequest="120" />
+                            <Label Text="{Binding TotalPayment, StringFormat='${0:F2}'}" TextColor="#FF9F43" FontSize="18" FontAttributes="Bold" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Requester Information Card -->
+                <Frame CornerRadius="12" BackgroundColor="#132F4C" Padding="16" HasShadow="False">
+                    <VerticalStackLayout Spacing="16">
+                        <Label Text="Requester Information" FontSize="18" FontAttributes="Bold" TextColor="White" />
+                        
+                        <HorizontalStackLayout Spacing="8">
+                            <Label Text="Name:" TextColor="#B0BEC5" WidthRequest="120" />
+                            <Label Text="{Binding RequesterName}" TextColor="White" />
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout Spacing="8">
+                            <Label Text="Phone:" TextColor="#B0BEC5" WidthRequest="120" />
+                            <Label Text="{Binding RequesterPhone}" TextColor="White" />
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout Spacing="8">
+                            <Label Text="Email:" TextColor="#B0BEC5" WidthRequest="120" />
+                            <Label Text="{Binding RequesterEmail}" TextColor="White" />
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout Spacing="8" IsVisible="{Binding HasAddress}">
+                            <Label Text="Address:" TextColor="#B0BEC5" WidthRequest="120" />
+                            <Label Text="{Binding FullAddress}" TextColor="White" LineBreakMode="WordWrap" />
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout Spacing="8" IsVisible="{Binding HasIdNumber}">
+                            <Label Text="ID Number:" TextColor="#B0BEC5" WidthRequest="120" />
+                            <Label Text="{Binding RequesterIdNumber}" TextColor="White" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Notification Settings Card -->
+                <Frame CornerRadius="12" BackgroundColor="#132F4C" Padding="16" HasShadow="False">
+                    <VerticalStackLayout Spacing="16">
+                        <Label Text="Notification Settings" FontSize="18" FontAttributes="Bold" TextColor="White" />
+                        
+                        <HorizontalStackLayout Spacing="8">
+                            <Label Text="Type:" TextColor="#B0BEC5" WidthRequest="120" />
+                            <Label Text="{Binding NotificationTypeDisplay}" TextColor="White" />
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout Spacing="8" IsVisible="{Binding IsSMSNotificationSelected}">
+                            <Label Text="SMS Number:" TextColor="#B0BEC5" WidthRequest="120" />
+                            <Label Text="{Binding RequesterPhone}" TextColor="White" />
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout Spacing="8" IsVisible="{Binding IsEmailNotificationSelected}">
+                            <Label Text="Email:" TextColor="#B0BEC5" WidthRequest="120" />
+                            <Label Text="{Binding RequesterEmail}" TextColor="White" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Submit Button -->
+                <Button Text="Submit Loan Request" 
+                        Command="{Binding SubmitLoanRequestCommand}"
+                        BackgroundColor="#1ABC9C"
+                        TextColor="White"
+                        FontAttributes="Bold"
+                        CornerRadius="12" 
+                        Padding="16,12"
+                        Margin="0,16,0,16" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Bottom Navigation -->
+        <views:BottomNavView Grid.Row="1" SelectedTab="Loans" />
+    </Grid>
+</ContentPage>

@@ -87,42 +87,44 @@ public class LoanPdfService
                 document.Add(paymentSummaryTable);
 
                 // Section 3: Payment Schedule
-                document.Add(CreateSectionHeader("PAYMENT SCHEDULE"));
-                Table scheduleTable = new Table(3)
-                    .SetWidth(UnitValue.CreatePercentValue(100))
-                    .SetMarginBottom(20);
-
-                // Header row
-                AddHeaderCell(scheduleTable, "Payment #");
-                AddHeaderCell(scheduleTable, "Due Date");
-                AddHeaderCell(scheduleTable, "Amount");
-
-                // Payment rows
-                DateTime startDate = DateTime.Today;
-                DateTime endDate = transaction.PaybackType == "By Date" && transaction.PaybackDate.HasValue
-                    ? transaction.PaybackDate.Value
-                    : DateTime.Today;
-
-                // If By Time, compute end date from duration
-                int durationDays = 0;
-                int durationMonths = 0;
-                if (transaction.PaybackType == "By Time" && !string.IsNullOrEmpty(transaction.PaybackDuration) && decimal.TryParse(transaction.PaybackDuration, out decimal duration))
+                if (transaction.TotalPayments > 0)
                 {
-                    if (transaction.IsDaysDuration)
-                    {
-                        durationDays = (int)duration;
-                        endDate = startDate.AddDays(durationDays);
-                    }
-                    else
-                    {
-                        durationMonths = (int)duration;
-                        endDate = startDate.AddMonths(durationMonths);
-                    }
-                }
+                    document.Add(CreateSectionHeader("PAYMENT SCHEDULE"));
+                    Table scheduleTable = new Table(3)
+                        .SetWidth(UnitValue.CreatePercentValue(100))
+                        .SetMarginBottom(20);
 
-                decimal amountPerPayment = transaction.TotalPayment / transaction.TotalPayments;
+                    // Header row
+                    AddHeaderCell(scheduleTable, "Payment #");
+                    AddHeaderCell(scheduleTable, "Due Date");
+                    AddHeaderCell(scheduleTable, "Amount");
 
-                for (int i = 1; i <= transaction.TotalPayments; i++)
+                    // Payment rows
+                    DateTime startDate = DateTime.Today;
+                    DateTime endDate = transaction.PaybackType == "By Date" && transaction.PaybackDate.HasValue
+                        ? transaction.PaybackDate.Value
+                        : DateTime.Today;
+
+                    // If By Time, compute end date from duration
+                    int durationDays = 0;
+                    int durationMonths = 0;
+                    if (transaction.PaybackType == "By Time" && !string.IsNullOrEmpty(transaction.PaybackDuration) && decimal.TryParse(transaction.PaybackDuration, out decimal duration))
+                    {
+                        if (transaction.IsDaysDuration)
+                        {
+                            durationDays = (int)duration;
+                            endDate = startDate.AddDays(durationDays);
+                        }
+                        else
+                        {
+                            durationMonths = (int)duration;
+                            endDate = startDate.AddMonths(durationMonths);
+                        }
+                    }
+
+                    decimal amountPerPayment = transaction.TotalPayment / transaction.TotalPayments;
+
+                    for (int i = 1; i <= transaction.TotalPayments; i++)
                 {
                     DateTime currentDate;
                     if (transaction.PaybackType == "By Time")
@@ -151,6 +153,7 @@ public class LoanPdfService
                 }
 
                 document.Add(scheduleTable);
+                }
 
                 // Section 4: Petitioner (logged-in user) Information
                 document.Add(CreateSectionHeader("PETITIONER INFORMATION"));
@@ -246,7 +249,7 @@ public class LoanPdfService
                             }
                             catch (Exception imgEx)
                             {
-                                System.Diagnostics.Debug.WriteLine($"PDF Collateral image embedding error: {imgEx.Message}");
+                                System.Diagnostics.Debug.WriteLine($"PDF Collateral image embedding error: {imgEx.Message} - LoanPdfService.cs:252");
                             }
                         }
                         else if (fileType.Equals("pdf", StringComparison.OrdinalIgnoreCase))
@@ -260,7 +263,7 @@ public class LoanPdfService
                     }
                     catch (Exception ex)
                     {
-                        System.Diagnostics.Debug.WriteLine($"PDF Collateral file error: {ex.Message}");
+                        System.Diagnostics.Debug.WriteLine($"PDF Collateral file error: {ex.Message} - LoanPdfService.cs:266");
                     }
                 }
 
@@ -276,7 +279,7 @@ public class LoanPdfService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"PDF Generation Error: {ex.Message} - LoanPdfService.cs:210");
+            System.Diagnostics.Debug.WriteLine($"PDF Generation Error: {ex.Message} - LoanPdfService.cs:282");
             throw;
         }
     }

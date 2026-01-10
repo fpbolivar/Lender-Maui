@@ -6,12 +6,12 @@ public record PaymentFrequencyOption(string Label, int PaymentsPerYear)
 {
     public static readonly IReadOnlyList<PaymentFrequencyOption> All = new List<PaymentFrequencyOption>
     {
-        new("Monthly", 12),
-        new("Biweekly", 26),
+        new("Daily", 365),
         new("Weekly", 52),
-        new("Quarterly", 4),
-        new("Yearly", 1)
+        new("Bi-week", 26),
+        new("Half Month", 24),
+        new("Monthly", 12)
     };
 
-    public static PaymentFrequencyOption Default => All[0];
+    public static PaymentFrequencyOption Default => All[4]; // Default to Monthly
 }

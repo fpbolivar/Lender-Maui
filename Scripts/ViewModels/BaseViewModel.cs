@@ -47,7 +47,8 @@ public abstract class NavigableViewModel : BaseViewModel
     {
         NavigateToTransactionsCommand = new Command(async () => await Shell.Current.GoToAsync("//transactions"));
         NavigateToDashboardCommand = new Command(async () => await Shell.Current.GoToAsync("//mainpage"));
-        NavigateToLoansCommand = new Command(async () => await Shell.Current.GoToAsync("//loanform"));
+        // Use relative route for loan form since it's registered via Routing.RegisterRoute
+        NavigateToLoansCommand = new Command(async () => await Shell.Current.GoToAsync("loanform"));
         NavigateToCalculatorCommand = new Command(async () => await Shell.Current.GoToAsync("//calculator"));
         NavigateToProfileCommand = new Command(async () => await Shell.Current.GoToAsync("//profile"));
     }

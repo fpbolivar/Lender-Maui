@@ -56,7 +56,7 @@ public class Transaction
 
     // Notification
     public string NotificationType { get; set; } = string.Empty;
-    public string NotificationTarget { get; set; } = string.Empty; // Phone or Email depending on type
+    public string NotificationTarget { get; set; } = string.Empty; // Phone, Email, or Push identifier depending on type
 
     public static Transaction FromViewModel(LoanFormViewModel vm, string petitionerName, string petitionerEmail, string petitionerPhone)
     {
@@ -104,7 +104,7 @@ public class Transaction
             NotificationType = vm.NotificationTypeDisplay,
             NotificationTarget = vm.IsSMSNotificationSelected
                 ? vm.RequesterPhone
-                : vm.IsEmailNotificationSelected ? vm.RequesterEmail : string.Empty,
+                : (vm.IsEmailNotificationSelected || vm.IsPushNotificationSelected) ? vm.RequesterEmail : string.Empty,
 
             Status = TransactionStatus.Pending
         };

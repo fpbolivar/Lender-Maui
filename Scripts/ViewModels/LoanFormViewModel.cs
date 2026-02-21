@@ -301,6 +301,9 @@ private bool _isNoInterestSelected = false;
     private bool _isEmailNotificationSelected = false;
     public bool IsEmailNotificationSelected { get => _isEmailNotificationSelected; set => SetProperty(ref _isEmailNotificationSelected, value); }
 
+    private bool _isPushNotificationSelected = false;
+    public bool IsPushNotificationSelected { get => _isPushNotificationSelected; set => SetProperty(ref _isPushNotificationSelected, value); }
+
     // Computed outputs
     private decimal _periodicPayment = 0;
     public decimal PeriodicPayment { get => _periodicPayment; private set => SetProperty(ref _periodicPayment, value); }
@@ -346,6 +349,7 @@ private bool _isNoInterestSelected = false;
         {
             if (IsSMSNotificationSelected) return "SMS";
             if (IsEmailNotificationSelected) return "Email";
+            if (IsPushNotificationSelected) return "Push";
             return "None";
         }
     }
@@ -423,6 +427,7 @@ private bool _isNoInterestSelected = false;
             IsNoNotificationSelected = type == "None";
             IsSMSNotificationSelected = type == "SMS";
             IsEmailNotificationSelected = type == "Email";
+            IsPushNotificationSelected = type == "Push";
         });
         
         ContinueToFinalSummaryCommand = new Command(async () =>
@@ -740,6 +745,7 @@ private bool _isNoInterestSelected = false;
             IsNoNotificationSelected = false;
             IsSMSNotificationSelected = false;
             IsEmailNotificationSelected = true;
+            IsPushNotificationSelected = false;
 
             // Notify derived properties changed
             OnPropertyChanged(nameof(HasAddress));

@@ -147,6 +147,13 @@
                                     CornerRadius="12" Padding="14,8"
                                     FontSize="13"
                                     BackgroundColor="{Binding IsEmailNotificationSelected, Converter={StaticResource BoolToColorConverter}}" />
+                            <Button Text="Push" 
+                                    Command="{Binding SetNotificationTypeCommand}" 
+                                    CommandParameter="Push"
+                                    TextColor="White" 
+                                    CornerRadius="12" Padding="14,8"
+                                    FontSize="13"
+                                    BackgroundColor="{Binding IsPushNotificationSelected, Converter={StaticResource BoolToColorConverter}}" />
                         </HorizontalStackLayout>
                     </VerticalStackLayout>
                 </Frame>

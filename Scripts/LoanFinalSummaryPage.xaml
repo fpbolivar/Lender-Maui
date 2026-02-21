@@ -169,6 +169,11 @@
                             <Label Text="Email:" TextColor="#B0BEC5" WidthRequest="120" />
                             <Label Text="{Binding RequesterEmail}" TextColor="White" />
                         </HorizontalStackLayout>
+
+                        <HorizontalStackLayout Spacing="8" IsVisible="{Binding IsPushNotificationSelected}">
+                            <Label Text="Push Target:" TextColor="#B0BEC5" WidthRequest="120" />
+                            <Label Text="{Binding RequesterEmail}" TextColor="White" />
+                        </HorizontalStackLayout>
                     </VerticalStackLayout>
                 </Frame>
 

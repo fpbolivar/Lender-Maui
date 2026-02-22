@@ -783,13 +783,25 @@ public class FirestoreService
         try
         {
             Debug.WriteLine($"[FirestoreService] Getting loans for user: {email} - FirestoreService.cs:749");
-            var loans = new List<LoanRequest>();
-            
-            // For now, return empty list - will be implemented when loan collection is created
-            // TODO: Query loans where LenderEmail == email OR BorrowerEmail == email
-            
-            Debug.WriteLine($"[FirestoreService] Found {loans.Count} loans for user - FirestoreService.cs:755");
-            return loans;
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return new List<LoanRequest>();
+            }
+
+            var url = $"{_baseUrl}/{FirestoreCollections.Loans}?key={FirestoreConstants.ApiKey}";
+            var response = await _httpClient.GetAsync(url);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var loans = ParseLoansFromJson(json, email);
+                Debug.WriteLine($"[FirestoreService] Found {loans.Count} loans for user - FirestoreService.cs:755");
+                return loans;
+            }
+
+            Debug.WriteLine($"[FirestoreService] Failed to fetch loans. Status: {response.StatusCode} - FirestoreService.cs:757");
+            return new List<LoanRequest>();
         }
         catch (Exception ex)
         {
@@ -824,6 +836,67 @@ public class FirestoreService
             Debug.WriteLine($"[FirestoreService] Error getting user transactions: {ex.Message} - FirestoreService.cs:788");
             return new List<Transaction>();
         }
+    }
+
+    private List<LoanRequest> ParseLoansFromJson(string json, string userEmail)
+    {
+        var loans = new List<LoanRequest>();
+
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            if (!doc.RootElement.TryGetProperty("documents", out var documents))
+            {
+                return loans;
+            }
+
+            foreach (var document in documents.EnumerateArray())
+            {
+                if (!document.TryGetProperty("fields", out var fields))
+                {
+                    continue;
+                }
+
+                var documentUserId = GetStringValue(fields, "userId");
+                var documentUserEmail = GetStringValue(fields, "userEmail");
+                var lenderEmail = GetStringValue(fields, "lenderEmail");
+                var borrowerEmail = GetStringValue(fields, "borrowerEmail");
+                var requesterEmail = GetStringValue(fields, "requesterEmail");
+                var petitionerEmail = GetStringValue(fields, "petitionerEmail");
+
+                var matchesUser =
+                    string.Equals(documentUserId, userEmail, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(documentUserEmail, userEmail, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(lenderEmail, userEmail, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(borrowerEmail, userEmail, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(requesterEmail, userEmail, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(petitionerEmail, userEmail, StringComparison.OrdinalIgnoreCase);
+
+                if (!matchesUser)
+                {
+                    continue;
+                }
+
+                var name = document.TryGetProperty("name", out var nameEl) ? nameEl.GetString() ?? string.Empty : string.Empty;
+                var loanId = name.Split('/').LastOrDefault() ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(loanId))
+                {
+                    continue;
+                }
+
+                var loan = JsonToLoan(loanId, document.GetRawText());
+                if (loan != null)
+                {
+                    loans.Add(loan);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[FirestoreService] Error parsing loans: {ex.Message} - FirestoreService.cs:823");
+        }
+
+        return loans;
     }
 
     private List<Transaction> ParseTransactionsFromJson(string json, string userEmail)
@@ -871,7 +944,7 @@ public class FirestoreService
                                 Type = type,
                                 Status = status,
                                 CreatedDate = GetDateTimeValue(fields, "createdAt"),
-                                Description = GetStringValue(fields, "notificationType"),
+                                Description = GetStringValue(fields, "description"),
                                 HasCollateral = GetBoolValue(fields, "hasCollateral"),
                                 CollateralDescription = GetStringValue(fields, "collateralDescription"),
                                 CollateralImageId = GetStringValue(fields, "collateralImageId"),
